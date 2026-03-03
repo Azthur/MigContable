@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Logs - SistemaMigConta{% endblock %}
+{% block page_title %}Logs de Integración{% endblock %}
+{% block breadcrumb %}Inicio › Monitoreo › Logs{% endblock %}
+
+{% block content %}
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card-dark">
+            <div class="card-title">Total Procesos</div>
+            <div class="stat-value" id="logTotal">—</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-dark">
+            <div class="card-title"><i class="bi bi-check-circle me-1"></i>Exitosos</div>
+            <div class="stat-value" style="color:var(--accent-green)" id="logSuccess">—</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-dark">
+            <div class="card-title"><i class="bi bi-x-circle me-1"></i>Errores</div>
+            <div class="stat-value" style="color:var(--accent-red)" id="logError">—</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-dark">
+            <div class="card-title"><i class="bi bi-exclamation-triangle me-1"></i>Advertencias</div>
+            <div class="stat-value" style="color:var(--accent-yellow)" id="logWarning">—</div>
+        </div>
+    </div>
+</div>
+
+<!-- Logs Table -->
+<div class="card-dark">
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <h5 style="font-size:15px; font-weight:600; margin:0;">
+            <i class="bi bi-journal-text me-2" style="color:var(--accent)"></i>Registro de Actividad
+        </h5>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <!-- Filter -->
+            <select class="form-control-dark" id="filterStatus" style="width:auto; padding:6px 12px;"
+                onchange="loadLogs()">
+                <option value="">Todos los estados</option>
+                <option value="SUCCESS">✅ Exitosos</option>
+                <option value="ERROR">❌ Errores</option>
+                <option value="WARNING">⚠️ Advertencias</option>
+            </select>
+            <button class="btn-ghost" onclick="loadLogs()" title="Actualizar">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+            <div style="font-size:11px; color:var(--text-secondary);" id="autoRefreshLabel">
+                <i class="bi bi-clock me-1"></i>Auto-refresh: 30s
+            </div>
+        </div>
+    </div>
+
+    <div id="logsTableContainer">
+        <div style="text-align:center; padding:50px; color:var(--text-secondary);">
+            <div class="spinner-sm"></div>
+            <div style="margin-top:8px; font-size:13px;">Cargando logs...</div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex align-items-center justify-content-between mt-3"
+        style="border-top:1px solid var(--border-color); padding-top:12px;">
+        <div style="font-size:12px; color:var(--text-secondary);" id="paginationInfo">—</div>
+        <div class="d-flex gap-2">
+            <button class="btn-ghost" id="btnPrev" onclick="changePage(-1)" style="padding:5px 12px; font-size:12px;"
+                disabled>
+                <i class="bi bi-chevron-left"></i> Anterior
+            </button>
+            <button class="btn-ghost" id="btnNext" onclick="changePage(1)" style="padding:5px 12px; font-size:12px;">
+                Siguiente <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal fade modal-dark" id="logDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size:15px; font-weight:600;">Detalle del Log</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding:20px;" id="logDetailBody"></div>
+            <div class="modal-footer">
+                <button class="btn-ghost" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let currentPage = 0;
+    const pageSize = 20;
+    let detailModal;
+
+    window.addEventListener('DOMContentLoaded', () => {
+        detailModal = new bootstrap.Modal(document.getElementById('logDetailModal'));
+        loadStats();
+        loadLogs();
+        setInterval(() => { loadLogs(); loadStats(); }, 30000);
+    });
+
+    async function loadStats() {
+        try {
+            const res = await fetch('/api/v1/logs/stats');
+            const data = await res.json();
+            document.getElementById('logTotal').textContent = data.total;
+            document.getElementById('logSuccess').textContent = data.success;
+            document.getElementById('logError').textContent = data.error;
+            document.getElementById('logWarning').textContent = data.warning;
+        } catch { }
+    }
+
+    async function loadLogs() {
+        const container = document.getElementById('logsTableContainer');
+        const status = document.getElementById('filterStatus').value;
+        const skip = currentPage * pageSize;
+        let url = `/api/v1/logs/?skip=${skip}&limit=${pageSize}`;
+        if (status) url += `&status=${status}`;
+
+        try {
+            const res = await fetch(url);
+            const logs = await res.json();
+
+            if (logs.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:50px; color:var(--text-secondary); font-size:13px;">
+                    <i class="bi bi-inbox" style="font-size:40px; display:block; margin-bottom:12px;"></i>
+                    No hay logs${status ? ' con el filtro seleccionado' : ' aún'}.
+                </div>`;
+                document.getElementById('paginationInfo').textContent = 'Sin resultados';
+                document.getElementById('btnNext').disabled = true;
+                document.getElementById('btnPrev').disabled = currentPage === 0;
+                return;
+            }
+
+            const rows = logs.map(log => {
+                const badge = log.status === 'SUCCESS' ? 'badge-success' :
+                    log.status === 'ERROR' ? 'badge-error' : 'badge-warning';
+                const date = log.created_at ? new Date(log.created_at).toLocaleString('es-CO') : '—';
+                const hasDetails = log.details && log.details.trim();
+                return `<tr>
+                    <td style="font-size:11px; color:var(--text-secondary);">#${log.id}</td>
+                    <td><span class="${badge}">${log.status || '—'}</span></td>
+                    <td>${log.process_name || '<span style="color:var(--text-secondary)">—</span>'}</td>
+                    <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${(log.message || '').replace(/"/g, '&quot;')}">${log.message || '—'}</td>
+                    <td style="color:var(--text-secondary); font-size:11px; white-space:nowrap;">${date}</td>
+                    <td>
+                        ${hasDetails ? `<button class="btn-ghost" style="padding:3px 10px; font-size:11px;" onclick="showDetail(${JSON.stringify(log).replace(/"/g, '&quot;')})">
+                            <i class="bi bi-eye"></i> Ver
+                        </button>` : '<span style="color:var(--text-secondary); font-size:11px;">—</span>'}
+                    </td>
+                </tr>`;
+            }).join('');
+
+            container.innerHTML = `<table class="table-dark-custom">
+                <thead><tr><th>ID</th><th>Estado</th><th>Proceso</th><th>Mensaje</th><th>Fecha</th><th>Detalle</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+
+            const from = skip + 1;
+            const to = skip + logs.length;
+            document.getElementById('paginationInfo').textContent = `Mostrando ${from}–${to} registros`;
+            document.getElementById('btnPrev').disabled = currentPage === 0;
+            document.getElementById('btnNext').disabled = logs.length < pageSize;
+        } catch {
+            container.innerHTML = '<div style="color:var(--accent-red); font-size:13px; padding:20px;">Error al cargar los logs.</div>';
+        }
+    }
+
+    function changePage(dir) {
+        currentPage = Math.max(0, currentPage + dir);
+        loadLogs();
+    }
+
+    function showDetail(log) {
+        const badge = log.status === 'SUCCESS' ? 'badge-success' :
+            log.status === 'ERROR' ? 'badge-error' : 'badge-warning';
+        const date = log.created_at ? new Date(log.created_at).toLocaleString('es-CO') : '—';
+        document.getElementById('logDetailBody').innerHTML = `
+            <div class="mb-3">
+                <div class="form-label-dark">Estado</div>
+                <span class="${badge}">${log.status}</span>
+            </div>
+            <div class="mb-3">
+                <div class="form-label-dark">Proceso</div>
+                <div style="font-size:13px;">${log.process_name || '—'}</div>
+            </div>
+            <div class="mb-3">
+                <div class="form-label-dark">Mensaje</div>
+                <div style="font-size:13px;">${log.message || '—'}</div>
+            </div>
+            <div class="mb-3">
+                <div class="form-label-dark">Fecha</div>
+                <div style="font-size:13px; color:var(--text-secondary);">${date}</div>
+            </div>
+            ${log.details ? `<div>
+                <div class="form-label-dark">Detalles / Stack Trace</div>
+                <pre style="background:var(--bg-dark); border:1px solid var(--border-color); border-radius:6px; padding:12px; font-size:11px; color:var(--accent-red); overflow:auto; max-height:300px;">${log.details}</pre>
+            </div>` : ''}
+        `;
+        detailModal.show();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlalchemy
+pyodbc
+psycopg2-binary
+pandas
+pydantic
+python-dotenv
+pydantic-settings

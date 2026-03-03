@@ -1,0 +1,3 @@
+id,table_name,filter_count,computed_count
+2,VtaRItem,1,0
+1,CcbRGdoc,2,2

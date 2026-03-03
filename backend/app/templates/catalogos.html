@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogos Contables â€” SistemaMigConta</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --dark: #1e293b;
+            --sidebar-w: 220px;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--dark);
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .sidebar .brand {
+            padding: 1.2rem 1rem;
+            border-bottom: 1px solid #334155;
+        }
+
+        .sidebar .brand h6 {
+            color: #fff;
+            font-weight: 700;
+            margin: 0;
+            font-size: 0.85rem;
+        }
+
+        .sidebar .brand small {
+            color: #94a3b8;
+            font-size: 0.7rem;
+        }
+
+        .sidebar .nav-link {
+            color: #94a3b8;
+            padding: 0.6rem 1rem;
+            font-size: 0.82rem;
+            border-radius: 6px;
+            margin: 2px 8px;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: #334155;
+            color: #fff;
+        }
+
+        .sidebar .nav-link i {
+            width: 18px;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-w);
+            padding: 1.5rem;
+        }
+
+        .page-header {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+        }
+
+        .card-header {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 1rem 1.25rem;
+        }
+
+        .tab-content {
+            padding: 1rem 0 0;
+        }
+
+        .nav-tabs .nav-link {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .table th {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            color: #64748b;
+            background: #f8fafc;
+        }
+
+        .table td {
+            font-size: 0.85rem;
+            vertical-align: middle;
+        }
+
+        .btn-sm {
+            font-size: 0.78rem;
+        }
+
+        .badge-cuenta {
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 0.72rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+
+        .search-box {
+            max-width: 280px;
+        }
+
+        .modal-header {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="brand">
+            <h6><i class="bi bi-database-fill-gear me-2"></i>MigConta</h6>
+            <small>Sistema de Migración Contable</small>
+        </div>
+        <nav class="mt-2">
+            <a href="/" class="nav-link"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+            <a href="/companies" class="nav-link"><i class="bi bi-building me-2"></i>Empresas</a>
+            <a href="/catalogos" class="nav-link active"><i class="bi bi-journal-bookmark me-2"></i>Catálogos</a>
+            <a href="/mapeo" class="nav-link"><i class="bi bi-diagram-3 me-2"></i>Mapeo Contable</a>
+            <a href="/logs" class="nav-link"><i class="bi bi-list-ul me-2"></i>Logs</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0 fw-bold"><i class="bi bi-journal-bookmark me-2 text-primary"></i>Catálogos Contables
+                </h5>
+                <small class="text-muted">Gestión de cuentas, centros de costo, tipos de movimiento y más</small>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <select class="form-select form-select-sm" id="companyFilter" style="width:200px">
+                    <option value="">Todas las empresas</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="catTabs">
+                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabCuentas"><i
+                                class="bi bi-list-ol me-1"></i>Cuentas Contables</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabPresupuesto"><i
+                                class="bi bi-wallet2 me-1"></i>Presupuesto</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabCentros"><i
+                                class="bi bi-diagram-2 me-1"></i>Centros de Costo</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabAnalitica"><i
+                                class="bi bi-bar-chart me-1"></i>Tipo Analítica</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabProductos"><i
+                                class="bi bi-box me-1"></i>Productos</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabMovimiento"><i
+                                class="bi bi-arrow-left-right me-1"></i>Tipo Movimiento</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabDinamicos"><i
+                                class="bi bi-table me-1"></i>Catálogos Dinámicos</a></li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content">
+                    <!-- Cuentas Contables -->
+                    <div class="tab-pane fade show active" id="tabCuentas">
+                        <div class="d-flex justify-content-between mb-3">
+                            <input type="text" class="form-control form-control-sm search-box" id="searchCuentas"
+                                placeholder="ðŸ” Buscar código o descripción...">
+                            <button class="btn btn-primary btn-sm" onclick="openModal('cuenta')"><i
+                                    class="bi bi-plus-lg me-1"></i>Nueva Cuenta</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="tableCuentas">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Descripción</th>
+                                        <th>Tipo</th>
+                                        <th>Moneda</th>
+                                        <th>Nivel</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyCuentas">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-3">Cargando...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Presupuesto -->
+                    <div class="tab-pane fade" id="tabPresupuesto">
+                        <div class="d-flex justify-content-between mb-3">
+                            <input type="text" class="form-control form-control-sm search-box" id="searchPresupuesto"
+                                placeholder="ðŸ” Buscar...">
+                            <button class="btn btn-primary btn-sm" onclick="openModal('presupuesto')"><i
+                                    class="bi bi-plus-lg me-1"></i>Nueva Cuenta</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Descripción</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyPresupuesto">
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-3">Cargando...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Centros de Costo -->
+                    <div class="tab-pane fade" id="tabCentros">
+                        <div class="d-flex justify-content-between mb-3">
+                            <input type="text" class="form-control form-control-sm search-box" id="searchCentros"
+                                placeholder="ðŸ” Buscar...">
+                            <button class="btn btn-primary btn-sm" onclick="openModal('centro')"><i
+                                    class="bi bi-plus-lg me-1"></i>Nuevo Centro</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Descripción</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyCentros">
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-3">Cargando...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Tipo Analítica -->
+                    <div class="tab-pane fade" id="tabAnalitica">
+                        <div class="d-flex justify-content-between mb-3">
+                            <input type="text" class="form-control form-control-sm search-box" id="searchAnalitica"
+                                placeholder="ðŸ” Buscar...">
+                            <button class="btn btn-primary btn-sm" onclick="openModal('analitica')"><i
+                                    class="bi bi-plus-lg me-1"></i>Nuevo Tipo</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Descripción</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyAnalitica">
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-3">Cargando...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Productos -->
+                    <div class="tab-pane fade" id="tabProductos">
+                        <div class="d-flex justify-content-between mb-3">
+                            <input type="text" class="form-control form-control-sm search-box" id="searchProductos"
+                                placeholder="ðŸ” Buscar...">
+                            <button class="btn btn-primary btn-sm" onclick="openModal('producto')"><i
+                                    class="bi bi-plus-lg me-1"></i>Nuevo Producto</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Descripción</th>
+                                        <th>Unidad</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyProductos">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">Cargando...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Tipo Movimiento -->
+                    <div class="tab-pane fade" id="tabMovimiento">
+                        <div class="d-flex justify-content-between mb-3">
+                            <input type="text" class="form-control form-control-sm search-box" id="searchMovimiento"
+                                placeholder="ðŸ” Buscar...">
+                            <button class="btn btn-primary btn-sm" onclick="openModal('movimiento')"><i
+                                    class="bi bi-plus-lg me-1"></i>Nuevo Tipo</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Descripción</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyMovimiento">
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-3">Cargando...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Catálogos Dinámicos -->
+                    <div class="tab-pane fade" id="tabDinamicos">
+                        <div class="d-flex justify-content-between mb-3">
+                            <input type="text" class="form-control form-control-sm search-box" id="searchDinamicos"
+                                placeholder="ðŸ” Buscar catálogo...">
+                            <button class="btn btn-primary btn-sm" onclick="openModal('dinamico')"><i
+                                    class="bi bi-plus-lg me-1"></i>Nuevo Catálogo</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Descripción</th>
+                                        <th>Columnas</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyDinamicos">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">Cargando...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Genérico -->
+    <div class="modal fade" id="catModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title mb-0" id="modalTitle">Nuevo Registro</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+                <div class="modal-footer" id="modalFooter">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnSaveModal"
+                        onclick="saveModal()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Gestionar Datos -->
+    <div class="modal fade" id="manageDataModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header text-bg-primary">
+                    <h5 class="modal-title mb-0" id="manageDataTitle">Gestionar Datos: </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted" id="manageDataCount">0 items cargados</span>
+                        <button class="btn btn-sm btn-success" onclick="addCatalogItemRow()"><i
+                                class="bi bi-plus-lg me-1"></i>Nuevo Registro Manual</button>
+                    </div>
+                    <div class="table-responsive" style="max-height: 50vh;">
+                        <table class="table table-hover table-bordered table-sm fixed-header">
+                            <thead class="table-light">
+                                <tr id="manageDataHead"></tr>
+                            </thead>
+                            <tbody id="manageDataBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+
+    <!-- Modal Formulario de Item -->
+    <div class="modal fade" id="itemFormModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-light border-0">
+                    <h5 class="modal-title fw-bold" id="itemFormTitle">Registro</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4 py-4" id="itemFormBody">
+                    <!-- Form fields will be injected here dynamically -->
+                </div>
+                <div class="modal-footer border-0 bg-light">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary px-4" onclick="saveItemForm()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <script>
+        window.showToast = function (icon, title) {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+            Toast.fire({
+                icon: icon,
+                title: title
+            });
+        };
+
+        const API = '/api/v1';
+        let currentType = '';
+        let currentId = null;
+        let companyId = null;
+        const modal = new bootstrap.Modal(document.getElementById('catModal'));
+
+        // Cargar empresas
+        async function loadCompanies() {
+            const r = await fetch(`${API}/companies/`);
+            const companies = await r.json();
+            const sel = document.getElementById('companyFilter');
+            companies.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id; opt.textContent = c.name;
+                sel.appendChild(opt);
+            });
+            if (companies.length > 0) {
+                sel.value = companies[0].id;
+                companyId = companies[0].id;
+                loadAll();
+            }
+            sel.addEventListener('change', () => { companyId = sel.value || null; loadAll(); });
+        }
+
+        function loadAll() {
+            loadCatalog('cuentas-contables', 'bodyCuentas', renderCuenta);
+            loadCatalog('cuentas-presupuesto', 'bodyPresupuesto', renderSimple);
+            loadCatalog('centros-costo', 'bodyCentros', renderSimple);
+            loadCatalog('tipo-analitica', 'bodyAnalitica', renderSimple);
+            loadCatalog('productos', 'bodyProductos', renderProducto);
+            loadCatalog('tipos-movimiento', 'bodyMovimiento', renderSimple);
+            loadDynamicCatalogs();
+        }
+
+        async function loadDynamicCatalogs() {
+            if (!companyId) return;
+            try {
+                const r = await fetch(`${API}/catalogs/?company_id=${companyId}`);
+                const items = await r.json();
+                const tbody = document.getElementById('bodyDinamicos');
+                if (!items.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">Sin registros</td></tr>'; return; }
+                tbody.innerHTML = items.map(i => `<tr>
+                    <td><strong>${i.name}</strong></td>
+                    <td>${i.description || '-'}</td>
+                    <td><small class="text-muted">${i.columns.join(', ')}</small></td>
+                    <td>
+                        <div class="d-flex gap-1 align-items-center">
+                            <button class="btn btn-outline-primary btn-sm py-0" onclick="openManageData(${i.id}, '${i.name}', '${i.columns.join(',')}')" title="Gestionar Datos"><i class="bi bi-table"></i> Datos</button>
+                            <button class="btn btn-outline-info btn-sm py-0" onclick="uploadDynamicCatalog(${i.id}, '${i.name}')" title="Subir CSV"><i class="bi bi-upload"></i></button>
+                            <button class="btn btn-outline-danger btn-sm py-0" onclick="deleteDynamicCatalog(${i.id})" title="Eliminar Catálogo"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadCatalog(endpoint, bodyId, renderFn, q = '') {
+            const params = new URLSearchParams();
+            if (companyId) params.append('company_id', companyId);
+            if (q) params.append('q', q);
+            const r = await fetch(`${API}/catalogos/${endpoint}?${params}`);
+            const items = await r.json();
+            const tbody = document.getElementById(bodyId);
+            if (!items.length) { tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted py-3">Sin registros</td></tr>'; return; }
+            tbody.innerHTML = items.map(i => renderFn(i)).join('');
+        }
+
+        function renderCuenta(i) {
+            return `<tr>
+        <td><span class="badge-cuenta">${i.codigo}</span></td>
+        <td>${i.descripcion}</td>
+        <td><small class="text-muted">${i.tipo || '-'}</small></td>
+        <td><small>${i.moneda || 'MN'}</small></td>
+        <td><small>${i.nivel || 1}</small></td>
+        <td>
+            <button class="btn btn-outline-primary btn-sm py-0" onclick="editItem('cuenta', ${JSON.stringify(i).replace(/"/g, '&quot;')})"><i class="bi bi-pencil"></i></button>
+            <button class="btn btn-outline-danger btn-sm py-0" onclick="deleteItem('cuentas-contables', ${i.id}, 'bodyCuentas', renderCuenta)"><i class="bi bi-trash"></i></button>
+        </td>
+    </tr>`;
+        }
+
+        function renderSimple(i) {
+            return `<tr>
+        <td><span class="badge-cuenta">${i.codigo}</span></td>
+        <td>${i.descripcion}</td>
+        <td>
+            <button class="btn btn-outline-primary btn-sm py-0" onclick="editItem('${currentType}', ${JSON.stringify(i).replace(/"/g, '&quot;')})"><i class="bi bi-pencil"></i></button>
+            <button class="btn btn-outline-danger btn-sm py-0" onclick="deleteItem('${getEndpoint(currentType)}', ${i.id})"><i class="bi bi-trash"></i></button>
+        </td>
+    </tr>`;
+        }
+
+        function renderProducto(i) {
+            return `<tr>
+        <td><span class="badge-cuenta">${i.codigo}</span></td>
+        <td>${i.descripcion}</td>
+        <td><small>${i.unidad || '-'}</small></td>
+        <td>
+            <button class="btn btn-outline-primary btn-sm py-0" onclick="editItem('producto', ${JSON.stringify(i).replace(/"/g, '&quot;')})"><i class="bi bi-pencil"></i></button>
+            <button class="btn btn-outline-danger btn-sm py-0" onclick="deleteItem('productos', ${i.id}, 'bodyProductos', renderProducto)"><i class="bi bi-trash"></i></button>
+        </td>
+    </tr>`;
+        }
+
+        const FORMS = {
+            cuenta: (d = {}) => `
+        <div class="row g-2">
+            <div class="col-4"><label class="form-label small">Código *</label><input class="form-control form-control-sm" id="f_codigo" value="${d.codigo || ''}" required></div>
+            <div class="col-8"><label class="form-label small">Descripción *</label><input class="form-control form-control-sm" id="f_descripcion" value="${d.descripcion || ''}" required></div>
+            <div class="col-4"><label class="form-label small">Tipo</label>
+                <select class="form-select form-select-sm" id="f_tipo">
+                    <option value="">-</option>
+                    ${['ACTIVO', 'PASIVO', 'PATRIMONIO', 'INGRESO', 'GASTO', 'COSTO'].map(t => `<option ${d.tipo === t ? 'selected' : ''}>${t}</option>`).join('')}
+                </select>
+            </div>
+            <div class="col-4"><label class="form-label small">Moneda</label>
+                <select class="form-select form-select-sm" id="f_moneda">
+                    <option value="MN" ${d.moneda === 'MN' ? 'selected' : ''}>MN - Soles</option>
+                    <option value="ME" ${d.moneda === 'ME' ? 'selected' : ''}>ME - Dólares</option>
+                    <option value="AM" ${d.moneda === 'AM' ? 'selected' : ''}>AM - Ambas</option>
+                </select>
+            </div>
+            <div class="col-4"><label class="form-label small">Nivel</label><input type="number" class="form-control form-control-sm" id="f_nivel" value="${d.nivel || 1}" min="1" max="6"></div>
+        </div>`,
+            presupuesto: (d = {}) => `
+        <div class="row g-2">
+            <div class="col-4"><label class="form-label small">Código *</label><input class="form-control form-control-sm" id="f_codigo" value="${d.codigo || ''}" required></div>
+            <div class="col-8"><label class="form-label small">Descripción *</label><input class="form-control form-control-sm" id="f_descripcion" value="${d.descripcion || ''}" required></div>
+        </div>`,
+            centro: (d = {}) => `
+        <div class="row g-2">
+            <div class="col-4"><label class="form-label small">Código *</label><input class="form-control form-control-sm" id="f_codigo" value="${d.codigo || ''}" required></div>
+            <div class="col-8"><label class="form-label small">Descripción *</label><input class="form-control form-control-sm" id="f_descripcion" value="${d.descripcion || ''}" required></div>
+        </div>`,
+            analitica: (d = {}) => `
+        <div class="row g-2">
+            <div class="col-4"><label class="form-label small">Código *</label><input class="form-control form-control-sm" id="f_codigo" value="${d.codigo || ''}" required></div>
+            <div class="col-8"><label class="form-label small">Descripción *</label><input class="form-control form-control-sm" id="f_descripcion" value="${d.descripcion || ''}" required></div>
+        </div>`,
+            producto: (d = {}) => `
+        <div class="row g-2">
+            <div class="col-4"><label class="form-label small">Código *</label><input class="form-control form-control-sm" id="f_codigo" value="${d.codigo || ''}" required></div>
+            <div class="col-8"><label class="form-label small">Descripción *</label><input class="form-control form-control-sm" id="f_descripcion" value="${d.descripcion || ''}" required></div>
+            <div class="col-4"><label class="form-label small">Unidad</label><input class="form-control form-control-sm" id="f_unidad" value="${d.unidad || ''}"></div>
+        </div>`,
+            movimiento: (d = {}) => `
+        <div class="row g-2">
+            <div class="col-4"><label class="form-label small">Código *</label><input class="form-control form-control-sm" id="f_codigo" value="${d.codigo || ''}" required></div>
+            <div class="col-8"><label class="form-label small">Descripción *</label><input class="form-control form-control-sm" id="f_descripcion" value="${d.descripcion || ''}" required></div>
+        </div>`,
+            dinamico: (d = {}) => `
+        <div class="row g-2">
+            <div class="col-12"><label class="form-label small">Nombre del Catálogo *</label><input class="form-control form-control-sm" id="f_nombre_dinamico" placeholder="Ej: CATALOGO_CLIENTES" value="${d.name || ''}" required></div>
+            <div class="col-12"><label class="form-label small">Descripción</label><input class="form-control form-control-sm" id="f_descripcion_dinamico" value="${d.description || ''}"></div>
+            <div class="col-12"><label class="form-label small">Columnas (separadas por coma) *</label><input class="form-control form-control-sm" id="f_columnas" placeholder="Ej: RUC, RAZON_SOCIAL, TIPO" value="${d.columns ? d.columns.join(', ') : ''}" required></div>
+            <div class="col-12"><small class="text-muted">Las columnas deben coincidir con las cabeceras del CSV a subir.</small></div>
+        </div>`,
+            uploadData: (d = {}) => `
+        <div class="row g-2">
+            <div class="col-12"><label class="form-label small">Subir archivo (CSV o Excel) para <strong>${d.name || ''}</strong></label>
+            <input type="file" class="form-control form-control-sm" id="f_upload_file" accept=".csv, .xls, .xlsx" required></div>
+            <div class="col-12 mt-3">
+                <label class="form-label small">Modo de subida</label>
+                <select class="form-select form-select-sm" id="f_upload_mode">
+                    <option value="replace">Reemplazar (Borrar datos anteriores)</option>
+                    <option value="append">Agregar (Mantener datos anteriores)</option>
+                </select>
+            </div>
+            <input type="hidden" id="f_upload_id" value="${d.id || ''}">
+        </div>`
+        };
+
+        const ENDPOINTS = {
+            cuenta: 'cuentas-contables', presupuesto: 'cuentas-presupuesto',
+            centro: 'centros-costo', analitica: 'tipo-analitica',
+            producto: 'productos', movimiento: 'tipos-movimiento'
+        };
+        const BODIES = {
+            cuenta: 'bodyCuentas', presupuesto: 'bodyPresupuesto',
+            centro: 'bodyCentros', analitica: 'bodyAnalitica',
+            producto: 'bodyProductos', movimiento: 'bodyMovimiento'
+        };
+        const RENDERS = {
+            cuenta: renderCuenta, presupuesto: renderSimple,
+            centro: renderSimple, analitica: renderSimple,
+            producto: renderProducto, movimiento: renderSimple
+        };
+        const TITLES = {
+            cuenta: 'Cuenta Contable', presupuesto: 'Cuenta Presupuestal',
+            centro: 'Centro de Costo', analitica: 'Tipo Analítica',
+            producto: 'Producto', movimiento: 'Tipo de Movimiento'
+        };
+
+        function getEndpoint(type) { return ENDPOINTS[type] || ''; }
+
+        function openModal(type, data = {}) {
+            currentType = type;
+            currentId = data.id || null;
+            document.getElementById('modalTitle').textContent = (currentId ? 'Editar ' : 'Nuevo ') + (TITLES[type] || 'Registro');
+            document.getElementById('modalBody').innerHTML = FORMS[type](data);
+            if (type === 'uploadData') {
+                document.getElementById('modalFooter').innerHTML = `<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-info btn-sm text-white" onclick="submitUploadFile()">Subir Archivo</button>`;
+            } else {
+                document.getElementById('modalFooter').innerHTML = `<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnSaveModal" onclick="saveModal()">Guardar</button>`;
+            }
+            modal.show();
+        }
+
+        function editItem(type, data) { openModal(type, data); }
+
+        async function saveModal() {
+            if (currentType === 'dinamico') {
+                const name = document.getElementById('f_nombre_dinamico')?.value?.trim();
+                const desc = document.getElementById('f_descripcion_dinamico')?.value?.trim();
+                const cols_raw = document.getElementById('f_columnas')?.value?.trim();
+                if (!name || !cols_raw) { showToast('error', 'Nombre y columnas son requeridos'); return; }
+                const cols = cols_raw.split(',').map(c => c.trim()).filter(c => c);
+
+                const body = { name, description: desc, columns: cols, company_id: parseInt(companyId) };
+                const url = currentId ? `${API}/catalogs/${currentId}` : `${API}/catalogs/`;
+                const method = currentId ? 'PUT' : 'POST';
+
+                const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                if (r.ok) {
+                    modal.hide();
+                    loadDynamicCatalogs();
+                } else {
+                    const err = await r.json();
+                    showToast('error', 'Error: ' + JSON.stringify(err.detail));
+                }
+                return;
+            }
+
+            const codigo = document.getElementById('f_codigo')?.value?.trim();
+            const descripcion = document.getElementById('f_descripcion')?.value?.trim();
+            if (!codigo || !descripcion) { showToast('error', 'Código y descripción son requeridos'); return; }
+
+            const body = { codigo, descripcion, company_id: companyId ? parseInt(companyId) : null };
+            if (currentType === 'cuenta') {
+                body.tipo = document.getElementById('f_tipo')?.value || null;
+                body.moneda = document.getElementById('f_moneda')?.value || 'MN';
+                body.nivel = parseInt(document.getElementById('f_nivel')?.value || 1);
+            }
+            if (currentType === 'producto') {
+                body.unidad = document.getElementById('f_unidad')?.value || null;
+            }
+
+            const endpoint = ENDPOINTS[currentType];
+            const url = currentId ? `${API}/catalogos/${endpoint}/${currentId}` : `${API}/catalogos/${endpoint}`;
+            const method = currentId ? 'PUT' : 'POST';
+
+            const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            if (r.ok) {
+                modal.hide();
+                loadCatalog(endpoint, BODIES[currentType], RENDERS[currentType]);
+            } else {
+                const err = await r.json();
+                showToast('error', 'Error: ' + JSON.stringify(err.detail));
+            }
+        }
+
+        function uploadDynamicCatalog(id, name) {
+            openModal('uploadData', { id, name });
+        }
+
+        async function submitUploadFile() {
+            const id = document.getElementById('f_upload_id').value;
+            const fileInput = document.getElementById('f_upload_file');
+            const mode = document.getElementById('f_upload_mode').value;
+
+            if (!fileInput.files.length) {
+                showToast('error', "Seleccione un archivo");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            formData.append("mode", mode);
+
+            try {
+                const r = await fetch(`${API}/catalogs/${id}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (r.ok) {
+                    const res = await r.json();
+                    showToast('error', `Éxito: ${res.message}`);
+                    modal.hide();
+                } else {
+                    const err = await r.json();
+                    showToast('error', 'Error: ' + JSON.stringify(err.detail));
+                }
+            } catch (e) {
+                showToast('error', "Error subiendo el archivo: " + e.message);
+            }
+        }
+
+        async function deleteDynamicCatalog(id) {
+            const result = await Swal.fire({ title: '¿Eliminar este catálogo dinámico y todos sus datos?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' }); if (!result.isConfirmed) return;
+            const r = await fetch(`${API}/catalogs/${id}`, { method: 'DELETE' });
+            if (r.ok) loadDynamicCatalogs();
+            else showToast('error', "Error al eliminar");
+        }
+
+        async function deleteItem(endpoint, id, bodyId, renderFn) {
+            const result = await Swal.fire({ title: '¿Eliminar este registro?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' }); if (!result.isConfirmed) return;
+            await fetch(`${API}/catalogos/${endpoint}/${id}`, { method: 'DELETE' });
+            loadCatalog(endpoint, bodyId, renderFn);
+        }
+
+        // Búsqueda en tiempo real
+        ['Cuentas', 'Presupuesto', 'Centros', 'Analitica', 'Productos', 'Movimiento'].forEach(name => {
+            const el = document.getElementById(`search${name}`);
+            if (!el) return;
+            const map = {
+                Cuentas: ['cuentas-contables', 'bodyCuentas', renderCuenta],
+                Presupuesto: ['cuentas-presupuesto', 'bodyPresupuesto', renderSimple],
+                Centros: ['centros-costo', 'bodyCentros', renderSimple],
+                Analitica: ['tipo-analitica', 'bodyAnalitica', renderSimple],
+                Productos: ['productos', 'bodyProductos', renderProducto],
+                Movimiento: ['tipos-movimiento', 'bodyMovimiento', renderSimple],
+            };
+            let timer;
+            el.addEventListener('input', () => {
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    const [ep, bid, rfn] = map[name];
+                    loadCatalog(ep, bid, rfn, el.value);
+                }, 300);
+            });
+        });
+
+        // Tab change reload
+        document.querySelectorAll('#catTabs .nav-link').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', () => loadAll());
+        });
+
+        let manageDialog = null;
+        let manageCatalogId = null;
+        let manageCatalogCols = [];
+
+        function openManageData(id, name, columnsStr) {
+            manageCatalogId = id;
+            manageCatalogCols = columnsStr.split(',').map(c => c.trim()).filter(c => c);
+            document.getElementById('manageDataTitle').textContent = `Gestionar Datos: ${name}`;
+
+            if (!manageDialog) {
+                manageDialog = new bootstrap.Modal(document.getElementById('manageDataModal'));
+            }
+
+            loadManageData();
+            manageDialog.show();
+        }
+
+        async function loadManageData() {
+            try {
+                // Setup headers
+                const thead = document.getElementById('manageDataHead');
+                thead.innerHTML = `<th>#</th>` + manageCatalogCols.map(c => `<th>${c}</th>`).join('') + `<th class="text-end">Acciones</th>`;
+
+                const res = await fetch(`${API}/catalogs/${manageCatalogId}/items?limit=1000`);
+                const items = await res.json();
+
+                const tbody = document.getElementById('manageDataBody');
+                tbody.innerHTML = '';
+
+                items.forEach((item, idx) => {
+                    let rowHtml = `<td>${idx + 1}</td>`;
+                    manageCatalogCols.forEach(col => {
+                        rowHtml += `<td>${item[col] || ''}</td>`;
+                    });
+
+                    // The item object has _id
+                    const itemId = item._id;
+                    const itemDataStr = encodeURIComponent(JSON.stringify(item));
+
+                    rowHtml += `<td class="text-end">
+                        <button class="btn btn-sm btn-outline-primary py-0" onclick="editCatalogItemRow(${itemId}, '${itemDataStr}')"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteCatalogItemRow(${itemId})"><i class="bi bi-trash"></i></button>
+                    </td>`;
+
+                    tbody.innerHTML += `<tr>${rowHtml}</tr>`;
+                });
+
+                document.getElementById('manageDataCount').innerText = `${items.length} items cargados`;
+            } catch (e) {
+                showToast('error', 'Error cargando datos: ' + e.message);
+            }
+        }
+
+        let itemFormDialog = null;
+        let currentItemId = null;
+
+        function addCatalogItemRow() {
+            currentItemId = null;
+            document.getElementById('itemFormTitle').textContent = 'Nuevo Registro';
+
+            let formHtml = '<div class="row g-3">';
+            manageCatalogCols.forEach(c => {
+                formHtml += `
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold text-secondary mb-1">${c}</label>
+                        <input type="text" id="item-input-${c}" class="form-control form-control-lg fs-6" placeholder="Escriba un valor para ${c}">
+                    </div>`;
+            });
+            formHtml += '</div>';
+
+            document.getElementById('itemFormBody').innerHTML = formHtml;
+
+            if (!itemFormDialog) itemFormDialog = new bootstrap.Modal(document.getElementById('itemFormModal'));
+            itemFormDialog.show();
+        }
+
+        function editCatalogItemRow(itemId, itemDataStr) {
+            currentItemId = itemId;
+            const currentData = JSON.parse(decodeURIComponent(itemDataStr));
+            document.getElementById('itemFormTitle').textContent = 'Editar Registro';
+
+            let formHtml = '<div class="row g-3">';
+            manageCatalogCols.forEach(c => {
+                const val = currentData[c] !== null && currentData[c] !== undefined ? currentData[c] : '';
+                formHtml += `
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold text-secondary mb-1">${c}</label>
+                        <input type="text" id="item-input-${c}" class="form-control form-control-lg fs-6" value="${val}" placeholder="Escriba un valor para ${c}">
+                    </div>`;
+            });
+            formHtml += '</div>';
+
+            document.getElementById('itemFormBody').innerHTML = formHtml;
+
+            if (!itemFormDialog) itemFormDialog = new bootstrap.Modal(document.getElementById('itemFormModal'));
+            itemFormDialog.show();
+        }
+
+        async function saveItemForm() {
+            let data = {};
+            manageCatalogCols.forEach(c => {
+                data[c] = document.getElementById(`item-input-${c}`).value;
+            });
+
+            const method = currentItemId ? 'PUT' : 'POST';
+            const url = currentItemId
+                ? `${API}/catalogs/${manageCatalogId}/items/${currentItemId}`
+                : `${API}/catalogs/${manageCatalogId}/items`;
+
+            try {
+                const r = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: data })
+                });
+
+                if (r.ok) {
+                    showToast('success', currentItemId ? 'Registro actualizado' : 'Registro agregado');
+                    itemFormDialog.hide();
+                    loadManageData();
+                    if (!currentItemId) loadDynamicCatalogs(); // Refresh counter if needed
+                } else {
+                    const err = await r.json();
+                    showToast('error', 'Error: ' + JSON.stringify(err.detail));
+                }
+            } catch (e) {
+                showToast('error', e.message);
+            }
+        }
+
+        async function deleteCatalogItemRow(itemId) {
+            const result = await Swal.fire({ title: '¿Eliminar fila?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
+            if (!result.isConfirmed) return;
+
+            try {
+                const r = await fetch(`${API}/catalogs/${manageCatalogId}/items/${itemId}`, { method: 'DELETE' });
+                if (r.ok) {
+                    showToast('success', 'Fila eliminada');
+                    loadManageData();
+                } else {
+                    const err = await r.json();
+                    showToast('error', 'Error: ' + JSON.stringify(err.detail));
+                }
+            } catch (e) { showToast('error', e.message); }
+        }
+
+        loadCompanies();
+    </script>
+</body>
+
+</html>

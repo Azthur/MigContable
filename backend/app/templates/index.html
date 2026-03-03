@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SistemaMigConta{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}Inicio › Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats Row -->
+<div class="row g-3 mb-4" id="statsRow">
+    <div class="col-md-3">
+        <div class="card-dark h-100">
+            <div class="card-title"><i class="bi bi-check-circle me-1"></i> Procesos Exitosos</div>
+            <div class="stat-value text-success" id="statSuccess">—</div>
+            <div class="stat-sub">Total acumulado</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-dark h-100">
+            <div class="card-title"><i class="bi bi-x-circle me-1"></i> Errores</div>
+            <div class="stat-value" style="color:var(--accent-red)" id="statError">—</div>
+            <div class="stat-sub">Total acumulado</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-dark h-100">
+            <div class="card-title"><i class="bi bi-diagram-3 me-1"></i> Mapeos de Cuentas</div>
+            <div class="stat-value" style="color:var(--accent)" id="statAccounts">—</div>
+            <div class="stat-sub">Configurados</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-dark h-100">
+            <div class="card-title"><i class="bi bi-database me-1"></i> Estado DB</div>
+            <div class="stat-value" style="font-size:18px; margin-top:6px;" id="statDb">
+                <span class="badge-info">Verificando...</span>
+            </div>
+            <div class="stat-sub" id="statDbSub">PostgreSQL 18 · localhost:5433</div>
+        </div>
+    </div>
+</div>
+
+<!-- ETL Runner + Recent Logs -->
+<div class="row g-3">
+    <!-- ETL Runner -->
+    <div class="col-lg-5">
+        <div class="card-dark h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 style="font-size:15px; font-weight:600; margin:0;">
+                    <i class="bi bi-play-circle me-2" style="color:var(--accent)"></i>Ejecutar Integración ETL
+                </h5>
+            </div>
+            <p style="font-size:13px; color:var(--text-secondary); margin-bottom:20px;">
+                Inicia el proceso de extracción, transformación y carga de datos contables desde SQL Server hacia
+                PostgreSQL.
+            </p>
+
+            <div class="mb-3">
+                <label class="form-label-dark">Fecha Inicio</label>
+                <input type="date" class="form-control-dark" id="startDate" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label-dark">Fecha Fin</label>
+                <input type="date" class="form-control-dark" id="endDate" required>
+            </div>
+
+            <button class="btn-accent w-100" id="btnRunEtl" onclick="runEtl()">
+                <i class="bi bi-play-fill me-1"></i> Ejecutar ETL
+            </button>
+
+            <div id="etlResult" class="mt-3"></div>
+        </div>
+    </div>
+
+    <!-- Recent Logs -->
+    <div class="col-lg-7">
+        <div class="card-dark h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 style="font-size:15px; font-weight:600; margin:0;">
+                    <i class="bi bi-journal-text me-2" style="color:var(--accent-purple)"></i>Últimos Logs
+                </h5>
+                <a href="/logs" class="btn-ghost" style="font-size:12px; padding:5px 12px;">
+                    Ver todos <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <div id="recentLogsContainer">
+                <div style="text-align:center; padding:30px; color:var(--text-secondary);">
+                    <div class="spinner-sm"></div>
+                    <div style="margin-top:8px; font-size:13px;">Cargando logs...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-3 mt-1">
+    <div class="col-12">
+        <div class="card-dark">
+            <h5 style="font-size:14px; font-weight:600; margin-bottom:16px; color:var(--text-secondary);">
+                <i class="bi bi-lightning me-1"></i> ACCIONES RÁPIDAS
+            </h5>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="/config" class="btn-ghost">
+                    <i class="bi bi-diagram-3 me-1"></i> Configurar Mapeo de Cuentas
+                </a>
+                <a href="/config#documents" class="btn-ghost">
+                    <i class="bi bi-file-earmark-text me-1"></i> Mapeo de Documentos
+                </a>
+                <a href="/logs" class="btn-ghost">
+                    <i class="bi bi-journal-text me-1"></i> Ver Logs Completos
+                </a>
+                <a href="/docs" class="btn-ghost" target="_blank">
+                    <i class="bi bi-code-slash me-1"></i> Documentación API
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Set default dates
+    const today = new Date().toISOString().split('T')[0];
+    const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+    document.getElementById('startDate').value = firstDay;
+    document.getElementById('endDate').value = today;
+
+    // Load stats
+    async function loadStats() {
+        // DB Status
+        try {
+            const res = await fetch('/api/v1/db-status');
+            const data = await res.json();
+            const dbEl = document.getElementById('statDb');
+            if (data.status === 'connected') {
+                dbEl.innerHTML = '<span class="badge-success"><i class="bi bi-check-circle me-1"></i>Conectado</span>';
+            } else {
+                dbEl.innerHTML = '<span class="badge-error"><i class="bi bi-x-circle me-1"></i>Error</span>';
+            }
+        } catch { }
+
+        // Log stats
+        try {
+            const res = await fetch('/api/v1/logs/stats');
+            const data = await res.json();
+            document.getElementById('statSuccess').textContent = data.success;
+            document.getElementById('statError').textContent = data.error;
+        } catch { }
+
+        // Account count
+        try {
+            const res = await fetch('/api/v1/config/accounts/');
+            const data = await res.json();
+            document.getElementById('statAccounts').textContent = data.length;
+        } catch { }
+    }
+
+    // Load recent logs
+    async function loadRecentLogs() {
+        const container = document.getElementById('recentLogsContainer');
+        try {
+            const res = await fetch('/api/v1/logs/?limit=5');
+            const logs = await res.json();
+            if (logs.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:13px;">No hay logs aún. Ejecuta tu primer proceso ETL.</div>';
+                return;
+            }
+            const rows = logs.map(log => {
+                const badge = log.status === 'SUCCESS' ? 'badge-success' :
+                    log.status === 'ERROR' ? 'badge-error' : 'badge-warning';
+                const date = log.created_at ? new Date(log.created_at).toLocaleString('es-CO') : '—';
+                return `<tr>
+                    <td><span class="${badge}">${log.status || '—'}</span></td>
+                    <td>${log.process_name || '—'}</td>
+                    <td style="color:var(--text-secondary); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${log.message || '—'}</td>
+                    <td style="color:var(--text-secondary); font-size:11px;">${date}</td>
+                </tr>`;
+            }).join('');
+            container.innerHTML = `<table class="table-dark-custom">
+                <thead><tr><th>Estado</th><th>Proceso</th><th>Mensaje</th><th>Fecha</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+        } catch {
+            container.innerHTML = '<div style="color:var(--text-secondary); font-size:13px; padding:20px;">No se pudieron cargar los logs.</div>';
+        }
+    }
+
+    async function runEtl() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const resultDiv = document.getElementById('etlResult');
+        const btn = document.getElementById('btnRunEtl');
+
+        if (!startDate || !endDate) {
+            resultDiv.innerHTML = '<div class="alert-dark alert-error-dark"><i class="bi bi-exclamation-triangle me-1"></i>Por favor selecciona ambas fechas.</div>';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-sm"></span> Ejecutando...';
+        resultDiv.innerHTML = '';
+
+        try {
+            const res = await fetch(`/api/v1/etl/run-etl/?start_date=${startDate}&end_date=${endDate}`, { method: 'POST' });
+            const data = await res.json();
+            if (res.ok) {
+                resultDiv.innerHTML = `<div class="alert-dark alert-success-dark"><i class="bi bi-check-circle me-1"></i>${data.message}</div>`;
+                setTimeout(loadRecentLogs, 2000);
+            } else {
+                resultDiv.innerHTML = `<div class="alert-dark alert-error-dark"><i class="bi bi-x-circle me-1"></i>Error: ${data.detail || 'Error desconocido'}</div>`;
+            }
+        } catch (err) {
+            resultDiv.innerHTML = `<div class="alert-dark alert-error-dark"><i class="bi bi-wifi-off me-1"></i>Error de red: ${err}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-play-fill me-1"></i> Ejecutar ETL';
+        }
+    }
+
+    loadStats();
+    loadRecentLogs();
+</script>
+{% endblock %}

@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block title %}Configuración - SistemaMigConta{% endblock %}
+{% block page_title %}Configuración{% endblock %}
+{% block breadcrumb %}Inicio › Configuración de Mapeos{% endblock %}
+
+{% block content %}
+<!-- Tabs -->
+<ul class="nav mb-4" id="configTabs" style="border-bottom: 1px solid var(--border-color); gap: 4px;">
+    <li class="nav-item">
+        <button class="tab-btn active" id="tabAccounts" onclick="showTab('accounts')">
+            <i class="bi bi-diagram-3 me-1"></i> Mapeo de Cuentas
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="tab-btn" id="tabDocuments" onclick="showTab('documents')">
+            <i class="bi bi-file-earmark-text me-1"></i> Mapeo de Documentos
+        </button>
+    </li>
+</ul>
+
+<!-- ── ACCOUNTS TAB ── -->
+<div id="panelAccounts">
+    <div class="card-dark">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 style="font-size:15px; font-weight:600; margin:0;">
+                <i class="bi bi-diagram-3 me-2" style="color:var(--accent)"></i>Mapeo de Cuentas Contables
+            </h5>
+            <button class="btn-accent" onclick="openAccountModal()">
+                <i class="bi bi-plus-lg me-1"></i> Nueva Cuenta
+            </button>
+        </div>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
+            Define la correspondencia entre los códigos de cuenta del sistema origen (SQL Server) y el sistema destino
+            (PostgreSQL).
+        </p>
+        <div id="accountsTableContainer">
+            <div style="text-align:center; padding:40px; color:var(--text-secondary);">
+                <div class="spinner-sm"></div>
+                <div style="margin-top:8px; font-size:13px;">Cargando mapeos...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── DOCUMENTS TAB ── -->
+<div id="panelDocuments" style="display:none;">
+    <div class="card-dark">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 style="font-size:15px; font-weight:600; margin:0;">
+                <i class="bi bi-file-earmark-text me-2" style="color:var(--accent-purple)"></i>Mapeo de Tipos de
+                Documento
+            </h5>
+            <button class="btn-accent" onclick="openDocModal()">
+                <i class="bi bi-plus-lg me-1"></i> Nuevo Documento
+            </button>
+        </div>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
+            Configura la equivalencia entre los tipos de documento del sistema origen y el sistema destino.
+        </p>
+        <div id="documentsTableContainer">
+            <div style="text-align:center; padding:40px; color:var(--text-secondary);">
+                <div class="spinner-sm"></div>
+                <div style="margin-top:8px; font-size:13px;">Cargando mapeos...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: Account ── -->
+<div class="modal fade modal-dark" id="accountModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="accountModalTitle" style="font-size:15px; font-weight:600;">Nueva Cuenta
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding:20px;">
+                <input type="hidden" id="accountId">
+                <div class="mb-3">
+                    <label class="form-label-dark">Código Cuenta Origen *</label>
+                    <input type="text" class="form-control-dark" id="srcAccountCode" placeholder="Ej: 110505">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Nombre Cuenta Origen</label>
+                    <input type="text" class="form-control-dark" id="srcAccountName" placeholder="Ej: Caja General">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Código Cuenta Destino *</label>
+                    <input type="text" class="form-control-dark" id="destAccountCode" placeholder="Ej: 1105">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Centro de Costo Destino</label>
+                    <input type="text" class="form-control-dark" id="destCostCenter" placeholder="Opcional">
+                </div>
+                <div class="form-check" style="margin-top:8px;">
+                    <input class="form-check-input" type="checkbox" id="accountActive" checked>
+                    <label class="form-check-label" style="font-size:13px; color:var(--text-secondary);">Activo</label>
+                </div>
+                <div id="accountModalMsg" class="mt-2"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn-accent" onclick="saveAccount()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL: Document ── -->
+<div class="modal fade modal-dark" id="docModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="docModalTitle" style="font-size:15px; font-weight:600;">Nuevo Tipo de
+                    Documento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding:20px;">
+                <input type="hidden" id="docId">
+                <div class="mb-3">
+                    <label class="form-label-dark">Tipo Documento Origen *</label>
+                    <input type="text" class="form-control-dark" id="srcDocType" placeholder="Ej: FV">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Tipo Documento Destino *</label>
+                    <input type="text" class="form-control-dark" id="destDocType" placeholder="Ej: FAC">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Descripción</label>
+                    <input type="text" class="form-control-dark" id="docDescription" placeholder="Ej: Factura de Venta">
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="docActive" checked>
+                    <label class="form-check-label" style="font-size:13px; color:var(--text-secondary);">Activo</label>
+                </div>
+                <div id="docModalMsg" class="mt-2"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn-accent" onclick="saveDoc()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .tab-btn {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: var(--text-secondary);
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all .2s;
+        margin-bottom: -1px;
+    }
+
+    .tab-btn:hover {
+        color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+    }
+
+    .form-check-input {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+
+    .form-check-input:checked {
+        background-color: var(--accent);
+        border-color: var(--accent);
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let accountModalInstance, docModalInstance;
+    window.addEventListener('DOMContentLoaded', () => {
+        accountModalInstance = new bootstrap.Modal(document.getElementById('accountModal'));
+        docModalInstance = new bootstrap.Modal(document.getElementById('docModal'));
+        loadAccounts();
+        loadDocuments();
+        // Check hash
+        if (location.hash === '#documents') showTab('documents');
+    });
+
+    function showTab(tab) {
+        document.getElementById('panelAccounts').style.display = tab === 'accounts' ? '' : 'none';
+        document.getElementById('panelDocuments').style.display = tab === 'documents' ? '' : 'none';
+        document.getElementById('tabAccounts').className = 'tab-btn' + (tab === 'accounts' ? ' active' : '');
+        document.getElementById('tabDocuments').className = 'tab-btn' + (tab === 'documents' ? ' active' : '');
+    }
+
+    // ── ACCOUNTS ──
+    async function loadAccounts() {
+        const container = document.getElementById('accountsTableContainer');
+        try {
+            const res = await fetch('/api/v1/config/accounts/');
+            const data = await res.json();
+            if (data.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary); font-size:13px;"><i class="bi bi-inbox" style="font-size:32px; display:block; margin-bottom:8px;"></i>No hay mapeos configurados aún.</div>';
+                return;
+            }
+            const rows = data.map(a => `<tr>
+                <td><code style="color:var(--accent); font-size:12px;">${a.source_account_code}</code></td>
+                <td>${a.source_account_name || '<span style="color:var(--text-secondary)">—</span>'}</td>
+                <td><code style="color:var(--accent-green); font-size:12px;">${a.dest_account_code}</code></td>
+                <td>${a.dest_cost_center || '<span style="color:var(--text-secondary)">—</span>'}</td>
+                <td><span class="${a.is_active ? 'badge-success' : 'badge-error'}">${a.is_active ? 'Activo' : 'Inactivo'}</span></td>
+                <td>
+                    <button class="btn-ghost" style="padding:4px 10px; font-size:11px;" onclick="editAccount(${JSON.stringify(a).replace(/"/g, '&quot;')})">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn-ghost" style="padding:4px 10px; font-size:11px; border-color:var(--accent-red); color:var(--accent-red);" onclick="deleteAccount(${a.id})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>`).join('');
+            container.innerHTML = `<table class="table-dark-custom">
+                <thead><tr><th>Cód. Origen</th><th>Nombre Origen</th><th>Cód. Destino</th><th>C. Costo</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+        } catch {
+            container.innerHTML = '<div style="color:var(--accent-red); font-size:13px; padding:20px;">Error al cargar los mapeos.</div>';
+        }
+    }
+
+    function openAccountModal(data = null) {
+        document.getElementById('accountModalTitle').textContent = data ? 'Editar Cuenta' : 'Nueva Cuenta';
+        document.getElementById('accountId').value = data?.id || '';
+        document.getElementById('srcAccountCode').value = data?.source_account_code || '';
+        document.getElementById('srcAccountName').value = data?.source_account_name || '';
+        document.getElementById('destAccountCode').value = data?.dest_account_code || '';
+        document.getElementById('destCostCenter').value = data?.dest_cost_center || '';
+        document.getElementById('accountActive').checked = data ? data.is_active : true;
+        document.getElementById('accountModalMsg').innerHTML = '';
+        accountModalInstance.show();
+    }
+
+    function editAccount(data) { openAccountModal(data); }
+
+    async function saveAccount() {
+        const id = document.getElementById('accountId').value;
+        const body = {
+            source_account_code: document.getElementById('srcAccountCode').value.trim(),
+            source_account_name: document.getElementById('srcAccountName').value.trim() || null,
+            dest_account_code: document.getElementById('destAccountCode').value.trim(),
+            dest_cost_center: document.getElementById('destCostCenter').value.trim() || null,
+            is_active: document.getElementById('accountActive').checked
+        };
+        if (!body.source_account_code || !body.dest_account_code) {
+            document.getElementById('accountModalMsg').innerHTML = '<div class="alert-dark alert-error-dark">Los campos marcados con * son obligatorios.</div>';
+            return;
+        }
+        const url = id ? `/api/v1/config/accounts/${id}` : '/api/v1/config/accounts/';
+        const method = id ? 'PUT' : 'POST';
+        try {
+            const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            if (res.ok) {
+                accountModalInstance.hide();
+                loadAccounts();
+            } else {
+                const err = await res.json();
+                document.getElementById('accountModalMsg').innerHTML = `<div class="alert-dark alert-error-dark">${err.detail || 'Error al guardar'}</div>`;
+            }
+        } catch {
+            document.getElementById('accountModalMsg').innerHTML = '<div class="alert-dark alert-error-dark">Error de red.</div>';
+        }
+    }
+
+    async function deleteAccount(id) {
+        if (!confirm('¿Eliminar este mapeo de cuenta?')) return;
+        await fetch(`/api/v1/config/accounts/${id}`, { method: 'DELETE' });
+        loadAccounts();
+    }
+
+    // ── DOCUMENTS ──
+    async function loadDocuments() {
+        const container = document.getElementById('documentsTableContainer');
+        try {
+            const res = await fetch('/api/v1/config/documents/');
+            const data = await res.json();
+            if (data.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary); font-size:13px;"><i class="bi bi-inbox" style="font-size:32px; display:block; margin-bottom:8px;"></i>No hay mapeos configurados aún.</div>';
+                return;
+            }
+            const rows = data.map(d => `<tr>
+                <td><code style="color:var(--accent); font-size:12px;">${d.source_doc_type}</code></td>
+                <td><code style="color:var(--accent-green); font-size:12px;">${d.dest_doc_type}</code></td>
+                <td>${d.description || '<span style="color:var(--text-secondary)">—</span>'}</td>
+                <td><span class="${d.is_active ? 'badge-success' : 'badge-error'}">${d.is_active ? 'Activo' : 'Inactivo'}</span></td>
+                <td>
+                    <button class="btn-ghost" style="padding:4px 10px; font-size:11px;" onclick="editDoc(${JSON.stringify(d).replace(/"/g, '&quot;')})">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn-ghost" style="padding:4px 10px; font-size:11px; border-color:var(--accent-red); color:var(--accent-red);" onclick="deleteDoc(${d.id})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>`).join('');
+            container.innerHTML = `<table class="table-dark-custom">
+                <thead><tr><th>Tipo Origen</th><th>Tipo Destino</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+        } catch {
+            container.innerHTML = '<div style="color:var(--accent-red); font-size:13px; padding:20px;">Error al cargar los mapeos.</div>';
+        }
+    }
+
+    function openDocModal(data = null) {
+        document.getElementById('docModalTitle').textContent = data ? 'Editar Documento' : 'Nuevo Tipo de Documento';
+        document.getElementById('docId').value = data?.id || '';
+        document.getElementById('srcDocType').value = data?.source_doc_type || '';
+        document.getElementById('destDocType').value = data?.dest_doc_type || '';
+        document.getElementById('docDescription').value = data?.description || '';
+        document.getElementById('docActive').checked = data ? data.is_active : true;
+        document.getElementById('docModalMsg').innerHTML = '';
+        docModalInstance.show();
+    }
+
+    function editDoc(data) { openDocModal(data); }
+
+    async function saveDoc() {
+        const id = document.getElementById('docId').value;
+        const body = {
+            source_doc_type: document.getElementById('srcDocType').value.trim(),
+            dest_doc_type: document.getElementById('destDocType').value.trim(),
+            description: document.getElementById('docDescription').value.trim() || null,
+            is_active: document.getElementById('docActive').checked
+        };
+        if (!body.source_doc_type || !body.dest_doc_type) {
+            document.getElementById('docModalMsg').innerHTML = '<div class="alert-dark alert-error-dark">Los campos marcados con * son obligatorios.</div>';
+            return;
+        }
+        const url = id ? `/api/v1/config/documents/${id}` : '/api/v1/config/documents/';
+        const method = id ? 'PUT' : 'POST';
+        try {
+            const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            if (res.ok) {
+                docModalInstance.hide();
+                loadDocuments();
+            } else {
+                const err = await res.json();
+                document.getElementById('docModalMsg').innerHTML = `<div class="alert-dark alert-error-dark">${err.detail || 'Error al guardar'}</div>`;
+            }
+        } catch {
+            document.getElementById('docModalMsg').innerHTML = '<div class="alert-dark alert-error-dark">Error de red.</div>';
+        }
+    }
+
+    async function deleteDoc(id) {
+        if (!confirm('¿Eliminar este mapeo de documento?')) return;
+        await fetch(`/api/v1/config/documents/${id}`, { method: 'DELETE' });
+        loadDocuments();
+    }
+</script>
+{% endblock %}

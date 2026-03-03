@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapeo Contable — SistemaMigConta</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --dark: #1e293b;
+            --sidebar-w: 220px;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--dark);
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .sidebar .brand {
+            padding: 1.2rem 1rem;
+            border-bottom: 1px solid #334155;
+        }
+
+        .sidebar .brand h6 {
+            color: #fff;
+            font-weight: 700;
+            margin: 0;
+            font-size: 0.85rem;
+        }
+
+        .sidebar .brand small {
+            color: #94a3b8;
+            font-size: 0.7rem;
+        }
+
+        .sidebar .nav-link {
+            color: #94a3b8;
+            padding: 0.6rem 1rem;
+            font-size: 0.82rem;
+            border-radius: 6px;
+            margin: 2px 8px;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: #334155;
+            color: #fff;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-w);
+            padding: 1.5rem;
+        }
+
+        .page-header {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+            margin-bottom: 1rem;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: #fff;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 0.9rem 1.25rem;
+        }
+
+        .subcategoria-card {
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            background: #fff;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+            transition: all 0.2s;
+        }
+
+        .subcategoria-card:hover {
+            box-shadow: 0 4px 12px rgba(37, 99, 235, .15);
+            transform: translateY(-1px);
+        }
+
+        .subcategoria-card .badge-sub {
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 0.72rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .btn-edit-sub {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+
+        .btn-edit-sub:hover {
+            background: #1d4ed8;
+            color: #fff;
+        }
+
+        .modal-header {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #94a3b8;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="brand">
+            <h6><i class="bi bi-database-fill-gear me-2"></i>MigConta</h6>
+            <small>Sistema de Migración Contable</small>
+        </div>
+        <nav class="mt-2">
+            <a href="/" class="nav-link"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+            <a href="/companies" class="nav-link"><i class="bi bi-building me-2"></i>Empresas</a>
+            <a href="/catalogos" class="nav-link"><i class="bi bi-journal-bookmark me-2"></i>Catálogos</a>
+            <a href="/mapeo" class="nav-link active"><i class="bi bi-diagram-3 me-2"></i>Mapeo Contable</a>
+            <a href="/logs" class="nav-link"><i class="bi bi-list-ul me-2"></i>Logs</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0 fw-bold"><i class="bi bi-diagram-3 me-2 text-primary"></i>Mapeo Contable</h5>
+                <small class="text-muted">Parametrización de asientos contables por categoría y subcategoría</small>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <select class="form-select form-select-sm" id="companyFilter" style="width:200px"></select>
+                <button class="btn btn-primary btn-sm" onclick="openCatModal()">
+                    <i class="bi bi-plus-lg me-1"></i>Nueva Categoría
+                </button>
+            </div>
+        </div>
+
+        <div id="categoriasList"></div>
+    </div>
+
+    <!-- Modal Categoría -->
+    <div class="modal fade" id="catModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title mb-0" id="catModalTitle">Nueva Categoría</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Nombre de la Categoría *</label>
+                        <input type="text" class="form-control" id="catNombre"
+                            placeholder="Ej: Migración del sistema Majestic al Contasis">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Descripción</label>
+                        <textarea class="form-control" id="catDescripcion" rows="2"
+                            placeholder="Descripción opcional..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-primary btn-sm" onclick="saveCategoria()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Subcategoría -->
+    <div class="modal fade" id="subModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title mb-0" id="subModalTitle">Nueva Subcategoría</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="subCategoriaId">
+                    <input type="hidden" id="subId">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Nombre de la Subcategoría *</label>
+                            <input type="text" class="form-control" id="subNombre"
+                                placeholder="Ej: Migración del Registro de Ventas">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Tabla Origen (BD Intermedia)</label>
+                            <select class="form-select" id="subTablaOrigen">
+                                <option value="">-- Seleccionar tabla --</option>
+                            </select>
+                            <small class="text-muted">Tabla de migconta_db de donde se tomarán los datos</small>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Código Origen</label>
+                            <input type="text" class="form-control" id="subCodigoOrigen" placeholder="Ej: 002"
+                                maxlength="10">
+                            <small class="text-muted">Código del libro contable</small>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Descripción</label>
+                            <input type="text" class="form-control" id="subDescripcion" placeholder="Opcional">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-primary btn-sm" onclick="saveSubcategoria()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API = '/api/v1';
+        let companyId = null;
+        let editCatId = null;
+        const catModal = new bootstrap.Modal(document.getElementById('catModal'));
+        const subModal = new bootstrap.Modal(document.getElementById('subModal'));
+
+        async function loadCompanies() {
+            const r = await fetch(`${API}/companies/`);
+            const companies = await r.json();
+            const sel = document.getElementById('companyFilter');
+            sel.innerHTML = '<option value="">Seleccionar empresa</option>';
+            companies.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id; opt.textContent = c.name;
+                sel.appendChild(opt);
+            });
+            if (companies.length > 0) {
+                sel.value = companies[0].id;
+                companyId = companies[0].id;
+                loadCategorias();
+            }
+            sel.addEventListener('change', () => { companyId = sel.value; loadCategorias(); });
+        }
+
+        async function loadCategorias() {
+            if (!companyId) return;
+            const r = await fetch(`${API}/mapeo/categorias?company_id=${companyId}`);
+            const cats = await r.json();
+            const container = document.getElementById('categoriasList');
+            if (!cats.length) {
+                container.innerHTML = `<div class="empty-state"><i class="bi bi-diagram-3"></i><h6>Sin categorías de mapeo</h6><p>Crea una categoría para comenzar a parametrizar los asientos contables</p><button class="btn btn-primary" onclick="openCatModal()"><i class="bi bi-plus-lg me-1"></i>Nueva Categoría</button></div>`;
+                return;
+            }
+            container.innerHTML = cats.map(cat => `
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="bi bi-folder2-open me-2"></i>
+                    <strong>${cat.nombre}</strong>
+                    ${cat.descripcion ? `<small class="ms-2 opacity-75">${cat.descripcion}</small>` : ''}
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-light" onclick="openSubModal(${cat.id})">
+                        <i class="bi bi-plus-lg me-1"></i>Nueva Subcategoría
+                    </button>
+                    <button class="btn btn-sm btn-outline-light" onclick="editCategoria(${JSON.stringify(cat).replace(/"/g, '&quot;')})">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteCategoria(${cat.id})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                ${cat.subcategorias && cat.subcategorias.length ? cat.subcategorias.map(sub => `
+                    <div class="subcategoria-card d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <i class="bi bi-diagram-2 text-primary"></i>
+                                <strong class="small">${sub.nombre}</strong>
+                                ${sub.tabla_origen ? `<span class="badge-sub"><i class="bi bi-table me-1"></i>${sub.tabla_origen}</span>` : ''}
+                                ${sub.codigo_origen ? `<span class="badge bg-secondary" style="font-size:0.7rem">${sub.codigo_origen}</span>` : ''}
+                            </div>
+                            <small class="text-muted">
+                                ${sub.lineas_asiento ? sub.lineas_asiento.length : 0} líneas de asiento configuradas
+                            </small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="editSubcategoria(${JSON.stringify(sub).replace(/"/g, '&quot;')}, ${cat.id})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <a href="/mapeo/${sub.id}" class="btn-edit-sub">
+                                <i class="bi bi-sliders me-1"></i>Configurar Asiento
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteSubcategoria(${sub.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('') : `<div class="text-center text-muted py-3"><small>Sin subcategorías. Agrega una para configurar los asientos contables.</small></div>`}
+            </div>
+        </div>
+    `).join('');
+        }
+
+        async function loadTablesForSub() {
+            // Cargar tablas de la BD intermedia para seleccionar tabla origen
+            try {
+                // Intentar obtener tablas de la BD intermedia via company dest connection
+                const r = await fetch(`${API}/companies/${companyId}/dest-tables`);
+                if (r.ok) {
+                    const tables = await r.json();
+                    const sel = document.getElementById('subTablaOrigen');
+                    tables.forEach(t => {
+                        const opt = document.createElement('option');
+                        opt.value = t.table_name || t;
+                        opt.textContent = t.table_name || t;
+                        sel.appendChild(opt);
+                    });
+                }
+            } catch (e) { /* ignorar si no hay conexión */ }
+        }
+
+        function openCatModal(data = null) {
+            editCatId = data ? data.id : null;
+            document.getElementById('catModalTitle').textContent = editCatId ? 'Editar Categoría' : 'Nueva Categoría';
+            document.getElementById('catNombre').value = data ? data.nombre : '';
+            document.getElementById('catDescripcion').value = data ? (data.descripcion || '') : '';
+            catModal.show();
+        }
+
+        function editCategoria(data) { openCatModal(data); }
+
+        async function saveCategoria() {
+            const nombre = document.getElementById('catNombre').value.trim();
+            if (!nombre) { alert('El nombre es requerido'); return; }
+            const body = { nombre, descripcion: document.getElementById('catDescripcion').value.trim(), company_id: parseInt(companyId) };
+            const url = editCatId ? `${API}/mapeo/categorias/${editCatId}` : `${API}/mapeo/categorias`;
+            const method = editCatId ? 'PUT' : 'POST';
+            const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            if (r.ok) { catModal.hide(); loadCategorias(); }
+            else { const e = await r.json(); alert('Error: ' + JSON.stringify(e.detail)); }
+        }
+
+        async function deleteCategoria(id) {
+            if (!confirm('¿Eliminar esta categoría y todas sus subcategorías?')) return;
+            await fetch(`${API}/mapeo/categorias/${id}`, { method: 'DELETE' });
+            loadCategorias();
+        }
+
+        let editSubId = null;
+        let editSubCatId = null;
+
+        function openSubModal(categoriaId) {
+            editSubId = null;
+            editSubCatId = categoriaId;
+            document.getElementById('subModalTitle').textContent = 'Nueva Subcategoría';
+            document.getElementById('subCategoriaId').value = categoriaId;
+            document.getElementById('subId').value = '';
+            document.getElementById('subNombre').value = '';
+            document.getElementById('subTablaOrigen').value = '';
+            document.getElementById('subCodigoOrigen').value = '';
+            document.getElementById('subDescripcion').value = '';
+            loadTablesForSub();
+            subModal.show();
+        }
+
+        function editSubcategoria(data, catId) {
+            editSubId = data.id;
+            editSubCatId = catId;
+            document.getElementById('subModalTitle').textContent = 'Editar Subcategoría';
+            document.getElementById('subCategoriaId').value = catId;
+            document.getElementById('subId').value = data.id;
+            document.getElementById('subNombre').value = data.nombre || '';
+            document.getElementById('subCodigoOrigen').value = data.codigo_origen || '';
+            document.getElementById('subDescripcion').value = data.descripcion || '';
+            loadTablesForSub().then(() => {
+                if (data.tabla_origen) document.getElementById('subTablaOrigen').value = data.tabla_origen;
+            });
+            subModal.show();
+        }
+
+        async function saveSubcategoria() {
+            const nombre = document.getElementById('subNombre').value.trim();
+            if (!nombre) { alert('El nombre es requerido'); return; }
+            const body = {
+                nombre,
+                categoria_id: parseInt(document.getElementById('subCategoriaId').value),
+                tabla_origen: document.getElementById('subTablaOrigen').value || null,
+                codigo_origen: document.getElementById('subCodigoOrigen').value.trim() || null,
+                descripcion: document.getElementById('subDescripcion').value.trim() || null,
+            };
+            const url = editSubId ? `${API}/mapeo/subcategorias/${editSubId}` : `${API}/mapeo/subcategorias`;
+            const method = editSubId ? 'PUT' : 'POST';
+            const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            if (r.ok) { subModal.hide(); loadCategorias(); }
+            else { const e = await r.json(); alert('Error: ' + JSON.stringify(e.detail)); }
+        }
+
+        async function deleteSubcategoria(id) {
+            if (!confirm('¿Eliminar esta subcategoría y todas sus líneas de asiento?')) return;
+            await fetch(`${API}/mapeo/subcategorias/${id}`, { method: 'DELETE' });
+            loadCategorias();
+        }
+
+        loadCompanies();
+    </script>
+</body>
+
+</html>

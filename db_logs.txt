@@ -1,0 +1,6 @@
+process_name,status,message,created_at
+ETL Incremental - VtaRItem,SUCCESS,Sin registros nuevos en VtaRItem,2026-02-20 21:31:13.706494+00:00
+ETL Incremental - CcbRGdoc,SUCCESS,Sin registros nuevos en CcbRGdoc,2026-02-20 21:31:13.435592+00:00
+ETL Manual,SUCCESS,ETL finalizado. 0 registros migrados de 2 tablas.,2026-02-20 21:31:13.400689+00:00
+ETL Incremental - VtaRItem,SUCCESS,Sin registros nuevos en VtaRItem,2026-02-20 21:20:34.086547+00:00
+ETL Incremental - CcbRGdoc,SUCCESS,Sin registros nuevos en CcbRGdoc,2026-02-20 21:20:33.905944+00:00

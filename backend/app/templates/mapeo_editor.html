@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Asiento — SistemaMigConta</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --dark: #1e293b;
+            --sidebar-w: 220px;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--dark);
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .sidebar .brand {
+            padding: 1.2rem 1rem;
+            border-bottom: 1px solid #334155;
+        }
+
+        .sidebar .brand h6 {
+            color: #fff;
+            font-weight: 700;
+            margin: 0;
+            font-size: 0.85rem;
+        }
+
+        .sidebar .nav-link {
+            color: #94a3b8;
+            padding: 0.6rem 1rem;
+            font-size: 0.82rem;
+            border-radius: 6px;
+            margin: 2px 8px;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: #334155;
+            color: #fff;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-w);
+            padding: 1.5rem;
+        }
+
+        .page-header {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+        }
+
+        .card-header {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 1rem 1.25rem;
+        }
+
+        .table th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #64748b;
+            background: #f8fafc;
+        }
+
+        .table td {
+            font-size: 0.83rem;
+            vertical-align: middle;
+        }
+
+        .linea-row {
+            cursor: pointer;
+        }
+
+        .linea-row:hover {
+            background: #f0f9ff;
+        }
+
+        .modal-header-custom {
+            background: #1e3a5f;
+            color: #fff;
+            padding: 0.6rem 1rem;
+        }
+
+        .modal-header-custom .btn-close {
+            filter: invert(1);
+        }
+
+        .field-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            gap: 1rem;
+        }
+
+        .field-key {
+            flex: 1;
+            max-width: 250px;
+        }
+
+        .field-val {
+            flex: 2;
+        }
+
+        .field-actions {
+            flex-shrink: 0;
+        }
+
+        .btn-add-linea {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: 0.83rem;
+        }
+
+        .btn-add-linea:hover {
+            background: #1d4ed8;
+            color: #fff;
+        }
+
+        .orden-badge {
+            background: #e2e8f0;
+            color: #475569;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .form-label-small {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.2rem;
+        }
+
+        /* ── Toast Notifications ───────────────────────────────── */
+        .toast-container {
+            position: fixed;
+            top: 1.2rem;
+            right: 1.2rem;
+            z-index: 11000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            pointer-events: none;
+        }
+
+        .toast-msg {
+            pointer-events: auto;
+            min-width: 320px;
+            max-width: 480px;
+            padding: 0.85rem 1.1rem;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
+            transform: translateX(120%);
+            opacity: 0;
+            animation: toastSlideIn 0.35s cubic-bezier(.22, .68, 0, 1.1) forwards;
+        }
+
+        .toast-msg.removing {
+            animation: toastSlideOut 0.3s ease-in forwards;
+        }
+
+        .toast-msg .toast-icon {
+            font-size: 1.15rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .toast-msg .toast-body {
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .toast-msg .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, .7);
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0;
+            margin-top: -2px;
+        }
+
+        .toast-msg .toast-close:hover {
+            color: #fff;
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #059669, #10b981);
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+
+        .toast-warning {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+        }
+
+        @keyframes toastSlideIn {
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes toastSlideOut {
+            to {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+        }
+
+        /* ── Confirm Modal Override ────────────────────────────── */
+        #confirmModal .modal-content {
+            border: none;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .2);
+        }
+
+        #confirmModal .modal-header {
+            background: linear-gradient(135deg, #1e3a5f, #2563eb);
+            color: #fff;
+            border: none;
+            padding: 0.8rem 1.2rem;
+        }
+
+        #confirmModal .modal-body {
+            font-size: 0.9rem;
+            padding: 1.4rem 1.5rem;
+        }
+
+        #confirmModal .modal-footer {
+            border: none;
+            padding: 0 1.2rem 1.2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="brand">
+            <h6><i class="bi bi-database-fill-gear me-2"></i>MigConta</h6>
+            <small>Sistema de Migración Contable</small>
+        </div>
+        <nav class="mt-2">
+            <a href="/" class="nav-link"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+            <a href="/companies" class="nav-link"><i class="bi bi-building me-2"></i>Empresas</a>
+            <a href="/catalogos" class="nav-link"><i class="bi bi-journal-bookmark me-2"></i>Catálogos</a>
+            <a href="/mapeo" class="nav-link active"><i class="bi bi-diagram-3 me-2"></i>Mapeo Contable</a>
+            <a href="/logs" class="nav-link"><i class="bi bi-list-ul me-2"></i>Logs</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-1" style="font-size:0.8rem">
+                            <li class="breadcrumb-item"><a href="/mapeo">Mapeo Contable</a></li>
+                            <li class="breadcrumb-item active" id="breadSubNombre">Cargando...</li>
+                        </ol>
+                    </nav>
+                    <h5 class="mb-0 fw-bold" id="pageTitle"><i class="bi bi-sliders me-2 text-primary"></i>Editor de
+                        Asiento Contable</h5>
+                    <small class="text-muted" id="pageSubtitle">Mapeo Dinámico de Cabeceras y Detalles</small>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="window.location='/mapeo'">
+                        <i class="bi bi-arrow-left me-1"></i>Volver
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info de la subcategoría -->
+        <div class="card mb-3">
+            <div class="card-body py-3">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label-small">Tabla origen:</label>
+                        <div id="infoTabla" class="form-control form-control-sm bg-light" readonly></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label-small">Clave(s) Agrupación Asiento separada por comas (ej.
+                            coddoc,cserie,cnumero):</label>
+                        <input type="text" id="claveAsiento" class="form-control form-control-sm"
+                            placeholder="Columnas de agrupación">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary btn-sm w-100" onclick="saveSubcategoriaConfig()">
+                            <i class="bi bi-floppy me-1"></i>Guardar config
+                        </button>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <button class="btn btn-outline-primary btn-sm" onclick="openCabeceraModal()">
+                            <i class="bi bi-file-earmark-text me-1"></i>Configurar Cabecera (Diario)
+                        </button>
+                    </div>
+                </div>
+                <hr class="my-2">
+                <div class="row g-3 align-items-end">
+                    <div class="col-auto">
+                        <span class="badge bg-secondary" style="font-size:0.75rem"><i
+                                class="bi bi-table me-1"></i>Tablas Destino (Paso 4)</span>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-small"><i class="bi bi-list-columns me-1"></i>Tabla Líneas
+                            Detalle:</label>
+                        <select id="tablaDetalleSelect" class="form-select form-select-sm"
+                            onchange="onDestTableChange('DETALLE')">
+                            <option value="">-- Sin configurar (cf_diariol) --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-small"><i class="bi bi-journal-text me-1"></i>Tabla Cabecera
+                            Asiento:</label>
+                        <select id="tablaCabeceraSelect" class="form-select form-select-sm"
+                            onchange="onDestTableChange('CABECERA')">
+                            <option value="">-- Sin configurar (cf_diario) --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <small id="destTableStatus" class="text-muted"></small>
+                    </div>
+                </div>
+                <hr class="my-2">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label-small text-primary"><i class="bi bi-hash me-1"></i>Columna destino
+                            Correlativo Asiento (nasiento):</label>
+                        <select id="colNasientoSelect" class="form-select form-select-sm"
+                            onchange="onGlobalColChange('nasiento')">
+                            <option value="">-- Sin configurar --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label-small text-info"><i class="bi bi-list-ol me-1"></i>Columna destino
+                            Correlativo Línea (nidlin):</label>
+                        <select id="colNidlinSelect" class="form-select form-select-sm"
+                            onchange="onGlobalColChange('nidlin')">
+                            <option value="">-- Sin configurar --</option>
+                        </select>
+                    </div>
+                </div>
+                <hr class="my-2">
+                <!-- Filtros de Periodo / Fecha por Subcategoría -->
+                <div class="row g-2 align-items-start">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-success" style="font-size:0.75rem">
+                                <i class="bi bi-funnel me-1"></i>Filtros de Datos (Periodo / Fecha)
+                            </span>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-sm btn-outline-success py-0 px-2" onclick="addFilterRule()"
+                                    style="font-size:0.75rem">
+                                    <i class="bi bi-plus-circle me-1"></i>Añadir Filtro
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="saveFilterRules()"
+                                    style="font-size:0.75rem">
+                                    <i class="bi bi-floppy me-1"></i>Guardar Filtros
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted d-block mb-2" style="font-size:0.72rem">
+                            Define qué registros procesar de la tabla origen. Ej: año = 2026, mes >= 02.
+                            Si no se definen filtros, se procesarán <strong>todos</strong> los registros.
+                        </small>
+                        <div id="filterRulesContainer">
+                            <!-- Filter rules injected here -->
+                        </div>
+                        <div id="filterRulesMsg" class="mt-1" style="font-size:0.75rem"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de líneas -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-table me-2 text-primary"></i>Líneas del Asiento Contable
+                    (Diariol)
+                </h6>
+                <button class="btn-add-linea btn-sm" onclick="openLineaModal()">
+                    <i class="bi bi-plus-lg me-1"></i>Añadir Nueva Línea
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width:40px">Ord</th>
+                                <th>Nombre / Descripción de Línea</th>
+                                <th>Propiedades Mapeadas</th>
+                                <th style="width:120px">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lineasBody">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    <i class="bi bi-hourglass-split me-2"></i>Cargando líneas...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Mapeo General Dinámico (Cabecera / Detalle) -->
+    <div class="modal fade" id="dynamicMappingModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header modal-header-custom">
+                    <h6 class="modal-title mb-0" id="dynamicMappingTitle"><i class="bi bi-sliders me-2"></i>Mapeo
+                        Dinámico</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <input type="hidden" id="dynamicCtxType"> <!-- 'CABECERA' o 'DETALLE' -->
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label-small mb-0">Reglas de Mapeo (Destino -> Fórmula/Valor
+                            Expresión)</label>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="addMappingField('', '')">
+                            <i class="bi bi-plus-circle me-1"></i>Añadir Regla
+                        </button>
+                    </div>
+
+                    <div id="mappingFieldsContainer" class="p-3 bg-white border rounded">
+                        <!-- Mapping fields injected here -->
+                    </div>
+                    <div class="mt-2 text-muted" style="font-size: 0.75rem;">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Utiliza variables de columna envolviéndolas en comillas si son literales, u operando AST
+                        directamente (Ej: <code>BUSCARX(codcli, 'CLIENTES', 'RUC', 'CUENTA')</code>,
+                        <code>"SOLES"</code>, <code>fchdoc</code>, <code>CONCAT('VTA-', coddoc)</code>).
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i
+                            class="bi bi-x me-1"></i>Salir</button>
+                    <button class="btn btn-primary btn-sm" onclick="saveDynamicMapping()"><i
+                            class="bi bi-floppy me-1"></i>Grabar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Detalle de Línea Estructurado -->
+    <div class="modal fade" id="detalleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-custom" style="background:#52647c;">
+                    <h6 class="modal-title mb-0"><i class="bi bi-list-columns-reverse me-2"></i>Detalle de interfase
+                        contable</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <input type="hidden" id="detCtxId">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-2">
+                            <label class="form-label-small fw-bold">Orden</label>
+                            <input type="number" id="detFilaOrden" class="form-control form-control-sm" value="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-small fw-bold">Nombre / Descripción de Línea</label>
+                            <input type="text" id="detFilaNombre" class="form-control form-control-sm"
+                                placeholder="Ej: VALOR NETO">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label-small fw-bold">Nivel de Aplicación</label>
+                            <select id="detNivel" class="form-select form-select-sm">
+                                <option value="DETALLE">DETALLE (Fila x Fila)</option>
+                                <option value="CABECERA">CABECERA (1 vez x Asiento)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label-small fw-bold"
+                                title="Opcional. Ejecutar esta línea solo si cumple la condición, ej: ccoddoc='07'">Condición
+                                (Opcional)</label>
+                            <div class="d-flex gap-1">
+                                <input type="text" id="detCondicion" class="form-control form-control-sm text-monospace"
+                                    placeholder="Ej: ccoddoc='07'">
+                                <button class="btn btn-sm btn-outline-primary py-0 px-2"
+                                    title="Asistente de Expresiones" onclick="openFormulaHelper(this)" type="button"><i
+                                        class="bi bi-magic"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
+                        <label class="form-label-small mb-0 fw-bold">Reglas de Mapeo (Columna Destino -> Fórmula/Valor
+                            Expresión)</label>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="addDetalleMappingField('', '')">
+                            <i class="bi bi-plus-circle me-1"></i>Añadir Regla
+                        </button>
+                    </div>
+
+                    <div id="detalleMappingFieldsContainer" class="p-3 bg-white border rounded"
+                        style="min-height: 200px;">
+                        <!-- Mapping fields injected here -->
+                    </div>
+
+                    <div class="alert alert-warning py-2 mb-0 mt-3" style="font-size:0.75rem;">
+                        <i class="bi bi-info-circle me-1"></i> Puede escribir nombre de columna de Contasis (ej:
+                        <code>cglosa</code>) y a la derecha texto fijo entre comillas (ej: <code>'Factura'</code>),
+                        variables de tu origen (ej: <code>nbase1</code>), o funciones como <code>BUSCARX()</code>.
+                    </div>
+                </div>
+                <div
+                    class="modal-footer d-flex justify-content-center border-top-0 pt-0 bg-light pb-4 offset-btn-group">
+                    <button class="btn btn-primary shadow-sm" style="background:#4b5b7e; border:none; width:120px;"
+                        onclick="saveDetalleMapping()"><i class="bi bi-floppy me-1"></i>Grabar</button>
+                    <button class="btn btn-warning shadow-sm" style="width:160px;" onclick="validateMissingColumns()"><i
+                            class="bi bi-check2-square me-1"></i>Validar Faltantes</button>
+                    <button class="btn btn-secondary shadow-sm" style="width:120px;" data-bs-dismiss="modal"><i
+                            class="bi bi-x me-1"></i>Salir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Asistente de Fórmulas -->
+    <div class="modal fade" id="formulaHelperModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h6 class="modal-title mb-0"><i class="bi bi-magic me-2"></i>Asistente de Expresiones</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <ul class="nav nav-tabs nav-fill bg-light" id="helperTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-columnas"
+                                type="button">Columnas</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-buscarx"
+                                type="button">Catálogos</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-formulas"
+                                type="button">Fórmulas</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content p-3">
+                        <div class="tab-pane fade show active" id="tab-columnas">
+                            <p class="small text-muted mb-2">Selecciona una columna de tu archivo origen:</p>
+                            <div class="list-group list-group-flush" id="helperColList"
+                                style="max-height: 250px; overflow-y: auto;">
+                                <!-- Columns injected here -->
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="tab-buscarx">
+                            <p class="small text-muted mb-2">Busca un valor en un catálogo personalizado usando
+                                <code>BUSCARX</code>:
+                            </p>
+                            <div class="mb-2">
+                                <label class="form-label-small">Catálogo:</label>
+                                <select id="helpCatalogSelect" class="form-select form-select-sm"
+                                    onchange="updateCatalogColumns()"></select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label-small">Columna a Buscar (Dentro del Catálogo):</label>
+                                <select id="helpCatalogSearchCol" class="form-select form-select-sm"></select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label-small">Variable/Valor a Buscar (De tu Origen):</label>
+                                <select id="helpCatalogVarCol" class="form-select form-select-sm"></select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label-small">Columna a Retornar (Resultado):</label>
+                                <select id="helpCatalogReturnCol" class="form-select form-select-sm"></select>
+                            </div>
+                            <button class="btn btn-sm btn-primary w-100" onclick="insertBuscarx()">Insertar
+                                Función</button>
+                        </div>
+                        <div class="tab-pane fade" id="tab-formulas">
+                            <p class="small text-muted mb-2">Inserta una función básica:</p>
+                            <div class="list-group list-group-flush">
+                                <button class="list-group-item list-group-item-action py-1 small"
+                                    onclick="insertText('CONCAT(col1, col2)')"><b>CONCAT</b>(col1, col2) - Unir
+                                    textos</button>
+                                <button class="list-group-item list-group-item-action py-1 small"
+                                    onclick="insertText('LEFT(col, 5)')"><b>LEFT</b>(col, n) - Extraer
+                                    izquierda</button>
+                                <button class="list-group-item list-group-item-action py-1 small"
+                                    onclick="insertText('RIGHT(col, 5)')"><b>RIGHT</b>(col, n) - Extraer
+                                    derecha</button>
+                                <button class="list-group-item list-group-item-action py-1 small"
+                                    onclick="insertText('Y(condicion1, condicion2)')"><b>Y</b>(cond1, cond2) - Lógico
+                                    AND</button>
+                                <button class="list-group-item list-group-item-action py-1 small"
+                                    onclick="insertText('O(condicion1, condicion2)')"><b>O</b>(cond1, cond2) - Lógico
+                                    OR</button>
+                                <button class="list-group-item list-group-item-action py-1 small"
+                                    onclick="insertText('SI.CONJUNTO(condicion1, valor1, condicion2, valor2)')"><b>SI.CONJUNTO</b>(...)
+                                    - Condiciones</button>
+                                <button class="list-group-item list-group-item-action py-1 small"
+                                    onclick="insertText('SUM(col1, col2)')"><b>SUM</b>(...) - Sumar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Confirm Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title mb-0"><i class="bi bi-question-circle me-2"></i>Confirmar</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="confirmModalBody">¿Estás seguro?</div>
+                <div class="modal-footer">
+                    <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal"
+                        style="min-width:80px">Cancelar</button>
+                    <button class="btn btn-sm btn-primary" id="confirmModalOk" style="min-width:80px">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API = '/api/v1';
+        const subcategoriaId = parseInt(window.location.pathname.split('/').pop());
+        let subcategoriaData = null;
+        let lineasData = [];
+
+        let helperColumns = [];
+        let helperCatalogs = [];
+        let currentHelperInput = null;
+        let destColumnsDetalle = [];   // columnas de cf_diariol
+        let destColumnsCabecera = [];  // columnas de cf_diario
+
+        const dynamicMappingModal = new bootstrap.Modal(document.getElementById('dynamicMappingModal'));
+        const detalleModal = new bootstrap.Modal(document.getElementById('detalleModal'));
+        const formulaHelperModal = new bootstrap.Modal(document.getElementById('formulaHelperModal'));
+        const confirmModalEl = document.getElementById('confirmModal');
+        const confirmModalInstance = new bootstrap.Modal(confirmModalEl);
+
+        // ─── Toast Notification System ─────────────────────────────────────────
+        function showToast(message, type = 'info', duration = 4000) {
+            const icons = {
+                success: 'bi-check-circle-fill',
+                error: 'bi-x-circle-fill',
+                warning: 'bi-exclamation-triangle-fill',
+                info: 'bi-info-circle-fill'
+            };
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast-msg toast-${type}`;
+            toast.innerHTML = `
+                <i class="bi ${icons[type] || icons.info} toast-icon"></i>
+                <span class="toast-body">${message}</span>
+                <button class="toast-close" onclick="dismissToast(this.parentElement)">&times;</button>
+            `;
+            container.appendChild(toast);
+            if (duration > 0) {
+                setTimeout(() => dismissToast(toast), duration);
+            }
+        }
+        function dismissToast(el) {
+            if (!el || el.classList.contains('removing')) return;
+            el.classList.add('removing');
+            el.addEventListener('animationend', () => el.remove());
+        }
+
+        // ─── Confirm Dialog (Promise-based) ────────────────────────────────────
+        function showConfirm(message) {
+            return new Promise(resolve => {
+                document.getElementById('confirmModalBody').textContent = message;
+                const okBtn = document.getElementById('confirmModalOk');
+                const handler = () => { cleanup(); resolve(true); };
+                const dismissHandler = () => { cleanup(); resolve(false); };
+                const cleanup = () => {
+                    okBtn.removeEventListener('click', handler);
+                    confirmModalEl.removeEventListener('hidden.bs.modal', dismissHandler);
+                };
+                okBtn.addEventListener('click', handler);
+                confirmModalEl.addEventListener('hidden.bs.modal', dismissHandler);
+                confirmModalInstance.show();
+            });
+        }
+
+        // Render a destination-column select (with fallback text input if no columns)
+        function makeDestSelect(colsList, selectedKey, extraClass = '') {
+            const listId = 'dl_' + Math.random().toString(36).substr(2, 9);
+            if (!colsList || colsList.length === 0) {
+                return `<input type="text" class="form-control form-control-sm map-k ${extraClass}" placeholder="Columna destino (ej: ccodcue)" value="${(selectedKey || '').replace(/"/g, '&quot;')}">`;
+            }
+            const opts = colsList.map(c => {
+                return `<option value="${c.column_name}">${c.data_type ? `(${c.data_type})` : ''}</option>`;
+            }).join('');
+
+            return `
+                <input type="text" list="${listId}" class="form-control form-control-sm map-k ${extraClass}" placeholder="Escribir o buscar..." value="${(selectedKey || '').replace(/"/g, '&quot;')}">
+                <datalist id="${listId}">
+                    ${opts}
+                </datalist>
+            `;
+        }
+
+        async function init() {
+            // Cargar subcategoría
+            const r = await fetch(`${API}/mapeo/subcategorias/${subcategoriaId}`);
+            subcategoriaData = await r.json();
+            document.getElementById('breadSubNombre').textContent = subcategoriaData.nombre;
+            document.getElementById('pageTitle').innerHTML = `<i class="bi bi-sliders me-2 text-primary"></i>${subcategoriaData.nombre}`;
+            document.getElementById('infoTabla').textContent = subcategoriaData.tabla_origen || 'No configurada';
+            document.getElementById('claveAsiento').value = subcategoriaData.clave_asiento || '';
+
+            // Cargar helper data (columnas origen)
+            try {
+                const hRes = await fetch(`${API}/mapeo/subcategorias/${subcategoriaId}/helper-data`);
+                if (hRes.ok) {
+                    const hData = await hRes.json();
+                    helperColumns = hData.columns || [];
+                    if (hData.company_id) {
+                        const cRes = await fetch(`${API}/catalogs/?company_id=${hData.company_id}`);
+                        if (cRes.ok) helperCatalogs = await cRes.json();
+                    }
+                }
+            } catch (e) { console.error("Helper data load failed:", e); }
+
+            // Cargar tablas del destino final (Paso 4) y popolar los selectores
+            try {
+                const hRes2 = await fetch(`${API}/mapeo/subcategorias/${subcategoriaId}/helper-data`);
+                if (hRes2.ok) {
+                    const hData2 = await hRes2.json();
+                    if (hData2.company_id) {
+                        const tRes = await fetch(`${API}/mapeo/final-tables?company_id=${hData2.company_id}`);
+                        if (tRes.ok) {
+                            const tables = await tRes.json();
+                            const selDet = document.getElementById('tablaDetalleSelect');
+                            const selCab = document.getElementById('tablaCabeceraSelect');
+                            const empOpt = '<option value="">-- Sin configurar (cf_diariol) --</option>';
+                            const empOptCab = '<option value="">-- Sin configurar (cf_diario) --</option>';
+                            const opts = tables.map(t =>
+                                `<option value="${t.table_name}">${t.table_schema}.${t.table_name}${t.description ? ' — ' + t.description : ''}</option>`
+                            ).join('');
+                            selDet.innerHTML = empOpt + opts;
+                            selCab.innerHTML = empOptCab + opts;
+                            // Pre-seleccionar los valores guardados
+                            if (subcategoriaData.tabla_destino_detalle)
+                                selDet.value = subcategoriaData.tabla_destino_detalle;
+                            if (subcategoriaData.tabla_destino_cabecera)
+                                selCab.value = subcategoriaData.tabla_destino_cabecera;
+                        }
+                    }
+                }
+            } catch (e) { console.warn("Final tables not loaded:", e); }
+
+            // Cargar columnas del destino final según tablas configuradas
+            await reloadDestColumns();
+
+            // Llenar selectores de correlativo con las opciones cargadas
+            populateGlobalColSelects();
+
+            loadLineas();
+            loadFilterRules();
+        }
+
+        // ─── Filter Rules (Periodo / Fecha por Subcategoría) ─────────────────────
+        function loadFilterRules() {
+            const rules = subcategoriaData?.filter_rules || [];
+            const container = document.getElementById('filterRulesContainer');
+            container.innerHTML = '';
+            if (rules.length === 0) return;
+            rules.forEach(r => addFilterRule(r));
+        }
+
+        function addFilterRule(data = {}) {
+            const container = document.getElementById('filterRulesContainer');
+            const row = document.createElement('div');
+            row.className = 'd-flex gap-1 mb-1 align-items-center filter-rule-row';
+
+            let colOptions = '<option value="">-- Columna --</option>';
+            helperColumns.forEach(c => {
+                const sel = (data.column === c) ? 'selected' : '';
+                colOptions += `<option value="${c}" ${sel}>${c}</option>`;
+            });
+
+            row.innerHTML = `
+                <select class="form-select form-select-sm fr-col" style="font-size:0.78rem; flex:2;">
+                    ${colOptions}
+                </select>
+                <select class="form-select form-select-sm fr-op" style="font-size:0.78rem; flex:1;" onchange="toggleFrVal2(this)">
+                    <option value="=" ${data.operator === '=' ? 'selected' : ''}>=</option>
+                    <option value=">" ${data.operator === '>' ? 'selected' : ''}>&gt;</option>
+                    <option value="<" ${data.operator === '<' ? 'selected' : ''}>&lt;</option>
+                    <option value=">=" ${data.operator === '>=' ? 'selected' : ''}>&gt;=</option>
+                    <option value="<=" ${data.operator === '<=' ? 'selected' : ''}>&lt;=</option>
+                    <option value="BETWEEN" ${data.operator === 'BETWEEN' ? 'selected' : ''}>BETWEEN</option>
+                    <option value="IN" ${data.operator === 'IN' ? 'selected' : ''}>IN</option>
+                    <option value="LIKE" ${data.operator === 'LIKE' ? 'selected' : ''}>LIKE</option>
+                    <option value="IS NULL" ${data.operator === 'IS NULL' ? 'selected' : ''}>IS NULL</option>
+                    <option value="IS NOT NULL" ${data.operator === 'IS NOT NULL' ? 'selected' : ''}>IS NOT NULL</option>
+                </select>
+                <input type="text" class="form-control form-control-sm fr-val" style="font-size:0.78rem; flex:2;" placeholder="Valor" value="${data.value || ''}">
+                <input type="text" class="form-control form-control-sm fr-val2" style="font-size:0.78rem; flex:1; display:${data.operator === 'BETWEEN' ? 'block' : 'none'};" placeholder="Hasta" value="${data.value2 || ''}">
+                <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="this.parentElement.remove()" style="font-size:0.78rem">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            `;
+            container.appendChild(row);
+        }
+
+        function toggleFrVal2(opSelect) {
+            const row = opSelect.closest('.filter-rule-row');
+            const val2 = row.querySelector('.fr-val2');
+            val2.style.display = opSelect.value === 'BETWEEN' ? 'block' : 'none';
+        }
+
+        function collectFilterRules() {
+            const rows = document.querySelectorAll('.filter-rule-row');
+            const rules = [];
+            rows.forEach(row => {
+                const col = row.querySelector('.fr-col')?.value || '';
+                const op = row.querySelector('.fr-op')?.value || '=';
+                const val = row.querySelector('.fr-val')?.value || '';
+                const val2 = row.querySelector('.fr-val2')?.value || '';
+                if (col && (val || op === 'IS NULL' || op === 'IS NOT NULL')) {
+                    const rule = { column: col, operator: op, value: val };
+                    if (val2) rule.value2 = val2;
+                    rules.push(rule);
+                }
+            });
+            return rules;
+        }
+
+        async function saveFilterRules() {
+            const rules = collectFilterRules();
+            const msgDiv = document.getElementById('filterRulesMsg');
+            try {
+                const r = await fetch(`${API}/mapeo/subcategorias/${subcategoriaId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filter_rules: rules.length > 0 ? rules : null })
+                });
+                if (r.ok) {
+                    subcategoriaData.filter_rules = rules.length > 0 ? rules : null;
+                    msgDiv.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Filtros guardados correctamente.</span>';
+                    setTimeout(() => msgDiv.innerHTML = '', 3000);
+                } else {
+                    msgDiv.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle me-1"></i>Error al guardar filtros.</span>';
+                }
+            } catch (e) {
+                msgDiv.innerHTML = '<span class="text-danger">Error de conexión.</span>';
+            }
+        }
+
+        async function reloadDestColumns() {
+            try {
+                const dRes = await fetch(`${API}/mapeo/subcategorias/${subcategoriaId}/dest-columns?nivel=DETALLE`);
+                if (dRes.ok) { const d = await dRes.json(); destColumnsDetalle = d.columns || []; }
+                const cRes2 = await fetch(`${API}/mapeo/subcategorias/${subcategoriaId}/dest-columns?nivel=CABECERA`);
+                if (cRes2.ok) { const d2 = await cRes2.json(); destColumnsCabecera = d2.columns || []; }
+                const st = document.getElementById('destTableStatus');
+                if (st) {
+                    const detLabel = destColumnsDetalle.length ? `${destColumnsDetalle.length} cols detalle` : 'sin cols detalle';
+                    const cabLabel = destColumnsCabecera.length ? `${destColumnsCabecera.length} cols cabecera` : 'sin cols cabecera';
+                    st.textContent = `✔ ${detLabel} / ${cabLabel}`;
+                    st.className = (destColumnsDetalle.length || destColumnsCabecera.length) ? 'text-success small' : 'text-warning small';
+                }
+
+                populateGlobalColSelects();
+            } catch (e) { console.warn("Dest columns not loaded:", e); }
+        }
+
+        function populateGlobalColSelects() {
+            const selNas = document.getElementById('colNasientoSelect');
+            const selNid = document.getElementById('colNidlinSelect');
+            if (!selNas || !selNid) return;
+
+            const empOpt = '<option value="">-- Sin configurar --</option>';
+
+            // Unir todas las columnas disponibles (Cabecera + Detalle) y quitar duplicados por si acaso
+            const allCols = [...destColumnsCabecera, ...destColumnsDetalle];
+            const uniqueCols = Array.from(new Set(allCols.map(c => c.column_name)))
+                .map(name => allCols.find(c => c.column_name === name));
+
+            const opts = uniqueCols.map(c => `<option value="${c.column_name}">${c.column_name}${c.data_type ? ' (' + c.data_type + ')' : ''}</option>`).join('');
+
+            selNas.innerHTML = empOpt + opts;
+            selNid.innerHTML = empOpt + opts;
+
+            // Ensure saved values are visible even if not in the current column list
+            if (subcategoriaData && subcategoriaData.col_destino_nasiento) {
+                if (!uniqueCols.some(c => c.column_name === subcategoriaData.col_destino_nasiento)) {
+                    const opt = document.createElement('option');
+                    opt.value = subcategoriaData.col_destino_nasiento;
+                    opt.textContent = subcategoriaData.col_destino_nasiento + ' (Guardado)';
+                    selNas.appendChild(opt);
+                }
+                selNas.value = subcategoriaData.col_destino_nasiento;
+            }
+            if (subcategoriaData && subcategoriaData.col_destino_nidlin) {
+                if (!uniqueCols.some(c => c.column_name === subcategoriaData.col_destino_nidlin)) {
+                    const opt = document.createElement('option');
+                    opt.value = subcategoriaData.col_destino_nidlin;
+                    opt.textContent = subcategoriaData.col_destino_nidlin + ' (Guardado)';
+                    selNid.appendChild(opt);
+                }
+                selNid.value = subcategoriaData.col_destino_nidlin;
+            }
+        }
+
+        async function onGlobalColChange(type) {
+            const val = type === 'nasiento' ? document.getElementById('colNasientoSelect').value : document.getElementById('colNidlinSelect').value;
+            const body = type === 'nasiento' ? { col_destino_nasiento: val || null } : { col_destino_nidlin: val || null };
+
+            try {
+                const r = await fetch(`${API}/mapeo/subcategorias/${subcategoriaId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (r.ok) {
+                    if (type === 'nasiento') subcategoriaData.col_destino_nasiento = val || null;
+                    else subcategoriaData.col_destino_nidlin = val || null;
+                }
+            } catch (e) { console.error('Error guardando config correlativo:', e); }
+        }
+
+        async function onDestTableChange(nivel) {
+            const selId = nivel === 'CABECERA' ? 'tablaCabeceraSelect' : 'tablaDetalleSelect';
+            const val = document.getElementById(selId).value;
+            const body = nivel === 'CABECERA'
+                ? { tabla_destino_cabecera: val || null }
+                : { tabla_destino_detalle: val || null };
+            try {
+                const r = await fetch(`${API}/mapeo/subcategorias/${subcategoriaId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (r.ok) {
+                    if (nivel === 'CABECERA') subcategoriaData.tabla_destino_cabecera = val;
+                    else subcategoriaData.tabla_destino_detalle = val;
+                    await reloadDestColumns();
+                }
+            } catch (e) { console.error('Error guardando tabla:', e); }
+        }
+
+        async function saveSubcategoriaConfig() {
+            const clave = document.getElementById('claveAsiento').value;
+            const tabDet = document.getElementById('tablaDetalleSelect')?.value || null;
+            const tabCab = document.getElementById('tablaCabeceraSelect')?.value || null;
+            try {
+                const r = await fetch(`${API}/mapeo/subcategorias/${subcategoriaId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        clave_asiento: clave,
+                        tabla_destino_detalle: tabDet || null,
+                        tabla_destino_cabecera: tabCab || null,
+                        col_destino_nasiento: document.getElementById('colNasientoSelect')?.value || null,
+                        col_destino_nidlin: document.getElementById('colNidlinSelect')?.value || null
+                    })
+                });
+                if (r.ok) {
+                    showToast('Configuración guardada correctamente.', 'success');
+                    subcategoriaData.clave_asiento = clave;
+                    subcategoriaData.tabla_destino_detalle = tabDet;
+                    subcategoriaData.tabla_destino_cabecera = tabCab;
+                    await reloadDestColumns();
+                } else {
+                    showToast('Error al guardar configuración.', 'error');
+                }
+            } catch (e) {
+                showToast('Error de conexión.', 'error');
+            }
+        }
+
+        async function loadLineas() {
+            const r = await fetch(`${API}/mapeo/subcategorias/${subcategoriaId}/lineas`);
+            lineasData = await r.json();
+            const tbody = document.getElementById('lineasBody');
+            if (!lineasData.length) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">
+            <i class="bi bi-plus-circle fs-3 d-block mb-2 text-primary"></i>
+            Sin líneas configuradas. Haz clic en "Añadir Nueva Línea" para comenzar.
+        </td></tr>`;
+                return;
+            }
+            tbody.innerHTML = lineasData.map(l => {
+                const mapDetalleKeys = l.mapeo_detalle ? Object.keys(l.mapeo_detalle) : [];
+                const badges = mapDetalleKeys.slice(0, 5).map(k => `<span class="badge bg-light text-dark border me-1">${k}</span>`).join('');
+                const extra = mapDetalleKeys.length > 5 ? `<span class="badge bg-secondary">+${mapDetalleKeys.length - 5}</span>` : '';
+                const nivelBadge = l.nivel === 'CABECERA' ? '<span class="badge bg-warning text-dark me-2">CABECERA</span>' : '<span class="badge bg-info text-dark me-2">DETALLE</span>';
+
+                return `<tr class="linea-row" onclick="openLineaModal(${l.id})">
+            <td><span class="orden-badge">${l.orden}</span></td>
+            <td>${nivelBadge}<strong class="small">${l.nombre_linea || 'Sin nombre'}</strong></td>
+            <td>${badges}${extra} ${mapDetalleKeys.length === 0 ? '<span class="text-muted small">Sin mapeos</span>' : ''}</td>
+            <td>
+                <button class="btn btn-outline-success btn-sm py-0 px-1" onclick="event.stopPropagation(); duplicateLinea(${l.id})" title="Duplicar línea"><i class="bi bi-files"></i></button>
+                <button class="btn btn-outline-primary btn-sm py-0 px-1" onclick="event.stopPropagation(); openLineaModal(${l.id})" title="Editar línea"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-outline-danger btn-sm py-0 px-1" onclick="event.stopPropagation(); deleteLinea(${l.id})" title="Eliminar línea"><i class="bi bi-trash"></i></button>
+            </td>
+        </tr>`;
+            }).join('');
+        }
+
+        function openCabeceraModal() {
+            document.getElementById('dynamicMappingTitle').innerHTML = '<i class="bi bi-journal-text me-2"></i>Mapeo Cabecera de Asiento (cf_diario)';
+
+            const container = document.getElementById('mappingFieldsContainer');
+            container.innerHTML = '';
+
+            const mapeo = subcategoriaData.mapeo_cabecera || {};
+            const keys = Object.keys(mapeo);
+            if (keys.length === 0) {
+                addMappingField('ccoddoc', '');
+                addMappingField('cserie', '');
+                addMappingField('cnumero', '');
+                addMappingField('cglosa', '');
+            } else {
+                keys.forEach(k => addMappingField(k, mapeo[k]));
+            }
+
+            dynamicMappingModal.show();
+        }
+
+        function addMappingField(key, val) {
+            const container = document.getElementById('mappingFieldsContainer');
+            if (!container) return;
+            const row = document.createElement('div');
+            row.className = 'field-row';
+            row.innerHTML = `
+                <div class="field-key">
+                    ${makeDestSelect(destColumnsCabecera, key)}
+                </div>
+                <div class="field-val d-flex gap-1" style="flex: 1;">
+                    <input type="text" class="form-control form-control-sm map-v text-monospace w-100" placeholder="Fórmula/Valor (Ej: ffechadoc, 'VTA')" value="${(val || '').replace(/"/g, '&quot;')}">
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2" title="Asistente de Expresiones" onclick="openFormulaHelper(this)" type="button"><i class="bi bi-magic"></i></button>
+                </div>
+                <div class="field-actions">
+                    <button class="btn btn-outline-danger btn-sm py-0 px-2" onclick="this.parentElement.parentElement.remove()" title="Eliminar regla"><i class="bi bi-trash"></i></button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        async function saveDynamicMapping() {
+            const mapData = {};
+            let hasDuplicate = false;
+            let usedKeys = new Set();
+
+            const rows = document.querySelectorAll('#mappingFieldsContainer .field-row');
+            for (let r of rows) {
+                const kEl = r.querySelector('.map-k');
+                const k = kEl ? kEl.value.trim() : '';
+                const v = (r.querySelector('.map-v')?.value || '').trim();
+
+                if (k) {
+                    if (usedKeys.has(k)) {
+                        showToast(`La columna de destino "${k}" está repetida. No se pueden mapear dos reglas a la misma columna.`, 'warning', 6000);
+                        hasDuplicate = true;
+                        break;
+                    }
+                    usedKeys.add(k);
+                    mapData[k] = v;
+                }
+            }
+            if (hasDuplicate) return;
+
+            try {
+                const r = await fetch(`${API}/mapeo/subcategorias/${subcategoriaId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mapeo_cabecera: mapData })
+                });
+                if (r.ok) {
+                    subcategoriaData.mapeo_cabecera = mapData;
+                    dynamicMappingModal.hide();
+                    showToast('Cabecera guardada correctamente.', 'success');
+                } else {
+                    const e = await r.json();
+                    showToast('Error: ' + JSON.stringify(e), 'error', 6000);
+                }
+            } catch (e) { showToast('Error de red al guardar cabecera.', 'error'); }
+        }
+
+
+        function addDetalleMappingField(key, val) {
+            const container = document.getElementById('detalleMappingFieldsContainer');
+            const nivel = (document.getElementById('detNivel')?.value || 'DETALLE').toUpperCase();
+            const cols = nivel === 'CABECERA' ? destColumnsCabecera : destColumnsDetalle;
+            const row = document.createElement('div');
+            row.className = 'field-row';
+            row.innerHTML = `
+                <div class="field-key">
+                    ${makeDestSelect(cols, key)}
+                </div>
+                <div class="field-val d-flex gap-1" style="flex: 1;">
+                    <input type="text" class="form-control form-control-sm map-v text-monospace w-100" placeholder="Fórmula/Valor (Ej: BUSCARX(...))" value="${val.replace(/"/g, '&quot;')}">
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2" title="Asistente de Expresiones" onclick="openFormulaHelper(this)" type="button"><i class="bi bi-magic"></i></button>
+                </div>
+                <div class="field-actions">
+                    <button class="btn btn-outline-danger btn-sm py-0 px-2" onclick="this.parentElement.parentElement.remove()" title="Eliminar regla"><i class="bi bi-trash"></i></button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function openLineaModal(lineaId = null) {
+            const container = document.getElementById('detalleMappingFieldsContainer');
+            if (container) container.innerHTML = '';
+
+            if (lineaId) {
+                const linea = lineasData.find(l => l.id === lineaId);
+                const mapeo = linea.mapeo_detalle || {};
+
+                document.getElementById('detCtxId').value = linea.id;
+                document.getElementById('detFilaOrden').value = linea.orden;
+                document.getElementById('detFilaNombre').value = linea.nombre_linea || '';
+                document.getElementById('detNivel').value = linea.nivel || 'DETALLE';
+                document.getElementById('detCondicion').value = linea.condicion_aplicacion || '';
+
+                const keys = Object.keys(mapeo);
+                if (keys.length === 0) {
+                    addDetalleMappingField('ccodcue', '');
+                    addDetalleMappingField('ndebe', '');
+                } else {
+                    keys.forEach(k => addDetalleMappingField(k, mapeo[k]));
+                }
+            } else {
+                document.getElementById('detCtxId').value = '';
+                document.getElementById('detFilaOrden').value = lineasData.length + 1;
+                document.getElementById('detFilaNombre').value = '';
+                document.getElementById('detNivel').value = 'DETALLE';
+                document.getElementById('detCondicion').value = '';
+
+                addDetalleMappingField('ccodcue', '');
+                addDetalleMappingField('ndebe', '');
+                addDetalleMappingField('nhaber', '');
+            }
+            detalleModal.show();
+        }
+
+        async function saveDetalleMapping() {
+            const id = document.getElementById('detCtxId').value;
+            const orden = parseInt(document.getElementById('detFilaOrden').value) || 0;
+            const nombre_linea = document.getElementById('detFilaNombre').value || null;
+            const nivel = document.getElementById('detNivel').value || 'DETALLE';
+            const condicion = document.getElementById('detCondicion').value.trim() || null;
+
+            const mapData = {};
+            let hasDuplicate = false;
+            let usedKeys = new Set();
+
+            const rows = document.querySelectorAll('#detalleMappingFieldsContainer .field-row');
+            for (let r of rows) {
+                const k = r.querySelector('.map-k').value.trim();
+                const v = r.querySelector('.map-v').value.trim();
+                if (k) {
+                    if (usedKeys.has(k)) {
+                        showToast(`La columna "${k}" está repetida en esta línea. Elimina la regla duplicada para continuar.`, 'warning', 6000);
+                        hasDuplicate = true;
+                        break;
+                    }
+                    usedKeys.add(k);
+                    mapData[k] = v;
+                }
+            }
+            if (hasDuplicate) return;
+
+            const body = {
+                subcategoria_id: subcategoriaId,
+                orden: orden,
+                nombre_linea: nombre_linea,
+                nivel: nivel,
+                condicion_aplicacion: condicion,
+                mapeo_detalle: mapData
+            };
+
+            const url = id ? `${API}/mapeo/lineas-asiento/${id}` : `${API}/mapeo/lineas-asiento`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const r = await fetch(url, {
+                    method, headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (r.ok) {
+                    detalleModal.hide();
+                    showToast('Línea guardada correctamente.', 'success');
+                    loadLineas();
+                } else {
+                    const e = await r.json();
+                    showToast('Error guardando detalle: ' + JSON.stringify(e), 'error', 6000);
+                }
+            } catch (e) { showToast('Error de red al guardar detalle.', 'error'); }
+        }
+
+        async function deleteLinea(id) {
+            const ok = await showConfirm('¿Eliminar esta línea de asiento de forma permanente?');
+            if (!ok) return;
+            const r = await fetch(`${API}/mapeo/lineas-asiento/${id}`, { method: 'DELETE' });
+            if (r.ok) { showToast('Línea eliminada.', 'success'); loadLineas(); }
+        }
+
+        function validateMissingColumns() {
+            const nivel = (document.getElementById('detNivel')?.value || 'DETALLE').toUpperCase();
+            const columnsDef = nivel === 'CABECERA' ? destColumnsCabecera : destColumnsDetalle;
+
+            if (!columnsDef || columnsDef.length === 0) {
+                showToast('No hay definición de columnas destino cargadas (revisa el Paso 4).', 'warning');
+                return;
+            }
+
+            const mappedKeys = new Set();
+            document.querySelectorAll('#detalleMappingFieldsContainer .field-row').forEach(r => {
+                const k = r.querySelector('.map-k').value.trim();
+                if (k) mappedKeys.add(k);
+            });
+
+            const missing = [];
+            columnsDef.forEach(c => {
+                if (!mappedKeys.has(c.column_name)) {
+                    missing.push(c.column_name);
+                }
+            });
+
+            if (missing.length === 0) {
+                showToast('¡Excelente! Todas las columnas destino están presentes en tu configuración.', 'success');
+            } else {
+                showToast(`Faltan mapear ${missing.length} columna(s): ${missing.join(', ')}`, 'warning', 8000);
+            }
+        }
+
+        async function duplicateLinea(id) {
+            const linea = lineasData.find(l => l.id === id);
+            if (!linea) return;
+
+            const ok = await showConfirm(`¿Estás seguro de duplicar la línea "${linea.nombre_linea || 'Sin nombre'}"?`);
+            if (!ok) return;
+
+            const body = {
+                subcategoria_id: linea.subcategoria_id,
+                orden: linea.orden + 1,
+                nombre_linea: (linea.nombre_linea ? linea.nombre_linea + ' (Copia)' : 'Copia de Línea'),
+                nivel: linea.nivel,
+                condicion_aplicacion: linea.condicion_aplicacion || null,
+                mapeo_detalle: linea.mapeo_detalle || {}
+            };
+
+            try {
+                const r = await fetch(`${API}/mapeo/lineas-asiento`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (r.ok) {
+                    showToast('Línea duplicada correctamente.', 'success');
+                    loadLineas();
+                } else {
+                    const e = await r.json();
+                    showToast('Error duplicando línea: ' + JSON.stringify(e), 'error', 6000);
+                }
+            } catch (e) { showToast('Error de red al duplicar.', 'error'); }
+        }
+
+
+        function openFormulaHelper(btn) {
+            currentHelperInput = btn.previousElementSibling; // El input map-v asociado
+
+            // Poblar columnas
+            const colList = document.getElementById('helperColList');
+            if (helperColumns.length === 0) {
+                colList.innerHTML = '<div class="text-muted small p-2">No hay columnas disponibles (verifica tabla origen).</div>';
+            } else {
+                colList.innerHTML = helperColumns.map(c =>
+                    `<button class="list-group-item list-group-item-action py-1 small" onclick="insertText('${c}')"><b>${c}</b></button>`
+                ).join('');
+            }
+
+            // Poblar selects de BUSCARX
+            const catSelect = document.getElementById('helpCatalogSelect');
+            const varColSelect = document.getElementById('helpCatalogVarCol');
+
+            varColSelect.innerHTML = helperColumns.map(c => `<option value="${c}">${c}</option>`).join('');
+
+            if (helperCatalogs.length === 0) {
+                catSelect.innerHTML = '<option value="">No hay catálogos</option>';
+            } else {
+                catSelect.innerHTML = helperCatalogs.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+                updateCatalogColumns(helperCatalogs[0]);
+            }
+
+            formulaHelperModal.show();
+        }
+
+        function updateCatalogColumns(catObj = null) {
+            const catName = document.getElementById('helpCatalogSelect').value;
+            const cat = catObj || helperCatalogs.find(c => c.name === catName);
+            const searchSelect = document.getElementById('helpCatalogSearchCol');
+            const returnSelect = document.getElementById('helpCatalogReturnCol');
+
+            if (cat && cat.columns) {
+                const opts = cat.columns.map(c => `<option value="${c}">${c}</option>`).join('');
+                searchSelect.innerHTML = opts;
+                returnSelect.innerHTML = opts;
+            } else {
+                searchSelect.innerHTML = '';
+                returnSelect.innerHTML = '';
+            }
+        }
+
+        function insertText(text) {
+            if (currentHelperInput) {
+                const startPos = currentHelperInput.selectionStart;
+                const endPos = currentHelperInput.selectionEnd;
+                currentHelperInput.value = currentHelperInput.value.substring(0, startPos)
+                    + text
+                    + currentHelperInput.value.substring(endPos, currentHelperInput.value.length);
+                currentHelperInput.focus();
+            }
+            formulaHelperModal.hide();
+        }
+
+        function insertBuscarx() {
+            const varCol = document.getElementById('helpCatalogVarCol').value;
+            const cat = document.getElementById('helpCatalogSelect').value;
+            const searchCol = document.getElementById('helpCatalogSearchCol').value;
+            const returnCol = document.getElementById('helpCatalogReturnCol').value;
+
+            if (!cat || !searchCol || !returnCol) {
+                showToast('Selecciona las opciones del catálogo.', 'warning');
+                return;
+            }
+            const formula = `BUSCARX(${varCol}, '${cat}', '${searchCol}', '${returnCol}')`;
+            insertText(formula);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

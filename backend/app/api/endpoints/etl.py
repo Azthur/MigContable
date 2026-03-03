@@ -1,0 +1,779 @@
+from fastapi import APIRouter, Depends, BackgroundTasks, HTTPException
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+from datetime import date, datetime
+from typing import Optional, List
+import uuid
+import pandas as pd
+from backend.app.core.database import get_dest_db
+from backend.app.models.models import (
+    IntegLog, Company, SourceConnection, DestinationConnection,
+    TableSelection, ColumnFilter, MigrationControl,
+    MapeoSubcategoria, MapeoLineaAsiento, AsientoContableGenerado,
+    ComputedColumnRule
+)
+from backend.app.services.connection_manager import ConnectionManager
+
+router = APIRouter()
+
+
+# ─── ETL Incremental con Filtros ─────────────────────────────────────────────
+
+def build_where_clause(filters: List[ColumnFilter], control: MigrationControl = None, start_date: str = None, end_date: str = None, param_style='qmark') -> tuple:
+    """Construye la cláusula WHERE con los filtros configurados y el control incremental"""
+    
+    # Force qmark style for PyODBC/MSSQL compatibility
+    # params will be a list, placeholders will be ?
+    conditions = []
+    params = []
+    
+    def add_param(value):
+        params.append(value)
+        return "?"
+
+    for i, f in enumerate(filters):
+        if not f.is_active:
+            continue
+        col = f"[{f.column_name}]"
+        op = f.operator.upper()
+
+        if op == "IS NULL":
+            conditions.append(f"{col} IS NULL")
+        elif op == "IS NOT NULL":
+            conditions.append(f"{col} IS NOT NULL")
+        elif op == "BETWEEN" and f.filter_value and f.filter_value2:
+            p_a = add_param(f.filter_value)
+            p_b = add_param(f.filter_value2)
+            conditions.append(f"{col} BETWEEN {p_a} AND {p_b}")
+        elif op == "IN" and f.filter_value:
+            vals = [v.strip() for v in f.filter_value.split(",")]
+            placeholders_list = []
+            for v in vals:
+                p = add_param(v)
+                placeholders_list.append(p)
+            placeholders = ", ".join(placeholders_list)
+            conditions.append(f"{col} IN ({placeholders})")
+        elif op == "LIKE" and f.filter_value:
+            p = add_param(f.filter_value)
+            conditions.append(f"{col} LIKE {p}")
+        elif f.filter_value:
+            p = add_param(f.filter_value)
+            conditions.append(f"{col} {op} {p}")
+
+    # Date Range (Manual Override)
+    if start_date and control and control.control_column:
+        col = f"[{control.control_column}]"
+        p = add_param(start_date)
+        conditions.append(f"{col} >= {p}")
+        
+    if end_date and control and control.control_column:
+        col = f"[{control.control_column}]"
+        p = add_param(end_date)
+        conditions.append(f"{col} <= {p}")
+
+    # Incremental
+    if not start_date and control and control.control_column and control.last_migrated_value:
+        cols = [c.strip() for c in control.control_column.split(',')]
+        if len(cols) > 1:
+            vals = [v.strip() for v in control.last_migrated_value.split(',')]
+            def build_recursive_tuple(idx):
+                if idx >= len(cols): return "1=0"
+                col_name = f"[{cols[idx]}]"
+                val = vals[idx] if idx < len(vals) else ''
+                
+                p1 = add_param(val)
+                base_cond = f"{col_name} > {p1}"
+                if idx == len(cols) - 1:
+                    return base_cond
+                
+                p2 = add_param(val)
+                next_cond = build_recursive_tuple(idx + 1)
+                return f"({base_cond}) OR ({col_name} = {p2} AND ({next_cond}))"
+
+            if len(vals) == len(cols):
+                composite_clause = build_recursive_tuple(0)
+                conditions.append(f"({composite_clause})")
+        else:
+            col = f"[{control.control_column}]"
+            p = add_param(control.last_migrated_value)
+            conditions.append(f"{col} > {p}")
+
+    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    return where, params
+
+
+def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, start_date: str = None, end_date: str = None, full_refresh: bool = False):
+    """Ejecuta ETL incremental para una tabla específica con sus filtros"""
+    sel = db.query(TableSelection).filter(TableSelection.id == table_selection_id).first()
+    if not sel:
+        return {"status": "ERROR", "message": "Selección de tabla no encontrada"}
+        
+
+
+    source_conn = db.query(SourceConnection).filter(SourceConnection.company_id == company_id).first()
+    dest_conn = db.query(DestinationConnection).filter(DestinationConnection.company_id == company_id).first()
+
+    if not source_conn or not dest_conn:
+        return {"status": "ERROR", "message": "Conexiones no configuradas"}
+
+    # Obtener filtros activos
+    filters = db.query(ColumnFilter).filter(
+        ColumnFilter.table_selection_id == table_selection_id,
+        ColumnFilter.is_active == True
+    ).all()
+
+    # Obtener control incremental
+    control = db.query(MigrationControl).filter(
+        MigrationControl.company_id == company_id,
+        MigrationControl.source_table == sel.table_name
+    ).first()
+
+    
+    # If control type is not DATE, ignore dates to avoid SQL errors
+    apply_dates = False
+    if sel.control_column and sel.control_column_type and "DATE" in sel.control_column_type.upper():
+         apply_dates = True
+    p_style = "qmark" # Default to qmark for reliability with pyodbc/MSSQL
+    
+    active_control = control if not full_refresh else None
+    active_start = start_date if apply_dates and not full_refresh else None
+    active_end = end_date if apply_dates and not full_refresh else None
+
+    where_clause, params = build_where_clause(filters, active_control, 
+                                              active_start, 
+                                              active_end,
+                                              param_style=p_style)
+
+    # Construir query de extracción
+    schema = sel.table_schema or "dbo"
+    query = f"SELECT * FROM [{schema}].[{sel.table_name}] {where_clause}"
+    
+    try:
+        with open("C:\\SistemaMigConta\\debug_etl.txt", "a") as f:
+            f.write(f"Query: {query}\nParams: {params}\n")
+    except:
+        pass
+
+    log = IntegLog(
+        company_id=company_id,
+        process_name=f"ETL Incremental - {sel.table_name}",
+        status="RUNNING",
+        message=f"DEBUG: p_style={p_style} query={query} | Iniciando extracción..."
+    )
+    db.add(log)
+    db.commit()
+
+    try:
+        # Conectar a origen (SQL Server)
+        src_data = {
+            "host": source_conn.host, "port": source_conn.port,
+            "database_name": source_conn.database_name,
+            "username": source_conn.username, "password": source_conn.password,
+            "driver": source_conn.driver, "db_type": source_conn.db_type
+        }
+        src_engine = ConnectionManager.get_source_engine(src_data)
+
+        # Conectar a destino (migconta_db)
+        dst_data = {
+            "host": dest_conn.host, "port": dest_conn.port,
+            "database_name": dest_conn.database_name,
+            "username": dest_conn.username, "password": dest_conn.password
+        }
+        dst_engine = ConnectionManager.get_dest_engine(dst_data)
+
+        # Usar pandas para leer y escribir
+        import pandas as pd
+        
+        # Leer desde origen usando conexión raw pyodbc para evitar que SQLAlchemy
+        # recompile la query y elimine los marcadores '?' (qmark style).
+        # raw_connection() devuelve la conexión pyodbc subyacente directamente.
+        raw_conn = src_engine.raw_connection()
+        try:
+            if params:
+                df = pd.read_sql(query, raw_conn, params=tuple(params))
+            else:
+                df = pd.read_sql(query, raw_conn)
+        finally:
+            raw_conn.close()
+                       
+        # Add Unique Migration ID (as requested by user for mapping)
+        if not df.empty:
+            df['_migration_id'] = [str(uuid.uuid4()) for _ in range(len(df))]
+            # Ensure company_id exists
+            if 'company_id' not in df.columns:
+                df['company_id'] = company_id
+            
+            # ── Aplicar Columnas Calculadas (condicionales tipo Excel) ──
+            computed_rules = db.query(ComputedColumnRule).filter(
+                ComputedColumnRule.table_selection_id == table_selection_id,
+                ComputedColumnRule.is_active == True
+            ).order_by(ComputedColumnRule.priority).all()
+            
+            if computed_rules:
+                from collections import defaultdict
+                grouped = defaultdict(list)
+                for rule in computed_rules:
+                    grouped[rule.new_column_name].append(rule)
+                
+                for new_col, col_rules in grouped.items():
+                    # Valor por defecto (tomar del primer rule que lo tenga)
+                    default = ""
+                    for cr in col_rules:
+                        if cr.default_value:
+                            default = cr.default_value
+                            break
+                    df[new_col] = default
+                    
+                    # Aplicar reglas en orden inverso de prioridad (última gana)
+                    for rule in reversed(col_rules):
+                        val_upper = rule.condition_value.strip().upper()
+                        
+                        # ── BUSCARX: Tipo de Cambio ──
+                        if val_upper in ("BUSCARX_TC_VENTA", "BUSCARX_TC_COMPRA"):
+                            if rule.source_column in df.columns:
+                                tc_col = "venta" if "VENTA" in val_upper else "compra"
+                                from backend.app.models.models import TipoCambio
+                                tc_rows = db.query(TipoCambio).all()
+                                tc_map = {str(r.fecha): float(getattr(r, tc_col)) for r in tc_rows}
+                                df[new_col] = df[rule.source_column].astype(str).str[:10].map(tc_map)
+                                if default:
+                                    df[new_col] = df[new_col].fillna(float(default) if default.replace('.','',1).isdigit() else default)
+                                else:
+                                    df[new_col] = df[new_col].fillna(0)
+
+                        # ── Fórmulas Dinámicas: BUSCARX, LEFT, RIGHT, CONCAT, SI.CONJUNTO, Math ──
+                        elif any(val_upper.startswith(p) for p in [
+                            "CONCAT(", "LEFT(", "RIGHT(", "SI.CONJUNTO(", 
+                            "BUSCARX(", "BUSCARX_EXT(", "BUSCARX_LOCAL(", "SUMA(", "RESTA(", "MULTIPLICA(", "DIVIDE(", "REDONDEAR(",
+                            "LARGO(", "ESPACIOS(", "MAYUSC(", "REPETIR(", "TEXTO(", "AÑO(", "MES(", "Y(", "O("
+                        ]):
+                                    from backend.app.core.formula_parser import evaluate_formula_on_df
+                                    
+                                    df[new_col] = evaluate_formula_on_df(
+                                        df=df,
+                                        formula_str=rule.condition_value,
+                                        db=db,
+                                        company_id=company_id,
+                                        default=default if default else ""
+                                    )
+
+                        else:
+                            # ── Condicional simple tipo IF ──
+                            # Solo aplica si la columna origen tiene el valor exacto
+                            actual_src = get_col_simple(rule.source_column, df)
+                            if actual_src:
+                                mask = df[actual_src].astype(str).str.strip().str.upper() == val_upper
+                                df.loc[mask, new_col] = rule.result_value
+                            # Fill rest with default if computed column is still empty/NaN for those rows?
+                            # Logic usually initializes with default (line 221), so we just update matches.
+        
+        rows_count = len(df)
+
+        if rows_count == 0:
+            if full_refresh:
+                # Si piden full refresh y orgien está vacío, truncamos también
+                try:
+                    table_dest_empty = sel.table_name.lower().replace(" ", "_")
+                    from sqlalchemy import text
+                    with dst_engine.begin() as conn:
+                        conn.execute(text(f'TRUNCATE TABLE "{table_dest_empty}" RESTART IDENTITY CASCADE'))
+                except:
+                    pass
+            log.status = "SUCCESS"
+            log.message = f"Sin registros {'nuevos ' if not full_refresh else ''}en {sel.table_name}"
+            log.records_processed = 0
+            db.commit()
+            return {"status": "OK", "message": log.message, "records": 0}
+
+        # Insertar en BD intermedia (append o replace)
+        table_dest = sel.table_name.lower().replace(" ", "_")
+        
+        # Sincronizar esquema de tabla si hay columnas nuevas (ej. columnas calculadas) solo si no reemplazamos
+        if not full_refresh:
+            from sqlalchemy import inspect
+            from sqlalchemy import text
+            inspector = inspect(dst_engine)
+            if inspector.has_table(table_dest):
+                existing_cols = [c['name'] for c in inspector.get_columns(table_dest)]
+                with dst_engine.begin() as conn:
+                    for col_name in df.columns:
+                        if col_name not in existing_cols:
+                            try:
+                                safe_col = col_name.replace('"', '""')
+                                conn.execute(text(f'ALTER TABLE "{table_dest}" ADD COLUMN "{safe_col}" TEXT'))
+                            except Exception as e:
+                                print(f"Error adding column {col_name}: {e}")
+
+        # Escribir en destino
+        write_mode = 'replace' if full_refresh else 'append'
+        df.to_sql(table_dest, dst_engine, if_exists=write_mode, index=False, chunksize=1000)
+
+        # Actualizar control incremental
+        if sel.control_column and rows_count > 0:
+            try:
+                cols = [c.strip() for c in sel.control_column.split(',')]
+                if len(cols) > 1:
+                    # Sort by columns to find the "max" row based on the composite key order
+                    # Need to ensure columns exist in DF
+                    valid_cols = [c for c in cols if c in df.columns]
+                    if len(valid_cols) == len(cols):
+                        last_row = df.sort_values(by=cols).iloc[-1]
+                        last_val = ", ".join([str(last_row[c]) for c in cols])
+                    else:
+                        last_val = None # Error logic
+                else:
+                    last_val = str(df[sel.control_column].max())
+            except Exception as e:
+                print(f"Error calculando incremental: {e}")
+                last_val = None
+            except:
+                last_val = str(df.iloc[-1][sel.control_column])
+                
+            if not control:
+                control = MigrationControl(
+                    company_id=company_id,
+                    source_table=sel.table_name,
+                    control_column=sel.control_column
+                )
+                db.add(control)
+            control.last_migrated_value = last_val
+            control.total_migrated = (control.total_migrated or 0) + rows_count
+            control.last_run_at = datetime.now()
+            control.last_run_status = "OK"
+
+        log.status = "SUCCESS"
+        log.message = f"Migrados {rows_count} registros de {sel.table_name} a tabla '{table_dest}'"
+        log.records_processed = rows_count
+        db.commit()
+        return {"status": "OK", "message": log.message, "records": rows_count}
+
+    except Exception as e:
+        log.status = "ERROR"
+        log.message = str(e)
+        db.commit()
+        return {"status": "ERROR", "message": str(e)}
+
+
+@router.post("/run-incremental/{company_id}/{table_selection_id}")
+def trigger_incremental_etl(company_id: int, table_selection_id: int,
+                             db: Session = Depends(get_dest_db)):
+    """Ejecuta ETL incremental para una tabla específica con sus filtros configurados"""
+    result = run_incremental_etl(company_id, table_selection_id, db)
+    if result["status"] == "ERROR":
+        raise HTTPException(status_code=500, detail=result["message"])
+    return result
+
+
+@router.post("/run-etl/")
+def trigger_etl(
+    background_tasks: BackgroundTasks,
+    company_id: int,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
+    full_refresh: bool = False,
+    db: Session = Depends(get_dest_db)
+):
+    """Triggers the ETL process in the background for a specific company."""
+    company = db.query(Company).filter(Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    
+    sd_str = str(start_date) if start_date else None
+    ed_str = str(end_date) if end_date else None
+    
+    background_tasks.add_task(run_etl_job, company_id, sd_str, ed_str, full_refresh, db)
+    return {"message": f"ETL job started for {company.name}"}
+
+
+def run_etl_job(company_id: int, start_date: str, end_date: str, full_refresh: bool, db: Session):
+    company = db.query(Company).filter(Company.id == company_id).first()
+    source_conn = db.query(SourceConnection).filter(SourceConnection.company_id == company_id).first()
+    dest_conn = db.query(DestinationConnection).filter(DestinationConnection.company_id == company_id).first()
+
+    if not company or not source_conn or not dest_conn:
+        log = IntegLog(company_id=company_id, process_name="ETL Manual", status="ERROR",
+                       message="Configuración incompleta: Faltan conexiones origen o destino")
+        db.add(log); db.commit(); return
+
+    refresh_msg = " (FULL REFRESH)" if full_refresh else ""
+    log = IntegLog(company_id=company_id, process_name="ETL Manual", status="RUNNING",
+                   message=f"Iniciando ETL{refresh_msg} para empresa {company.name} ({start_date} a {end_date})")
+    db.add(log); db.commit()
+
+    try:
+        selections = db.query(TableSelection).filter(
+            TableSelection.company_id == company_id,
+            TableSelection.is_selected == True
+        ).order_by(TableSelection.extraction_order).all()
+
+        if not selections:
+            raise Exception("No hay tablas seleccionadas para extraer")
+
+        total_records = 0
+        for sel in selections:
+            result = run_incremental_etl(company_id, sel.id, db, start_date, end_date, full_refresh=full_refresh)
+            total_records += result.get("records", 0)
+
+        log.status = "SUCCESS"
+        log.message = f"ETL finalizado. {total_records} registros migrados de {len(selections)} tablas."
+        log.records_processed = total_records
+    except Exception as e:
+        log.status = "ERROR"
+        log.message = str(e)
+    finally:
+        db.commit()
+
+
+# ─── Generación de Asientos Contables ────────────────────────────────────────
+
+@router.post("/generate-asientos")
+def generate_asientos_contables(
+    body: dict,
+    db: Session = Depends(get_dest_db)
+):
+    """
+    Genera asientos contables en formato Contasis a partir de la configuración
+    de mapeo de una subcategoría y los datos en la BD intermedia.
+    """
+    subcategoria_id = body.get("subcategoria_id")
+    periodo = body.get("periodo", str(datetime.now().year))
+    mes = body.get("mes", f"{datetime.now().month:02d}")
+
+    sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == subcategoria_id).first()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Subcategoría no encontrada")
+
+    lineas = db.query(MapeoLineaAsiento).filter(
+        MapeoLineaAsiento.subcategoria_id == subcategoria_id,
+        MapeoLineaAsiento.is_active == True
+    ).order_by(MapeoLineaAsiento.orden).all()
+
+    if not lineas:
+        raise HTTPException(status_code=400, detail="No hay líneas de asiento configuradas")
+
+    if not sub.tabla_origen:
+        raise HTTPException(status_code=400, detail="La subcategoría no tiene tabla origen configurada")
+
+    # Construir filtros opcionales para la query
+    filters = body.get("filters", [])
+    query_str = f'SELECT * FROM "{sub.tabla_origen.lower()}"'
+    query_params = {}
+    
+    if filters:
+        where_parts = []
+        for i, f in enumerate(filters):
+            col = f.get("column", "")
+            op = f.get("operator", "=").upper()
+            val = f.get("value", "")
+            val2 = f.get("value2", "")
+            
+            if not col:
+                continue
+            
+            col_quoted = f'"{col}"'
+            
+            if op == "IS NULL":
+                where_parts.append(f"{col_quoted} IS NULL")
+            elif op == "IS NOT NULL":
+                where_parts.append(f"{col_quoted} IS NOT NULL")
+            elif op == "BETWEEN" and val and val2:
+                where_parts.append(f"{col_quoted} BETWEEN :p{i}a AND :p{i}b")
+                query_params[f"p{i}a"] = val
+                query_params[f"p{i}b"] = val2
+            elif op == "IN" and val:
+                vals = [v.strip() for v in val.split(",")]
+                placeholders = ", ".join([f":p{i}_{j}" for j in range(len(vals))])
+                where_parts.append(f"{col_quoted} IN ({placeholders})")
+                for j, v in enumerate(vals):
+                    query_params[f"p{i}_{j}"] = v
+            elif op == "LIKE" and val:
+                where_parts.append(f"{col_quoted} LIKE :p{i}")
+                query_params[f"p{i}"] = val
+            elif val:
+                where_parts.append(f"{col_quoted} {op} :p{i}")
+                query_params[f"p{i}"] = val
+        
+        if where_parts:
+            query_str += " WHERE " + " AND ".join(where_parts)
+
+    # Obtener datos de la BD intermedia
+    from backend.app.core.database import dest_engine
+    try:
+        with dest_engine.connect() as conn:
+            result = conn.execute(text(query_str), query_params)
+            rows = result.fetchall()
+            columns = list(result.keys())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al leer tabla origen '{sub.tabla_origen}': {str(e)}")
+
+    if not rows:
+        return {"message": f"Sin datos en la tabla '{sub.tabla_origen}'", "generated": 0}
+
+    # Obtener company_id de la categoría
+    cat = sub.categoria
+    company_id = cat.company_id
+
+    # Generar lote único
+    lote_id = str(uuid.uuid4())[:8].upper()
+
+    # Número de asiento (correlativo)
+    last_asiento = db.query(AsientoContableGenerado).filter(
+        AsientoContableGenerado.company_id == company_id,
+        AsientoContableGenerado.cper == periodo,
+        AsientoContableGenerado.cmes == mes
+    ).count()
+    nasiento_base = last_asiento + 1
+
+    generated = 0
+    asiento_num = nasiento_base
+
+    for row_idx, row in enumerate(rows):
+        row_dict = dict(zip(columns, row))
+
+        # Generar una línea de asiento por cada línea configurada
+        for nidlin, linea in enumerate(lineas, start=1):
+            # Calcular importe
+            importe = 0.0
+            if linea.columna_importe and linea.columna_importe in row_dict:
+                try:
+                    importe = float(row_dict[linea.columna_importe] or 0)
+                except:
+                    importe = 0.0
+
+            # Cuenta contable
+            if linea.cuenta_tipo == "FIJA":
+                ccodcue = linea.cuenta_fija
+            else:
+                ccodcue = str(row_dict.get(linea.cuenta_columna, "")) if linea.cuenta_columna else None
+
+            # Tipo de cambio
+            ntc = 1.0
+            if linea.col_tc and linea.col_tc in row_dict:
+                try:
+                    ntc = float(row_dict[linea.col_tc] or 1)
+                except:
+                    ntc = 1.0
+
+            # Moneda
+            if linea.moneda == "COLUMNA" and linea.moneda_columna:
+                moneda_val = str(row_dict.get(linea.moneda_columna, "SOLES"))
+                ccodmon = "14" if "SOL" in moneda_val.upper() else "02"
+            else:
+                ccodmon = "14" if linea.moneda == "SOLES" else "02"
+
+            # Debe / Haber
+            ndebe = importe if linea.lado == "DEBE" else 0.0
+            nhaber = importe if linea.lado == "HABER" else 0.0
+            ndebes = ndebe if ccodmon == "14" else ndebe * ntc
+            nhabers = nhaber if ccodmon == "14" else nhaber * ntc
+            ndebed = ndebe if ccodmon == "02" else ndebe / ntc if ntc else 0
+            nhaberd = nhaber if ccodmon == "02" else nhaber / ntc if ntc else 0
+
+            # Glosa
+            glosa = linea.glosa_template or ""
+            for col_name, col_val in row_dict.items():
+                glosa = glosa.replace(f"{{{col_name}}}", str(col_val or ""))
+            glosa = glosa.replace("{nidlin}", str(nidlin))
+
+            # Tipo movimiento
+            if linea.tipo_mov_tipo == "FIJO":
+                tipo_mov = linea.tipo_mov_fijo
+            else:
+                tipo_mov = str(row_dict.get(linea.tipo_mov_columna, "")) if linea.tipo_mov_columna else None
+
+            # Centro de costo
+            if linea.centro_costo_columna:
+                ccodcos = str(row_dict.get(linea.centro_costo_columna, ""))
+            elif linea.centro_costo_id:
+                from backend.app.models.models import CatCentroCosto
+                cc = db.query(CatCentroCosto).filter(CatCentroCosto.id == linea.centro_costo_id).first()
+                ccodcos = cc.codigo if cc else None
+            else:
+                ccodcos = None
+
+            # Cuenta presupuestal
+            if linea.cuenta_presupuesto_columna:
+                ccodpresu = str(row_dict.get(linea.cuenta_presupuesto_columna, ""))
+            elif linea.cuenta_presupuesto_id:
+                from backend.app.models.models import CatCuentaPresupuesto
+                cp = db.query(CatCuentaPresupuesto).filter(CatCuentaPresupuesto.id == linea.cuenta_presupuesto_id).first()
+                ccodpresu = cp.codigo if cp else None
+            else:
+                ccodpresu = None
+
+            # Campos de referencia del asiento
+            def get_col(col_attr):
+                col_name = getattr(linea, col_attr)
+                if col_name and col_name in row_dict:
+                    return str(row_dict[col_name] or "")
+                return None
+
+            asiento = AsientoContableGenerado(
+                company_id=company_id,
+                subcategoria_id=subcategoria_id,
+                cper=get_col("col_periodo") or periodo,
+                cmes=get_col("col_mes") or mes,
+                ccodori=get_col("ccodori") or sub.codigo_origen or "001",
+                nasiento=asiento_num,
+                nidlin=nidlin,
+                ntc=ntc,
+                ccodcue=ccodcue,
+                ndebe=round(ndebe, 4),
+                nhaber=round(nhaber, 4),
+                cglosa=glosa[:500] if glosa else None,
+                ndebes=round(ndebes, 4),
+                nhabers=round(nhabers, 4),
+                ndebed=round(ndebed, 4),
+                nhaberd=round(nhaberd, 4),
+                ccoddoc=get_col("col_tipo_doc") or tipo_mov,
+                cserie=get_col("col_serie"),
+                cnumero=get_col("col_numero"),
+                ffechadoc=get_col("col_fecha"),
+                ccodruc=get_col("col_ruc"),
+                ccodenti=get_col("col_cod_entidad"),
+                nbase1=float(row_dict.get(linea.col_base_imponible, 0) or 0) if linea.col_base_imponible else 0,
+                nigv1=float(row_dict.get(linea.col_igv, 0) or 0) if linea.col_igv else 0,
+                ntot=round(ndebe + nhaber, 4),
+                nbase1s=float(row_dict.get(linea.col_base_imponible, 0) or 0) if linea.col_base_imponible and ccodmon == "14" else 0,
+                nigv1s=float(row_dict.get(linea.col_igv, 0) or 0) if linea.col_igv and ccodmon == "14" else 0,
+                ntots=round(ndebes + nhabers, 4),
+                nbase1d=float(row_dict.get(linea.col_base_imponible, 0) or 0) if linea.col_base_imponible and ccodmon == "02" else 0,
+                nigv1d=float(row_dict.get(linea.col_igv, 0) or 0) if linea.col_igv and ccodmon == "02" else 0,
+                ntotd=round(ndebed + nhaberd, 4),
+                ccodcos=ccodcos,
+                ccodpresu=ccodpresu,
+                ccodmon=ccodmon,
+                cregis="V" if "VENTA" in (sub.nombre or "").upper() else None,
+                ncomp=row_idx + 1,
+                estado="PENDIENTE",
+                lote_id=lote_id
+            )
+            db.add(asiento)
+            generated += 1
+
+        asiento_num += 1
+
+    db.commit()
+    return {
+        "message": f"Se generaron {generated} líneas de asiento en {len(rows)} asientos",
+        "lote_id": lote_id,
+        "generated": generated,
+        "asientos": len(rows)
+    }
+
+
+# ─── Proceso Completo (ETL + Generar + Migrar) ────────────────────────────────
+
+@router.post("/run-full/{company_id}")
+def run_full_etl(company_id: int, body: dict = {}, db: Session = Depends(get_dest_db)):
+    """
+    Ejecuta el flujo completo de migración:
+    1. ETL incremental: extrae datos de SQL Server → migconta_db
+    2. Generación: crea asientos en cf_diariol (staging)
+    3. Migración: copia cf_diariol staging → Contasis final
+    """
+    from backend.app.models.models import MapeoCategoria, MapeoSubcategoria, FinalDestConnection
+    from backend.app.api.endpoints.mapeo import generate_to_cf_diariol, migrate_to_final
+    from datetime import datetime
+
+    results = {
+        "paso1_etl": {"status": "SKIP", "message": "No ejecutado", "records": 0},
+        "paso2_generar": {"status": "SKIP", "message": "No ejecutado", "generated": 0},
+        "paso3_migrar": {"status": "SKIP", "message": "No ejecutado", "migrated": 0},
+    }
+
+    # ── Paso 1: ETL incremental ──
+    try:
+        selections = db.query(TableSelection).filter(
+            TableSelection.company_id == company_id,
+            TableSelection.is_selected == True
+        ).order_by(TableSelection.extraction_order).all()
+
+        start_date = body.get("start_date")
+        end_date = body.get("end_date")
+        full_refresh = body.get("full_refresh", False)
+
+        total_etl = 0
+        for sel in selections:
+            result = run_incremental_etl(company_id, sel.id, db, start_date, end_date, full_refresh=full_refresh)
+            total_etl += result.get("records", 0)
+
+        results["paso1_etl"] = {
+            "status": "OK",
+            "message": f"ETL completado: {total_etl} registros de {len(selections)} tablas",
+            "records": total_etl
+        }
+    except Exception as e:
+        results["paso1_etl"] = {"status": "ERROR", "message": str(e), "records": 0}
+
+    # ── Paso 2: Generar asientos en cf_diariol ──
+    try:
+        categorias = db.query(MapeoCategoria).filter(
+            MapeoCategoria.company_id == company_id,
+            MapeoCategoria.is_active == True
+        ).all()
+
+        total_gen = 0
+        lotes = []
+        clear_prev = body.get("clear_previous", False)
+        for cat in categorias:
+            for sub in cat.subcategorias:
+                if not sub.is_active or not sub.tabla_origen:
+                    continue
+                try:
+                    gen_result = generate_to_cf_diariol(
+                        {
+                            "subcategoria_id": sub.id, 
+                            "clear_previous": clear_prev
+                        },
+                        db
+                    )
+                    total_gen += gen_result.get("generated", 0)
+                    if gen_result.get("lote_id"):
+                        lotes.append(gen_result["lote_id"])
+                except Exception as sub_e:
+                    pass  # Continuar con las demás subcategorías
+
+        results["paso2_generar"] = {
+            "status": "OK",
+            "message": f"Generados {total_gen} líneas en cf_diariol",
+            "generated": total_gen,
+            "lotes": lotes
+        }
+    except Exception as e:
+        results["paso2_generar"] = {"status": "ERROR", "message": str(e), "generated": 0}
+
+    # ── Paso 3: Migrar al destino final ──
+    try:
+        final_conn = db.query(FinalDestConnection).filter(
+            FinalDestConnection.company_id == company_id,
+            FinalDestConnection.is_active == True
+        ).first()
+
+        if not final_conn:
+            results["paso3_migrar"] = {
+                "status": "SKIP",
+                "message": "No hay conexión destino final configurada",
+                "migrated": 0
+            }
+        else:
+            mig_result = migrate_to_final(company_id, None, db)
+            results["paso3_migrar"] = {
+                "status": "OK",
+                "message": mig_result.get("message", ""),
+                "migrated": mig_result.get("migrated_lineas", 0)
+            }
+    except Exception as e:
+        results["paso3_migrar"] = {"status": "ERROR", "message": str(e), "migrated": 0}
+
+    overall_status = "OK" if all(
+        r["status"] in ("OK", "SKIP") for r in results.values()
+    ) else "PARTIAL"
+
+    return {
+        "status": overall_status,
+        "company_id": company_id,
+        "periodo": periodo,
+        "mes": mes,
+        "resultados": results
+    }
