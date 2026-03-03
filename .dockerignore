@@ -1,0 +1,13 @@
+*.pyc
+__pycache__
+.pytest_cache
+.vscode
+.env
+.git
+.gitignore
+*.log
+*.txt
+*.sqlite
+*.db
+!backend/requirements.txt
+!backend/app/main.py

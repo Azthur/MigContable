@@ -7,3 +7,6 @@ pandas
 pydantic
 python-dotenv
 pydantic-settings
+httpx
+python-multipart
+jinja2
