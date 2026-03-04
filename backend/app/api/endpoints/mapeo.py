@@ -784,6 +784,12 @@ def _generate_subcategoria_cf_diariol(
         
         counters_por_asiento[nasiento_key] = last_nasiento_in_db
 
+    # Verificar si el usuario ha seteado un asiento inicial forzado en la subcategoría
+    if getattr(sub, "asiento_inicial", None) is not None:
+        # Se prioriza el asiento inicial si es mayor al de la DB para no sobreescribir. 
+        # Restamos 1 porque la base le suma 1 después.
+        counters_por_asiento[nasiento_key] = max(counters_por_asiento[nasiento_key], sub.asiento_inicial - 1)
+
     nasiento_base = counters_por_asiento[nasiento_key] + 1
     df['nasiento'] = df.groupby(clave_columns, dropna=False).ngroup() + nasiento_base
     

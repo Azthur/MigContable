@@ -1,0 +1,52 @@
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ? AND (([codcia] > ?) OR ([codcia] = ? AND (([coddoc] > ?) OR ([coddoc] = ? AND ([nrodoc] > ?)))))
+Params: ['002', '2025', '002', '002', 'N/A', 'N/A', 'M030000279']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ? AND (([CodCia] > ?) OR ([CodCia] = ? AND (([coddoc] > ?) OR ([coddoc] = ? AND ([nrodoc] > ?)))))
+Params: ['002', '2026', '002', '002', 'N/A', 'N/A', 'M030000279']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ? AND (([codcia] > ?) OR ([codcia] = ? AND (([coddoc] > ?) OR ([coddoc] = ? AND ([nrodoc] > ?)))))
+Params: ['002', '2025', '002', '002', 'N/A', 'N/A', 'M030000279']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ? AND (([CodCia] > ?) OR ([CodCia] = ? AND (([coddoc] > ?) OR ([coddoc] = ? AND ([nrodoc] > ?)))))
+Params: ['002', '2026', '002', '002', 'N/A', 'N/A', 'M030000279']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ? AND (([codcia] > ?) OR ([codcia] = ? AND (([coddoc] > ?) OR ([coddoc] = ? AND ([nrodoc] > ?)))))
+Params: ['002', '2025', '002', '002', 'N/A', 'N/A', 'M030000279']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ? AND (([CodCia] > ?) OR ([CodCia] = ? AND (([coddoc] > ?) OR ([coddoc] = ? AND ([nrodoc] > ?)))))
+Params: ['002', '2026', '002', '002', 'N/A', 'N/A', 'M030000279']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ? AND (([codcia] > ?) OR ([codcia] = ? AND (([coddoc] > ?) OR ([coddoc] = ? AND ([nrodoc] > ?)))))
+Params: ['002', '2025', '002', '002', 'N/A', 'N/A', 'M030000279']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ? AND (([CodCia] > ?) OR ([CodCia] = ? AND (([coddoc] > ?) OR ([coddoc] = ? AND ([nrodoc] > ?)))))
+Params: ['002', '2026', '002', '002', 'N/A', 'N/A', 'M030000279']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ?
+Params: ['002', '2026']

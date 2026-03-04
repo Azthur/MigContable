@@ -11,12 +11,29 @@ services:
     volumes:
       - .:/app
     environment:
-      # Ajustamos los connection strings para que usen host.docker.internal
-      # Esto permite que el contenedor alcance las bases de datos locales del host
+      # Ajustamos los connection strings para que usen localhost o db
       - SQL_SERVER_CONNECTION_STRING=mssql+pyodbc://sa:M%40n%40nt1%40l2025@host.docker.internal/CONTASIS?driver=ODBC+Driver+17+for+SQL+Server
-      - POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@host.docker.internal:5433/migconta_db
+      - POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@db:5432/migconta_db
       - API_PORT=8000
       - DEBUG=True
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14
+    container_name: sistemamigconta-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: migconta_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

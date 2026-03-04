@@ -563,6 +563,22 @@
                 </div>
                 <p class="text-muted small mb-3">Ejecuta los tres pasos en secuencia: Extraer → Generar → Migrar.
                 </p>
+
+                <div class="mb-3">
+                    <div class="form-check form-switch mb-2 custom-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="fullRefreshFullEtlSwitch">
+                        <label class="form-check-label text-muted small" for="fullRefreshFullEtlSwitch">
+                            <strong>Re-extraer Todo</strong>
+                        </label>
+                    </div>
+                    <div class="form-check form-switch custom-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="regenFullEtlSwitch">
+                        <label class="form-check-label text-muted small" for="regenFullEtlSwitch">
+                            <strong>Re-generar Todo</strong>
+                        </label>
+                    </div>
+                </div>
+
                 <button class="btn-accent w-100" style="background: linear-gradient(135deg, #6366f1, #a855f7);"
                     onclick="runFullEtl()" id="btnFull">
                     <i class="bi bi-lightning-charge me-2"></i> Proceso Completo
@@ -1908,6 +1924,10 @@
                 if (res.ok) {
                     setStepResult('btnStep3', origHtml, 'step3Result', true,
                         data.message || `Migradas ${data.migrated_lineas || 0} líneas`);
+
+                    // Mostrar datatable con registros migrados
+                    document.getElementById('cfDiariolPanel').style.display = 'block';
+                    loadCfDiariol(null, 'MIGRADO');
                 } else {
                     setStepResult('btnStep3', origHtml, 'step3Result', false, data.detail || 'Error en migración');
                 }
@@ -1917,13 +1937,17 @@
         }
 
         async function runFullEtl() {
-            const fullRefresh = document.getElementById('fullRefreshSwitch')?.checked;
+            const fullRefresh = document.getElementById('fullRefreshFullEtlSwitch')?.checked;
+            const regenAll = document.getElementById('regenFullEtlSwitch')?.checked;
             const origHtml = '<i class="bi bi-lightning-charge me-2"></i> Proceso Completo';
             setStepLoading('btnFull', 'fullResult', 'Ejecutando proceso completo...');
             try {
                 const res = await fetch(`/api/v1/etl/run-full/${companyId}`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ full_refresh: fullRefresh })
+                    body: JSON.stringify({
+                        full_refresh: fullRefresh || false,
+                        clear_previous: regenAll || false
+                    })
                 });
                 const data = await res.json();
                 if (res.ok) {
@@ -1959,7 +1983,7 @@
         }
 
         // ─── Staging Preview State ─────────────────────────────────────────
-        async function loadCfDiariol(subcatId = null) {
+        async function loadCfDiariol(subcatId = null, forcedStatus = null) {
             const container = document.getElementById('cfDiariolContainer');
             if (!container) return;
             container.innerHTML = '<div class="text-center py-3"><div class="spinner-sm"></div> Cargando todos los registros (espera unos segundos)...</div>';
@@ -1971,6 +1995,7 @@
                 // Fetch all records for export, without artificial limits
                 let url = `/api/v1/mapeo/staging-preview?company_id=${companyId}&limit=1000000&skip=0`;
                 if (filterSubcat) url += `&subcategoria_id=${filterSubcat}`;
+                if (forcedStatus) url += `&estado=${forcedStatus}`;
 
                 const res = await fetch(url);
                 if (!res.ok) throw new Error('Error cargando staging');
@@ -2277,11 +2302,9 @@
         }
 
         async function generateSubcat(subcatId) {
-            const { periodo, mes } = getEtlPeriod();
             const { isConfirmed } = await Swal.fire({
                 title: 'Generar Asientos',
-                html: `<p style="color:#8b949e;">Se generarán asientos contables para la subcategoría <strong style="color:#58a6ff;">#${subcatId}</strong></p>
-                       <p style="color:#e6edf3; font-size:14px;"><i class="bi bi-calendar3 me-1"></i>Período: <strong>${periodo}-${mes}</strong></p>`,
+                html: `<p style="color:#8b949e;">Se generarán asientos contables para la subcategoría <strong style="color:#58a6ff;">#${subcatId}</strong></p>`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: '<i class="bi bi-play-fill me-1"></i> Generar',
@@ -2295,7 +2318,7 @@
             try {
                 const res = await fetch('/api/v1/mapeo/generate-to-cf-diariol', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ subcategoria_id: subcatId, periodo, mes })
+                    body: JSON.stringify({ subcategoria_id: subcatId })
                 });
                 const data = await res.json();
                 if (res.ok) {

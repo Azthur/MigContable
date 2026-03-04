@@ -23,6 +23,10 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc \
     && rm -rf /var/lib/apt/lists/*
 
+# Configurar OpenSSL para permitir protocolos antiguos (TLSv1, TLSv1.1) si el servidor lo requiere
+RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf \
+    && sed -i 's/CipherString = DEFAULT@SECLEVEL=2/CipherString = DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
+
 # Establecer el directorio de trabajo
 WORKDIR /app
 

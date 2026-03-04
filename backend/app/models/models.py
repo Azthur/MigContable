@@ -326,11 +326,12 @@ class MapeoSubcategoria(DestBase):
     # Columnas específicas de destino global (para correlativos)
     col_destino_nasiento = Column(String(100), nullable=True) 
     col_destino_nidlin = Column(String(100), nullable=True)
-    # Schema del destino final (ej: public)
     schema_destino = Column(String(100), nullable=True, default="public")
     # Controlar qué se genera por subcategoría
     generate_headers = Column(Boolean, default=True)
     generate_details = Column(Boolean, default=True)
+    # Número de asiento inicial configurable (opcional)
+    asiento_inicial = Column(Integer, nullable=True)
     # Filtros de periodo/fecha por subcategoría (JSON array)
     # Formato: [{"column": "anos", "operator": "=", "value": "2026"},
     #           {"column": "C_mes", "operator": ">=", "value": "02"}]

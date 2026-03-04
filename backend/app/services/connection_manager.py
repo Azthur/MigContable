@@ -39,30 +39,43 @@ class ConnectionManager:
     """Gestiona conexiones dinámicas a bases de datos por empresa."""
 
     @staticmethod
+    def _resolve_host(host: str) -> str:
+        """Resuelve localhost a host.docker.internal si está en Docker (Linux)."""
+        import os
+        if os.name != 'nt' and host in ("localhost", "127.0.0.1"):
+            return "host.docker.internal"
+        return host
+
+    @staticmethod
     def get_source_engine(conn_data: dict) -> Engine:
         """
         Crea un engine SQLAlchemy para la conexión fuente.
         conn_data: dict con host, port, database_name, username, password, driver, db_type
         """
         db_type = conn_data.get("db_type", "MSSQL").upper()
+        host = ConnectionManager._resolve_host(conn_data["host"])
         if db_type == "MSSQL":
+            driver = conn_data.get("driver", "ODBC Driver 17 for SQL Server")
+            import os
+            if os.name != 'nt' and driver in ("SQL Server", "SQL Server Native Client 11.0"):
+                driver = "ODBC Driver 17 for SQL Server"
+
             url = build_mssql_url(
-                host=conn_data["host"],
+                host=host,
                 port=conn_data.get("port", 1433),
                 database=conn_data["database_name"],
                 username=conn_data["username"],
                 password=conn_data["password"],
-                driver=conn_data.get("driver", "ODBC Driver 17 for SQL Server")
+                driver=driver
             )
             # fast_executemany requiere drivers ODBC modernos (13, 17, 18).
             # El driver legacy "SQL Server" falla con esta opción.
-            driver_name = conn_data.get("driver", "ODBC Driver 17 for SQL Server")
-            use_fast = "ODBC Driver" in driver_name
+            use_fast = "ODBC Driver" in driver
 
             return create_engine(url, fast_executemany=use_fast, connect_args={"timeout": 10})
         elif db_type == "POSTGRESQL":
             url = build_postgres_url(
-                host=conn_data["host"],
+                host=host,
                 port=conn_data.get("port", 5432),
                 database=conn_data["database_name"],
                 username=conn_data["username"],
@@ -75,8 +88,9 @@ class ConnectionManager:
     @staticmethod
     def get_dest_engine(conn_data: dict) -> Engine:
         """Crea un engine SQLAlchemy para la conexión destino (PostgreSQL)."""
+        host = ConnectionManager._resolve_host(conn_data["host"])
         url = build_postgres_url(
-            host=conn_data["host"],
+            host=host,
             port=conn_data.get("port", 5433),
             database=conn_data["database_name"],
             username=conn_data["username"],

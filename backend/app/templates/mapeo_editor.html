@@ -326,18 +326,25 @@
                         <label class="form-label-small">Tabla origen:</label>
                         <div id="infoTabla" class="form-control form-control-sm bg-light" readonly></div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label-small">Clave(s) Agrupación Asiento separada por comas (ej.
                             coddoc,cserie,cnumero):</label>
                         <input type="text" id="claveAsiento" class="form-control form-control-sm"
                             placeholder="Columnas de agrupación">
                     </div>
                     <div class="col-md-2">
+                        <label class="form-label-small text-warning"
+                            title="Opcional. Forza un número de asiento desde el cual empezar la contabilización para así evitar colisiones">Asiento
+                            Inicial Fijo (Opcional):</label>
+                        <input type="number" id="asientoInicial" class="form-control form-control-sm border-warning"
+                            placeholder="Ej: 500" min="1">
+                    </div>
+                    <div class="col-md-2">
                         <button class="btn btn-primary btn-sm w-100" onclick="saveSubcategoriaConfig()">
                             <i class="bi bi-floppy me-1"></i>Guardar config
                         </button>
                     </div>
-                    <div class="col-md-3 text-end">
+                    <div class="col-md-2 text-end">
                         <button class="btn btn-outline-primary btn-sm" onclick="openCabeceraModal()">
                             <i class="bi bi-file-earmark-text me-1"></i>Configurar Cabecera (Diario)
                         </button>
@@ -764,6 +771,7 @@
             document.getElementById('pageTitle').innerHTML = `<i class="bi bi-sliders me-2 text-primary"></i>${subcategoriaData.nombre}`;
             document.getElementById('infoTabla').textContent = subcategoriaData.tabla_origen || 'No configurada';
             document.getElementById('claveAsiento').value = subcategoriaData.clave_asiento || '';
+            document.getElementById('asientoInicial').value = subcategoriaData.asiento_inicial || '';
 
             // Cargar helper data (columnas origen)
             try {
@@ -1002,6 +1010,8 @@
             const clave = document.getElementById('claveAsiento').value;
             const tabDet = document.getElementById('tablaDetalleSelect')?.value || null;
             const tabCab = document.getElementById('tablaCabeceraSelect')?.value || null;
+            const asientoInicialVal = document.getElementById('asientoInicial').value;
+            const asientoInicial = asientoInicialVal ? parseInt(asientoInicialVal, 10) : null;
             try {
                 const r = await fetch(`${API}/mapeo/subcategorias/${subcategoriaId}`, {
                     method: 'PUT',
@@ -1011,7 +1021,8 @@
                         tabla_destino_detalle: tabDet || null,
                         tabla_destino_cabecera: tabCab || null,
                         col_destino_nasiento: document.getElementById('colNasientoSelect')?.value || null,
-                        col_destino_nidlin: document.getElementById('colNidlinSelect')?.value || null
+                        col_destino_nidlin: document.getElementById('colNidlinSelect')?.value || null,
+                        asiento_inicial: asientoInicial
                     })
                 });
                 if (r.ok) {
@@ -1019,6 +1030,7 @@
                     subcategoriaData.clave_asiento = clave;
                     subcategoriaData.tabla_destino_detalle = tabDet;
                     subcategoriaData.tabla_destino_cabecera = tabCab;
+                    subcategoriaData.asiento_inicial = asientoInicial;
                     await reloadDestColumns();
                 } else {
                     showToast('Error al guardar configuración.', 'error');

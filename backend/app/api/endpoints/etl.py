@@ -436,8 +436,8 @@ def generate_asientos_contables(
     de mapeo de una subcategoría y los datos en la BD intermedia.
     """
     subcategoria_id = body.get("subcategoria_id")
-    periodo = body.get("periodo", str(datetime.now().year))
-    mes = body.get("mes", f"{datetime.now().month:02d}")
+    periodo = body.get("periodo") or str(datetime.now().year)
+    mes = body.get("mes") or f"{datetime.now().month:02d}"
 
     sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == subcategoria_id).first()
     if not sub:
@@ -692,6 +692,7 @@ def run_full_etl(company_id: int, body: dict = {}, db: Session = Depends(get_des
         start_date = body.get("start_date")
         end_date = body.get("end_date")
         full_refresh = body.get("full_refresh", False)
+        clear_prev = body.get("clear_previous", False)
 
         total_etl = 0
         for sel in selections:
@@ -773,7 +774,5 @@ def run_full_etl(company_id: int, body: dict = {}, db: Session = Depends(get_des
     return {
         "status": overall_status,
         "company_id": company_id,
-        "periodo": periodo,
-        "mes": mes,
         "resultados": results
     }
