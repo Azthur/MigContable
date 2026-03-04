@@ -241,6 +241,21 @@
                             <label class="form-label small fw-semibold">Descripción</label>
                             <input type="text" class="form-control" id="subDescripcion" placeholder="Opcional">
                         </div>
+                        <div class="col-12 mt-3">
+                            <label class="form-label small fw-semibold">¿Qué procesar al generar asientos?</label>
+                            <div class="d-flex gap-4 mt-1">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="subGenHeaders" checked>
+                                    <label class="form-check-label text-muted small"
+                                        for="subGenHeaders">Cabeceras</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="subGenDetails" checked>
+                                    <label class="form-check-label text-muted small"
+                                        for="subGenDetails">Detalles</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -321,7 +336,10 @@
                             </small>
                         </div>
                         <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-outline-secondary" onclick="editSubcategoria(${JSON.stringify(sub).replace(/"/g, '&quot;')}, ${cat.id})">
+                            <button class="btn btn-sm btn-outline-success" onclick="duplicateSubcategoria(${sub.id})" title="Duplicar">
+                                <i class="bi bi-files"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="editSubcategoria(${JSON.stringify(sub).replace(/"/g, '&quot;')}, ${cat.id})" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </button>
                             <a href="/mapeo/${sub.id}" class="btn-edit-sub">
@@ -341,11 +359,11 @@
         async function loadTablesForSub() {
             // Cargar tablas de la BD intermedia para seleccionar tabla origen
             try {
-                // Intentar obtener tablas de la BD intermedia via company dest connection
-                const r = await fetch(`${API}/companies/${companyId}/dest-tables`);
+                const r = await fetch(`${API}/companies/${companyId}/intermediate-tables`);
                 if (r.ok) {
                     const tables = await r.json();
                     const sel = document.getElementById('subTablaOrigen');
+                    sel.innerHTML = '<option value="">-- Seleccionar tabla --</option>';
                     tables.forEach(t => {
                         const opt = document.createElement('option');
                         opt.value = t.table_name || t;
@@ -396,6 +414,8 @@
             document.getElementById('subTablaOrigen').value = '';
             document.getElementById('subCodigoOrigen').value = '';
             document.getElementById('subDescripcion').value = '';
+            document.getElementById('subGenHeaders').checked = true;
+            document.getElementById('subGenDetails').checked = true;
             loadTablesForSub();
             subModal.show();
         }
@@ -409,6 +429,8 @@
             document.getElementById('subNombre').value = data.nombre || '';
             document.getElementById('subCodigoOrigen').value = data.codigo_origen || '';
             document.getElementById('subDescripcion').value = data.descripcion || '';
+            document.getElementById('subGenHeaders').checked = data.generate_headers !== false;
+            document.getElementById('subGenDetails').checked = data.generate_details !== false;
             loadTablesForSub().then(() => {
                 if (data.tabla_origen) document.getElementById('subTablaOrigen').value = data.tabla_origen;
             });
@@ -424,6 +446,8 @@
                 tabla_origen: document.getElementById('subTablaOrigen').value || null,
                 codigo_origen: document.getElementById('subCodigoOrigen').value.trim() || null,
                 descripcion: document.getElementById('subDescripcion').value.trim() || null,
+                generate_headers: document.getElementById('subGenHeaders').checked,
+                generate_details: document.getElementById('subGenDetails').checked
             };
             const url = editSubId ? `${API}/mapeo/subcategorias/${editSubId}` : `${API}/mapeo/subcategorias`;
             const method = editSubId ? 'PUT' : 'POST';
@@ -436,6 +460,20 @@
             if (!confirm('¿Eliminar esta subcategoría y todas sus líneas de asiento?')) return;
             await fetch(`${API}/mapeo/subcategorias/${id}`, { method: 'DELETE' });
             loadCategorias();
+        }
+
+        async function duplicateSubcategoria(id) {
+            if (!confirm('¿Estás seguro de duplicar esta subcategoría con todo su mapeo?')) return;
+            try {
+                const r = await fetch(`${API}/mapeo/subcategorias/${id}/duplicate`, { method: 'POST' });
+                if (r.ok) {
+                    loadCategorias();
+                } else {
+                    const e = await r.json(); alert('Error: ' + (e.detail || JSON.stringify(e)));
+                }
+            } catch (e) {
+                alert('Error de red: ' + e.message);
+            }
         }
 
         loadCompanies();

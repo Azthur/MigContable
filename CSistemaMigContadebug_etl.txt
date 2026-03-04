@@ -50,3 +50,7 @@ Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
 Params: ['002', '2025']
 Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ?
 Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] = ?
+Params: ['002', '2026']

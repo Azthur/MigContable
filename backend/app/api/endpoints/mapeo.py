@@ -123,6 +123,57 @@ def delete_subcategoria(sub_id: int, db: Session = Depends(get_dest_db)):
     db.commit()
     return {"message": "Eliminado"}
 
+@router.post("/subcategorias/{sub_id}/duplicate", response_model=MapeoSubcategoriaSchema)
+def duplicate_subcategoria(sub_id: int, db: Session = Depends(get_dest_db)):
+    """Duplica una subcategoría entera con sus líneas de asiento y todos sus mapeos."""
+    original = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == sub_id).first()
+    if not original:
+        raise HTTPException(status_code=404, detail="Subcategoría no encontrada")
+
+    # Clonar la subcategoría básica
+    new_sub = MapeoSubcategoria(
+        categoria_id=original.categoria_id,
+        nombre=f"{original.nombre} (Copia)",
+        descripcion=original.descripcion,
+        tabla_origen=original.tabla_origen,
+        codigo_origen=original.codigo_origen,
+        schema_destino=original.schema_destino,
+        tabla_destino_detalle=original.tabla_destino_detalle,
+        tabla_destino_cabecera=original.tabla_destino_cabecera,
+        clave_asiento=original.clave_asiento,
+        col_destino_nasiento=original.col_destino_nasiento,
+        col_destino_nidlin=original.col_destino_nidlin,
+        asiento_inicial=original.asiento_inicial,
+        generate_headers=original.generate_headers,
+        generate_details=original.generate_details,
+        mapeo_cabecera=original.mapeo_cabecera.copy() if original.mapeo_cabecera else None,
+        filter_rules=original.filter_rules.copy() if original.filter_rules else None,
+        is_active=True
+    )
+    db.add(new_sub)
+    db.flush() # Para obtener el ID de new_sub antes de las líneas
+
+    # Clonar las líneas de asiento
+    lineas = db.query(MapeoLineaAsiento).filter(
+        MapeoLineaAsiento.subcategoria_id == sub_id,
+        MapeoLineaAsiento.is_active == True
+    ).order_by(MapeoLineaAsiento.orden).all()
+
+    for linea in lineas:
+        new_linea = MapeoLineaAsiento(
+            subcategoria_id=new_sub.id,
+            orden=linea.orden,
+            nivel=linea.nivel,
+            condicion_aplicacion=linea.condicion_aplicacion,
+            nombre_linea=linea.nombre_linea,
+            mapeo_detalle=linea.mapeo_detalle.copy() if linea.mapeo_detalle else None,
+            is_active=True
+        )
+        db.add(new_linea)
+
+    db.commit()
+    db.refresh(new_sub)
+    return new_sub
 
 # ─── Líneas de Asiento ────────────────────────────────────────────────────────
 
