@@ -25,6 +25,9 @@ def get_source_db():
     db = SourceSessionLocal()
     try:
         yield db
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
 
@@ -32,5 +35,9 @@ def get_dest_db():
     db = DestSessionLocal()
     try:
         yield db
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
+

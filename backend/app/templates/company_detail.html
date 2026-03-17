@@ -506,18 +506,18 @@
                     </select>
                 </div>
 
-                <!-- Filtros para Step 2 -->
-                <div id="step2FiltersPanel" style="display:none;">
-                    <div class="d-flex justify-content-between align-items-center mb-2 mt-2">
-                        <small class="text-muted"><i class="bi bi-funnel me-1"></i>Filtrar datos antes de
-                            generar</small>
-                        <button class="btn-ghost btn-sm" onclick="addStep2FilterRow()" style="font-size:0.75rem;">
-                            <i class="bi bi-plus-lg"></i> Filtro
+                <!-- Panel de Acción por Subcategoría -->
+                <div id="subcatActionPanel" style="display:none;" class="p-2 border border-warning rounded mb-2 mt-2" style="background: rgba(245, 158, 11, 0.05);">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <small class="text-warning"><i class="bi bi-info-circle me-1"></i> Control de Subcategoría</small>
+                        <button class="btn btn-outline-danger btn-sm" onclick="deleteSubcatAsientos()" style="font-size:0.75rem;">
+                            <i class="bi bi-trash me-1"></i> Eliminar asientos pendientes
                         </button>
                     </div>
-                    <div id="step2FiltersContainer" style="max-height:200px; overflow-y:auto;"></div>
-                    <div class="text-muted small mt-1" id="step2FilterInfo"></div>
+                    <hr class="my-1" style="opacity:0.1; borderColor: #f59e0b;">
+                    <div id="subcatControlInfo" class="text-muted small"></div>
                 </div>
+
 
                 <div class="form-check form-switch mb-2 custom-switch mt-3">
                     <input class="form-check-input" type="checkbox" role="switch" id="regenSwitch">
@@ -1502,15 +1502,16 @@
                 if (!res.ok) return;
                 const cats = await res.json();
                 subcatSel.innerHTML = '<option value="">-- Todas las subcategorías --</option>';
-                step2SubcatTableMap = {};
+                step2SubcatDataMap = {}; // Guardar objeto completo
                 cats.forEach(cat => {
                     (cat.subcategorias || []).forEach(sub => {
                         if (!sub.is_active) return;
                         const opt = document.createElement('option');
                         opt.value = sub.id;
-                        opt.textContent = `[${cat.nombre}] ${sub.nombre}${sub.tabla_origen ? ' (' + sub.tabla_origen + ')' : ''}`;
+                        opt.textContent = `[${cat.nombre}] ${sub.nombre}${sub.tabla_origen ? ' (' + sub.tabla_origen + ')' : ' (Sin Tabla Origen)'}`;
                         subcatSel.appendChild(opt);
-                        if (sub.tabla_origen) step2SubcatTableMap[String(sub.id)] = sub.tabla_origen;
+                        step2SubcatDataMap[String(sub.id)] = sub;
+
                     });
                 });
             } catch (e) {
@@ -1518,6 +1519,7 @@
             }
         }
         loadEtlSubcategories();
+
 
         // Funciones de ETL Periodo eliminadas
 
@@ -1560,47 +1562,75 @@
 
         // ─── Step 2 Filter Management ─────────────────────────────────────────────
         let step2Columns = [];
-        let step2SubcatTableMap = {}; // subcategoria_id -> tabla_origen
+        let step2SubcatDataMap = {}; // subcategoria_id -> subcat_object
 
         async function onSubcatChange() {
             const subcatId = document.getElementById('genSubcatSelect')?.value || '';
-            const panel = document.getElementById('step2FiltersPanel');
-            const container = document.getElementById('step2FiltersContainer');
-            const info = document.getElementById('step2FilterInfo');
+            const actionPanel = document.getElementById('subcatActionPanel');
+            const info = document.getElementById('subcatControlInfo');
+            const regenSwitch = document.getElementById('regenSwitch');
 
             if (!subcatId) {
-                panel.style.display = 'none';
-                step2Columns = [];
-                container.innerHTML = '';
+                if(actionPanel) actionPanel.style.display = 'none';
+                if(regenSwitch) regenSwitch.parentElement.style.display = 'block'; // Mostrar regenerar todo
                 return;
             }
 
-            panel.style.display = 'block';
-            container.innerHTML = '';
-            info.textContent = 'Cargando columnas...';
+            if(actionPanel) actionPanel.style.display = 'block';
+            // Ocultar switch de "Re-generar Todo" para una sola subcat para evitar confusiones
+            if(regenSwitch) regenSwitch.parentElement.style.display = 'none'; 
+            if(info) info.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Cargando información...';
 
-            // Get the table name for this subcategory
-            const tableName = step2SubcatTableMap[subcatId];
-            if (!tableName) {
-                info.textContent = 'No se encontró tabla origen para esta subcategoría.';
+            const sub = step2SubcatDataMap[subcatId];
+            if (!sub) {
+                if(info) info.textContent = 'No se encontró configuración para esta subcategoría.';
                 return;
             }
 
-            try {
-                const res = await fetch(`/api/v1/companies/${companyId}/dest-table-columns?table_name=${encodeURIComponent(tableName)}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    step2Columns = data.columns || [];
-                    info.textContent = `Tabla: ${tableName} — ${step2Columns.length} columnas disponibles. Agregue filtros o deje vacío para procesar todos.`;
-                    // Add one empty filter row by default
-                    addStep2FilterRow();
-                } else {
-                    info.textContent = 'Error al cargar columnas de la tabla.';
+            const tableName = sub.tabla_origen;
+            let ctrlCol = sub.control_column_origen;
+            
+            if (!ctrlCol && subcatId) {
+                try {
+                    const hRes = await fetch(`/api/v1/mapeo/subcategorias/${subcatId}/helper-data`);
+                    if (!hRes.ok) {
+                        ctrlCol = `<span class="text-danger">API Error (${hRes.status})</span>`;
+                    } else {
+                        const hData = await hRes.json();
+                        if (hData.suggested_control_column) {
+                            ctrlCol = `${hData.suggested_control_column} <span class="badge bg-info text-dark" style="font-size:0.65rem">Sugerido</span>`;
+                        } else {
+                            ctrlCol = '<span class="text-muted">No sugerido (Backend null)</span>';
+                        }
+                    }
+                } catch (e) { 
+                    ctrlCol = `<span class="text-danger">JS Error: ${e.message}</span>`;
                 }
-            } catch (e) {
-                info.textContent = 'Error de conexión: ' + e.message;
+            } else if (ctrlCol) {
+                ctrlCol = `${ctrlCol} <span class="badge bg-success" style="font-size:0.65rem">Guardado</span>`;
+            }
+
+            if (!ctrlCol) {
+                ctrlCol = '<span class="text-muted">No configurado (Saltar Fetch)</span>';
+            }
+
+
+            const ctrlVal = sub.last_generated_control_value || '<span class="text-muted">Ninguno</span>';
+            const startAsiento = sub.asiento_inicial || '<span class="text-muted">Por defecto</span>';
+
+
+            if(info) {
+                info.innerHTML = `
+                    <div class="row g-1">
+                        <div class="col-6"><strong>Tabla Origen:</strong> <code>${tableName || '-'}</code></div>
+                        <div class="col-6"><strong>Asiento Inicial:</strong> <span class="badge bg-secondary">${startAsiento}</span></div>
+                        <div class="col-6"><strong>Columna Control:</strong> <code>${ctrlCol}</code></div>
+                        <div class="col-6"><strong>Último Valor Control:</strong> <span class="badge bg-warning text-dark">${ctrlVal}</span></div>
+                    </div>
+                `;
             }
         }
+
 
         function addStep2FilterRow(data = {}) {
             const container = document.getElementById('step2FiltersContainer');
@@ -1671,6 +1701,35 @@
                 }
             });
             return filters;
+        }
+
+        async function deleteSubcatAsientos() {
+            const subcatId = document.getElementById('genSubcatSelect')?.value || '';
+            if (!subcatId) return;
+
+            const sub = step2SubcatDataMap[subcatId];
+            const name = sub ? sub.nombre : `ID ${subcatId}`;
+
+            if (!confirm(`¿Está seguro de eliminar los asientos pendientes (no migrados) para la subcategoría "${name}"? Esta acción evitará duplicados cuando vuelva a generar.`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/v1/mapeo/delete-subcategoria-asientos/${companyId}/${subcatId}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('success', data.message || 'Asientos eliminados correctamente');
+                    if(document.getElementById('cfDiariolPanel')) {
+                        loadCfDiariol(); // Refresh staging table view if visible
+                    }
+                } else {
+                    showToast('error', 'Error al eliminar asientos: ' + (data.detail || 'Error desconocido'));
+                }
+            } catch (e) {
+                showToast('error', 'Error de red: ' + e.message);
+            }
         }
 
         async function runEtlStep2() {

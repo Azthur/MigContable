@@ -34,10 +34,20 @@ router = APIRouter()
 
 @router.get("/categorias", response_model=List[MapeoCategoriaSchema])
 def list_categorias(company_id: Optional[int] = None, db: Session = Depends(get_dest_db)):
-    query = db.query(MapeoCategoria).filter(MapeoCategoria.is_active == True)
-    if company_id:
-        query = query.filter(MapeoCategoria.company_id == company_id)
-    return query.order_by(MapeoCategoria.nombre).all()
+    try:
+        query = db.query(MapeoCategoria).filter(MapeoCategoria.is_active == True)
+        if company_id:
+            query = query.filter(MapeoCategoria.company_id == company_id)
+        res = query.order_by(MapeoCategoria.nombre).all()
+        return res
+
+    except Exception as e:
+        import traceback
+        print("LIST_CATEGORIAS CRASH:", e)
+        print(traceback.format_exc())
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+
 
 @router.get("/categorias/{cat_id}", response_model=MapeoCategoriaSchema)
 def get_categoria(cat_id: int, db: Session = Depends(get_dest_db)):
@@ -241,10 +251,37 @@ def get_helper_data(sub_id: int, db: Session = Depends(get_dest_db)):
         except Exception as e:
             pass # Ignoramos errores si la tabla no existe aún
 
+    suggested_control_column = None
+    log_path = "c:\\SistemaMigConta\\backend\\helper_data_hit.log"
+    with open(log_path, "a") as f:
+        f.write(f"--- ENDPOINT START {sub_id} --- table={sub.tabla_origen}, company={company_id}\n")
+        
+    if sub.tabla_origen and company_id:
+        try:
+
+            from backend.app.models.models import TableSelection
+            ts_list = db.query(TableSelection).filter(TableSelection.company_id == company_id).all()
+            with open(log_path, "a") as f: f.write(f"Found {len(ts_list)} table selections\n")
+            
+            for ts in ts_list:
+                if ts.table_name and sub.tabla_origen:
+                    if ts.table_name.lower() in sub.tabla_origen.lower() or sub.tabla_origen.lower() in ts.table_name.lower():
+                        if ts.control_column:
+                            suggested_control_column = ts.control_column
+                            with open(log_path, "a") as f: f.write(f"MATCH FOUND: {ts.table_name} -> {ts.control_column}\n")
+                            break
+        except Exception as e:
+            with open(log_path, "a") as f: f.write(f"G_HELPER_DATA ERROR: {e}\n")
+            pass
+
+
+
     return {
         "company_id": company_id,
-        "columns": columns
+        "columns": columns,
+        "suggested_control_column": suggested_control_column
     }
+
 
 
 @router.get("/subcategorias/{sub_id}/dest-columns")
@@ -492,6 +529,71 @@ def reset_migration_control(control_id: int, db: Session = Depends(get_dest_db))
 
 
 # ─── Asientos Generados ───────────────────────────────────────────────────────
+
+@router.delete("/delete-subcategoria-asientos/{company_id}/{subcategoria_id}")
+def delete_subcategoria_asientos(company_id: int, subcategoria_id: int, db: Session = Depends(get_dest_db)):
+    """Elimina asientos NO migrados (estado 0 o 1) de una subcategoría específica."""
+    from sqlalchemy import Table, MetaData
+    from backend.app.core.database import dest_engine as engine
+
+    sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == subcategoria_id).first()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Subcategoría no encontrada")
+
+    metadata = MetaData()
+    deleted_det = 0
+    deleted_head = 0
+
+    tabla_det_name = sub.tabla_destino_detalle or "cf_diariol"
+    tabla_head_name = sub.tabla_destino_cabecera or "cf_diario"
+
+    try:
+        DetTable = Table(tabla_det_name, metadata, autoload_with=engine)
+    except:
+        DetTable = None
+    try:
+        HeadTable = Table(tabla_head_name, metadata, autoload_with=engine)
+    except:
+        HeadTable = None
+
+    # Collect nasiento values to delete from headers too
+    asientos_to_delete = []
+    if DetTable is not None:
+        check_col = sub.col_destino_nasiento or "nasiento"
+        if check_col in [c.name for c in DetTable.columns]:
+            stmt_sel = db.query(getattr(DetTable.c, check_col)).filter(
+                DetTable.c.company_id == company_id,
+                DetTable.c.estado.in_(["0", "1", "PENDIENTE"]),
+                DetTable.c.subcategoria_id == subcategoria_id
+            ).distinct()
+            asientos_to_delete = [a[0] for a in db.execute(stmt_sel).fetchall() if a[0]]
+
+        stmt_del = DetTable.delete().where(
+            DetTable.c.company_id == company_id,
+            DetTable.c.estado.in_(["0", "1", "PENDIENTE"]),
+            DetTable.c.subcategoria_id == subcategoria_id
+        )
+        result = db.execute(stmt_del)
+        deleted_det = result.rowcount
+
+    if HeadTable is not None and asientos_to_delete:
+        check_col_head = sub.col_destino_nasiento or "nasiento"
+        if check_col_head in [c.name for c in HeadTable.columns]:
+            stmt_del_h = HeadTable.delete().where(
+                HeadTable.c.company_id == company_id,
+                HeadTable.c.estado.in_(["0", "1", "PENDIENTE"]),
+                getattr(HeadTable.c, check_col_head).in_(asientos_to_delete)
+            )
+            result_h = db.execute(stmt_del_h)
+            deleted_head = result_h.rowcount
+
+    db.commit()
+    return {
+        "message": f"Eliminados {deleted_det} líneas y {deleted_head} cabeceras pendientes para subcategoría {sub.nombre}",
+        "deleted_detail": deleted_det,
+        "deleted_header": deleted_head
+    }
+
 
 @router.get("/asientos-generados")
 def list_asientos(company_id: int, subcategoria_id: Optional[int] = None,
@@ -800,9 +902,22 @@ def _generate_subcategoria_cf_diariol(
             clave_columns = [columns[0]] if columns else []
 
     # ─── Control Incremental: excluir filas ya migradas ───
-    if getattr(sub, 'control_column_origen', None) and getattr(sub, 'last_generated_control_value', None):
-        ctrl_col = sub.control_column_origen
-        ctrl_val = sub.last_generated_control_value
+    ctrl_col = getattr(sub, 'control_column_origen', None)
+    ctrl_val = getattr(sub, 'last_generated_control_value', None)
+    
+    if not ctrl_col and company_id:
+        try:
+            from backend.app.models.models import TableSelection
+            ts_list = db.query(TableSelection).filter(TableSelection.company_id == company_id).all()
+            for ts in ts_list:
+                if ts.table_name.lower() in sub.tabla_origen.lower() or sub.tabla_origen.lower() in ts.table_name.lower():
+                    if ts.control_column:
+                        ctrl_col = ts.control_column
+                        break
+        except Exception: pass
+
+    if ctrl_col and ctrl_val:
+
         ctrl_col_lower = ctrl_col.lower()
         if ctrl_col_lower in [c.lower() for c in columns]:
             # Find the actual column name (case-sensitive match)
@@ -1212,6 +1327,10 @@ def generate_to_cf_diariol(body: dict, db: Session = Depends(get_dest_db)):
                 subcategoria_id = None
     
         clear_previous = body.get("clear_previous", False)
+        # Forzar auto-limpieza si se genera para UNA subcategoría para evitar duplicados
+        if subcategoria_id is not None:
+            clear_previous = True
+
         filters = body.get("filters", [])
     
         # _log(f"subcategoria_id={subcategoria_id} (raw={raw_subcat}), company_id={company_id}, clear={clear_previous}")
@@ -1512,6 +1631,32 @@ def migrate_to_final(
                                 ).values(estado="MIGRADO"))
                             except Exception as e:
                                 print(f"Error bulk inserting details: {e}")
+
+                                # --- UPDATE SUBCATEGORY CONTROL FIELDS AFTER SUCCESSFUL MIGRATIONS ---
+                                try:
+                                    from sqlalchemy import func
+                                    # 1. Update asiento_inicial based on max nasiento
+                                    if LocalHeadTable is not None:
+                                        nasiento_col = sub.col_destino_nasiento or "nasiento"
+                                        stmt_max = db.query(func.max(getattr(LocalHeadTable.c, nasiento_col))).filter(
+                                            LocalHeadTable.c.company_id == company_id,
+                                            LocalHeadTable.c.subcategoria_id == sub.id,
+                                            LocalHeadTable.c.estado == "MIGRADO"
+                                        )
+                                        max_nasiento = db.execute(stmt_max).scalar()
+                                        if max_nasiento is not None:
+                                            sub.asiento_inicial = int(max_nasiento) + 1
+
+                                    # 2. Update last_generated_control_value based on source table
+                                    if getattr(sub, 'control_column_origen', None) and sub.tabla_origen:
+                                        ctrl_col = sub.control_column_origen
+                                        src_table = sub.tabla_origen
+                                        stmt_max_ctrl = text(f"SELECT MAX({ctrl_col}) FROM {src_table}")
+                                        max_ctrl_val = db.execute(stmt_max_ctrl).scalar()
+                                        if max_ctrl_val is not None:
+                                            sub.last_generated_control_value = str(max_ctrl_val)
+                                except Exception as e:
+                                    print(f"Error updating subcategory control fields for {sub.nombre}: {e}")
 
         db.commit()
 
@@ -1890,7 +2035,7 @@ def validate_staging_data(
                 }
 
             # Leer datos de staging para esta subcategoría
-            where_sql = "company_id = :company_id AND subcategoria_id = :sub_id"
+            where_sql = "company_id = :company_id AND subcategoria_id = :sub_id AND estado = '1'"
             params = {"company_id": company_id, "sub_id": sub.id}
 
             try:
