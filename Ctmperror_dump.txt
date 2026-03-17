@@ -1,4 +1,4 @@
-GLOBAL EXCEPTION CAUGHT for http://localhost:8000/api/v1/etl/run-full/1
+GLOBAL EXCEPTION CAUGHT for http://localhost:8000/api/v1/mapeo/origen-preview?company_id=1&limit=1000000&skip=0
 Traceback (most recent call last):
   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
     await self.app(scope, receive, _send)
@@ -43,7 +43,7 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 986, in run
     result = context.run(func, *args)
              ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/app/backend/app/api/endpoints/etl.py", line 776, in run_full_etl
-    "company_id": company_id,
-               ^^^^^^^
-NameError: name 'periodo' is not defined
+  File "/app/backend/app/api/endpoints/mapeo.py", line 1687, in list_origen_preview
+    selections = db.query(TableSelection).join(SourceConnection).filter(
+                                               ^^^^^^^^^^^^^^^^
+NameError: name 'SourceConnection' is not defined

@@ -31,6 +31,17 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="companyId">
+                <div class="mb-3" id="cloneFromGroup">
+                    <label class="form-label-dark">
+                        <i class="bi bi-clipboard-check me-1"></i>Copiar configuración de
+                    </label>
+                    <select class="form-control-dark" id="cloneFromSelect">
+                        <option value="">— No copiar (empresa vacía) —</option>
+                    </select>
+                    <div class="form-text" style="font-size:11px; color:var(--text-secondary); margin-top:4px;">
+                        Copia mapeos, conexiones, selección de tablas, catálogos y demás configuraciones.
+                    </div>
+                </div>
                 <div class="mb-3">
                     <label class="form-label-dark">Nombre Empresa *</label>
                     <input type="text" class="form-control-dark" id="companyName" required>
@@ -51,7 +62,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn-ghost" data-bs-dismiss="modal">Cancelar</button>
-                <button class="btn-accent" onclick="saveCompany()">Guardar</button>
+                <button class="btn-accent" id="saveCompanyBtn" onclick="saveCompany()">Guardar</button>
             </div>
         </div>
     </div>
@@ -61,6 +72,7 @@
 {% block extra_scripts %}
 <script>
     let companyModal;
+    let allCompanies = [];
 
     window.addEventListener('DOMContentLoaded', () => {
         companyModal = new bootstrap.Modal(document.getElementById('companyModal'));
@@ -71,9 +83,9 @@
         const container = document.getElementById('companiesContainer');
         try {
             const res = await fetch('/api/v1/companies/');
-            const companies = await res.json();
+            allCompanies = await res.json();
 
-            if (companies.length === 0) {
+            if (allCompanies.length === 0) {
                 container.innerHTML = `
                     <div class="col-12">
                         <div class="card-dark text-center py-5">
@@ -85,7 +97,7 @@
                 return;
             }
 
-            container.innerHTML = companies.map(c => `
+            container.innerHTML = allCompanies.map(c => `
                 <div class="col-md-6 col-lg-4">
                     <div class="card-dark h-100 position-relative group-hover">
                         <div class="d-flex justify-content-between align-items-start mb-2">
@@ -119,14 +131,35 @@
         }
     }
 
+    function populateCloneSelect(excludeId) {
+        const sel = document.getElementById('cloneFromSelect');
+        sel.innerHTML = '<option value="">— No copiar (empresa vacía) —</option>';
+        allCompanies.forEach(c => {
+            if (c.id !== excludeId) {
+                sel.innerHTML += `<option value="${c.id}">${c.name}${c.ruc ? ' (' + c.ruc + ')' : ''}</option>`;
+            }
+        });
+    }
+
     function openCompanyModal(data = null) {
-        document.getElementById('companyModalTitle').textContent = data ? 'Editar Empresa' : 'Nueva Empresa';
+        const isEdit = !!data;
+        document.getElementById('companyModalTitle').textContent = isEdit ? 'Editar Empresa' : 'Nueva Empresa';
         document.getElementById('companyId').value = data?.id || '';
         document.getElementById('companyName').value = data?.name || '';
         document.getElementById('companyRuc').value = data?.ruc || '';
         document.getElementById('companyDesc').value = data?.description || '';
         document.getElementById('companyActive').checked = data ? data.is_active : true;
         document.getElementById('companyModalMsg').innerHTML = '';
+
+        // Mostrar/ocultar selector de clonación
+        const cloneGroup = document.getElementById('cloneFromGroup');
+        if (isEdit) {
+            cloneGroup.style.display = 'none';
+        } else {
+            cloneGroup.style.display = 'block';
+            populateCloneSelect(null);
+        }
+
         companyModal.show();
     }
 
@@ -144,8 +177,27 @@
             return;
         }
 
-        const url = id ? `/api/v1/companies/${id}` : '/api/v1/companies/';
-        const method = id ? 'PUT' : 'POST';
+        const cloneFromId = document.getElementById('cloneFromSelect').value;
+        const isClone = !id && cloneFromId;
+
+        let url, method;
+        if (id) {
+            url = `/api/v1/companies/${id}`;
+            method = 'PUT';
+        } else if (isClone) {
+            url = `/api/v1/companies/${cloneFromId}/clone`;
+            method = 'POST';
+        } else {
+            url = '/api/v1/companies/';
+            method = 'POST';
+        }
+
+        const btn = document.getElementById('saveCompanyBtn');
+        const origText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = isClone
+            ? '<span class="spinner-border spinner-border-sm me-1"></span>Copiando configuraciones...'
+            : '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
 
         try {
             const res = await fetch(url, {
@@ -163,6 +215,9 @@
             }
         } catch (e) {
             document.getElementById('companyModalMsg').innerHTML = `<div class="alert-error-dark small">Error de red</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = origText;
         }
     }
 

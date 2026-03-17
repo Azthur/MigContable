@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro — MigConta</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --bg-color: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --surface-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at top left, rgba(139, 92, 246, 0.15), transparent 40%),
+                radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.15), transparent 40%);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .auth-card {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: 20px;
+            padding: 2.5rem 3rem;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeInScale 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .auth-logo {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #a78bfa, #60a5fa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .auth-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .form-floating>label {
+            color: var(--text-muted);
+        }
+
+        .form-floating>.form-control {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--surface-border);
+            color: var(--text-main);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-floating>.form-control:focus {
+            background-color: rgba(15, 23, 42, 0.8);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+        }
+
+        .form-floating>.form-control:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
+            -webkit-text-fill-color: var(--text-main) !important;
+        }
+
+        .btn-auth {
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            border: none;
+            color: white;
+            padding: 0.8rem;
+            border-radius: 12px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(139, 92, 246, 0.8);
+        }
+
+        .btn-auth:active {
+            transform: translateY(1px);
+        }
+
+        .auth-footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .auth-footer a:hover {
+            color: #a78bfa;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-card">
+        <div class="auth-logo"><i class="bi bi-person-plus-fill me-2"></i>Crear Cuenta</div>
+        <div class="auth-subtitle">Registra tu usuario para acceder a MigConta</div>
+
+        <form id="registerForm">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="nameInput" placeholder="Juan Pérez" required>
+                <label for="nameInput"><i class="bi bi-person me-2"></i>Nombre Completo</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" id="emailInput" placeholder="name@example.com" required>
+                <label for="emailInput"><i class="bi bi-envelope me-2"></i>Correo Electrónico</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="password" class="form-control" id="passwordInput" placeholder="Contraseña" required
+                    minlength="6">
+                <label for="passwordInput"><i class="bi bi-lock me-2"></i>Contraseña</label>
+            </div>
+
+            <button type="submit" class="btn btn-auth" id="registerBtn">Registrarme</button>
+        </form>
+
+        <div class="auth-footer">
+            ¿Ya tienes tu cuenta? <a href="/login">Inicia Sesión aquí</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fullName = document.getElementById('nameInput').value;
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            const btn = document.getElementById('registerBtn');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registrando...';
+
+            try {
+                const response = await fetch('/api/v1/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        full_name: fullName,
+                        email: email,
+                        password: password,
+                        role: 'operator',
+                        is_active: true
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Registro Exitoso!',
+                        text: 'Ahora puedes iniciar sesión con tus credenciales',
+                        background: '#1e293b',
+                        color: '#f8fafc',
+                        confirmButtonColor: '#8b5cf6'
+                    }).then(() => {
+                        window.location.href = "/login";
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de Registro',
+                        text: data.detail || 'Verifica la información',
+                        background: '#1e293b',
+                        color: '#f8fafc',
+                        confirmButtonColor: '#8b5cf6'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de Red',
+                    text: 'No se pudo contactar al servidor',
+                    background: '#1e293b',
+                    color: '#f8fafc',
+                    confirmButtonColor: '#8b5cf6'
+                });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Registrarme';
+            }
+        });
+    </script>
+</body>
+
+</html>

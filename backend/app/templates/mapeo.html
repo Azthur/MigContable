@@ -267,6 +267,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const API = '/api/v1';
         let companyId = null;
@@ -323,7 +324,7 @@
             </div>
             <div class="card-body">
                 ${cat.subcategorias && cat.subcategorias.length ? cat.subcategorias.map(sub => `
-                    <div class="subcategoria-card d-flex justify-content-between align-items-center">
+                    <div class="subcategoria-card d-flex justify-content-between align-items-center" style="${sub.is_active === false ? 'opacity: 0.5; filter: grayscale(100%);' : ''}">
                         <div>
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <i class="bi bi-diagram-2 text-primary"></i>
@@ -342,11 +343,11 @@
                             <button class="btn btn-sm btn-outline-secondary" onclick="editSubcategoria(${JSON.stringify(sub).replace(/"/g, '&quot;')}, ${cat.id})" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <a href="/mapeo/${sub.id}" class="btn-edit-sub">
+                            <a href="/mapeo/${sub.id}" class="btn-edit-sub" style="${sub.is_active === false ? 'pointer-events:none; opacity: 0.5;' : ''}">
                                 <i class="bi bi-sliders me-1"></i>Configurar Asiento
                             </a>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteSubcategoria(${sub.id})">
-                                <i class="bi bi-trash"></i>
+                            <button class="btn btn-sm ${sub.is_active === false ? 'btn-outline-success' : 'btn-outline-danger'}" onclick="toggleSubcategoria(${sub.id}, ${sub.is_active !== false})" title="${sub.is_active === false ? 'Activar Subcategoría' : 'Inactivar Subcategoría'}">
+                                <i class="bi ${sub.is_active === false ? 'bi-toggle-off' : 'bi-toggle-on'}"></i>
                             </button>
                         </div>
                     </div>
@@ -396,9 +397,28 @@
         }
 
         async function deleteCategoria(id) {
-            if (!confirm('¿Eliminar esta categoría y todas sus subcategorías?')) return;
-            await fetch(`${API}/mapeo/categorias/${id}`, { method: 'DELETE' });
-            loadCategorias();
+            const { isConfirmed } = await Swal.fire({
+                title: '¿Eliminar Categoría?',
+                text: '¿Estás seguro de eliminar esta categoría y todas sus subcategorías?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+            if (!isConfirmed) return;
+
+            try {
+                const r = await fetch(`${API}/mapeo/categorias/${id}`, { method: 'DELETE' });
+                if (r.ok) {
+                    loadCategorias();
+                    Swal.fire('Eliminado', 'La categoría ha sido eliminada correctamente.', 'success');
+                } else {
+                    const e = await r.json();
+                    Swal.fire('Error', JSON.stringify(e.detail), 'error');
+                }
+            } catch (e) { Swal.fire('Error de red', e.message, 'error'); }
         }
 
         let editSubId = null;
@@ -456,24 +476,56 @@
             else { const e = await r.json(); alert('Error: ' + JSON.stringify(e.detail)); }
         }
 
-        async function deleteSubcategoria(id) {
-            if (!confirm('¿Eliminar esta subcategoría y todas sus líneas de asiento?')) return;
-            await fetch(`${API}/mapeo/subcategorias/${id}`, { method: 'DELETE' });
-            loadCategorias();
+        async function toggleSubcategoria(id, currentlyActive) {
+            const actionText = currentlyActive ? 'Inactivar' : 'Activar';
+            const { isConfirmed } = await Swal.fire({
+                title: `¿${actionText} Subcategoría?`,
+                text: `¿Estás seguro de ${actionText.toLowerCase()} esta subcategoría?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: currentlyActive ? '#d33' : '#28a745',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: `Sí, ${actionText.toLowerCase()}`,
+                cancelButtonText: 'Cancelar'
+            });
+            if (!isConfirmed) return;
+
+            try {
+                const r = await fetch(`${API}/mapeo/subcategorias/${id}/toggle`, { method: 'POST' });
+                if (r.ok) {
+                    loadCategorias();
+                    const state = await r.json();
+                    Swal.fire('Éxito', `La subcategoría ha sido ${state.is_active ? 'activada' : 'inactivada'} correctamente.`, 'success');
+                } else {
+                    const e = await r.json();
+                    Swal.fire('Error', JSON.stringify(e.detail), 'error');
+                }
+            } catch (e) { Swal.fire('Error de red', e.message, 'error'); }
         }
 
         async function duplicateSubcategoria(id) {
-            if (!confirm('¿Estás seguro de duplicar esta subcategoría con todo su mapeo?')) return;
+            const { isConfirmed } = await Swal.fire({
+                title: '¿Duplicar Subcategoría?',
+                text: '¿Estás seguro de duplicar esta subcategoría con todo su mapeo?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, duplicar',
+                cancelButtonText: 'Cancelar'
+            });
+            if (!isConfirmed) return;
+
             try {
                 const r = await fetch(`${API}/mapeo/subcategorias/${id}/duplicate`, { method: 'POST' });
                 if (r.ok) {
                     loadCategorias();
+                    Swal.fire('Duplicado', 'La subcategoría ha sido duplicada.', 'success');
                 } else {
-                    const e = await r.json(); alert('Error: ' + (e.detail || JSON.stringify(e)));
+                    const e = await r.json();
+                    Swal.fire('Error', e.detail || JSON.stringify(e), 'error');
                 }
-            } catch (e) {
-                alert('Error de red: ' + e.message);
-            }
+            } catch (e) { Swal.fire('Error de red', e.message, 'error'); }
         }
 
         loadCompanies();

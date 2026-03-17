@@ -336,6 +336,8 @@ class MapeoSubcategoriaBase(BaseModel):
     schema_destino: Optional[str] = "public"
     filter_rules: Optional[List[dict]] = None
     asiento_inicial: Optional[int] = None
+    control_column_origen: Optional[str] = None
+    last_generated_control_value: Optional[str] = None
     is_active: bool = True
 
 class MapeoSubcategoriaCreate(MapeoSubcategoriaBase):
@@ -357,6 +359,8 @@ class MapeoSubcategoriaUpdate(BaseModel):
     schema_destino: Optional[str] = None
     filter_rules: Optional[List[dict]] = None
     asiento_inicial: Optional[int] = None
+    control_column_origen: Optional[str] = None
+    last_generated_control_value: Optional[str] = None
     is_active: Optional[bool] = None
     categoria_id: Optional[int] = None
 

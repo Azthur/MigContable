@@ -16,9 +16,11 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
         return pd.Series([default] * len(df), index=df.index)
 
     # Convert simple column name directly if it just matches a column exactly
-    if formula_str.upper() in [c.upper() for c in df.columns]:
-        col_map = {c.upper(): c for c in df.columns}
-        return df[col_map[formula_str.upper()]]
+    # Ignore spaces and case
+    clean_cols = {str(c).upper().strip(): c for c in df.columns}
+    formula_clean = formula_str.upper().strip()
+    if formula_clean in clean_cols:
+        return df[clean_cols[formula_clean]]
 
     # If it's pure digits (like '002' or '121201'), return it as string to avoid AST SyntaxError
     if re.fullmatch(r'\d+', formula_str):
@@ -37,7 +39,7 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
     formula_ast_str = formula_ast_str.replace('<>', '!=')
     formula_ast_str = formula_ast_str.replace("SI.CONJUNTO", "SI_CONJUNTO")
 
-    col_map = {c.upper(): c for c in df.columns}
+    col_map = {str(c).upper().strip(): c for c in df.columns}
 
     def eval_ast(node: ast.AST) -> pd.Series:
         def get_string_arg(arg_node):
@@ -61,8 +63,8 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
             left = eval_ast(node.left)
             right = eval_ast(node.comparators[0])
             op = type(node.ops[0])
-            left_str = left.astype(str).str.strip().str.upper()
-            right_str = right.astype(str).str.strip().str.upper()
+            left_str = left.astype(str).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
+            right_str = right.astype(str).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
             if op == ast.Eq: return left_str == right_str
             elif op == ast.NotEq: return left_str != right_str
             elif op == ast.Gt: return pd.to_numeric(left, errors='coerce') > pd.to_numeric(right, errors='coerce')
@@ -172,6 +174,27 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
             elif func_id == "MAYUSC" and len(node.args) >= 1:
                 src = eval_ast(node.args[0])
                 return src.astype(str).str.upper()
+
+            elif func_id == "ENCONTRAR" and len(node.args) >= 2:
+                # ENCONTRAR(TextoBuscado, TextoDestino) → 1-based position, 0 if not found
+                search = eval_ast(node.args[0])
+                source = eval_ast(node.args[1])
+                search_str = search.astype(str).str.strip()
+                source_str = source.astype(str).str.strip()
+                # Use pandas str.find (0-based, -1 if not found), convert to 1-based
+                pos = source_str.combine(search_str, lambda s, srch: s.find(srch))
+                return pos.apply(lambda x: x + 1 if x >= 0 else 0)
+
+            elif func_id == "EXTRAER" and len(node.args) >= 3:
+                # EXTRAER(Texto, PosicionInicio, NumCaracteres) → substring (1-based start)
+                src = eval_ast(node.args[0]).astype(str).str.strip()
+                start_pos = pd.to_numeric(eval_ast(node.args[1]), errors='coerce').fillna(1).astype(int)
+                num_chars = pd.to_numeric(eval_ast(node.args[2]), errors='coerce').fillna(0).astype(int)
+                # Convert 1-based to 0-based and extract
+                return pd.Series(
+                    [s[max(0, p-1):max(0, p-1)+n] for s, p, n in zip(src, start_pos, num_chars)],
+                    index=df.index
+                )
                 
             elif func_id == "REPETIR" and len(node.args) >= 2:
                 src = eval_ast(node.args[0])

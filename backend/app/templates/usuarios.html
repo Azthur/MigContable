@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Usuarios - SistemaMigConta{% endblock %}
+{% block page_title %}Gestión de Usuarios{% endblock %}
+{% block breadcrumb %}Configuración › Usuarios{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-1" style="color:var(--text-primary);"><i class="bi bi-people-fill me-2"
+                    style="color:var(--accent-purple)"></i>Directorio de Usuarios</h5>
+            <p class="mb-0" style="font-size:13px; color:var(--text-secondary);">Administra el acceso y roles de los
+                integrantes del sistema.</p>
+        </div>
+        <button class="btn-accent" onclick="openNewUserModal()">
+            <i class="bi bi-person-plus-fill me-1"></i> Registrar Usuario
+        </button>
+    </div>
+</div>
+
+<div class="card-dark">
+    <table id="usersTable" class="table table-dark-custom" style="width:100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Creado En</th>
+                <th class="text-end">Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="usersTableBody">
+            <!-- Dynamic Data -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Registro Usuario -->
+<div class="modal fade modal-dark" id="userModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title mb-0"><i class="bi bi-person-badge me-2"></i>Nuevo Usuario</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newUserForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Nombre Completo</label>
+                        <input type="text" class="form-control form-control-dark" id="userName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Correo Electrónico</label>
+                        <input type="email" class="form-control form-control-dark" id="userEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Contraseña</label>
+                        <input type="password" class="form-control form-control-dark" id="userPass" required
+                            minlength="6">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Rol Asignado</label>
+                        <select class="form-select form-control-dark" id="userRole" required>
+                            <option value="operator">Operator (Limitado)</option>
+                            <option value="admin">Administrador (Total)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-accent w-100" id="btnSaveUser">Crear Usuario</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let dtTable = null;
+    const utoken = localStorage.getItem('migconta_token');
+
+    async function loadUsers() {
+        try {
+            const res = await fetch('/api/v1/auth/', {
+                headers: { 'Authorization': `Bearer ${utoken}` }
+            });
+
+            if (res.status === 403) {
+                Swal.fire('Acceso Denegado', 'No tienes permisos de administrador.', 'error').then(() => window.location.href = '/');
+                return;
+            }
+
+            const data = await res.json();
+
+            if (dtTable) {
+                dtTable.destroy();
+            }
+
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(u => {
+                const tr = document.createElement('tr');
+                const bag = u.is_active ? `<span class="badge-success">Activo</span>` : `<span class="badge-error">Inactivo</span>`;
+                const roleBadge = u.role === 'admin' ?
+                    `<span class="badge" style="background:var(--accent-purple); color:#fff; font-size:11px;">Admin</span>` :
+                    `<span class="badge-info">Operator</span>`;
+
+                tr.innerHTML = `
+                    <td>#${u.id}</td>
+                    <td class="fw-semibold">${u.full_name || '—'}</td>
+                    <td>${u.email}</td>
+                    <td>${roleBadge}</td>
+                    <td>${bag}</td>
+                    <td style="color:var(--text-secondary); font-size:12px;">${new Date(u.created_at).toLocaleDateString()}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-ghost me-1" onclick="toggleStatus(${u.id})" title="Alternar Estado">
+                            <i class="bi bi-power"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            dtTable = $('#usersTable').DataTable({
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                order: [[0, 'desc']],
+                pageLength: 10
+            });
+        } catch (err) {
+            showToast('error', 'Error al cargar usuarios');
+        }
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById('userModal'));
+
+    function openNewUserModal() {
+        document.getElementById('newUserForm').reset();
+        modal.show();
+    }
+
+    document.getElementById('newUserForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSaveUser');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-sm"></span> Guardando...';
+
+        try {
+            const res = await fetch('/api/v1/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${utoken}`
+                },
+                body: JSON.stringify({
+                    full_name: document.getElementById('userName').value,
+                    email: document.getElementById('userEmail').value,
+                    password: document.getElementById('userPass').value,
+                    role: document.getElementById('userRole').value
+                })
+            });
+
+            const resp = await res.json();
+
+            if (res.ok) {
+                Swal.fire({ icon: 'success', title: 'Usuario Creado', background: '#1e293b', color: '#fff' });
+                modal.hide();
+                loadUsers();
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: resp.detail, background: '#1e293b', color: '#fff' });
+            }
+        } catch (err) {
+            showToast('error', 'Error de red');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Crear Usuario';
+        }
+    });
+
+    async function toggleStatus(id) {
+        if (!confirm('¿Cambiar estado de acceso del usuario?')) return;
+        try {
+            const res = await fetch(`/api/v1/auth/${id}/status`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${utoken}` }
+            });
+            if (res.ok) {
+                showToast('success', 'Estado modificado');
+                loadUsers();
+            } else {
+                const data = await res.json();
+                showToast('error', data.detail || 'Error al cambiar estado');
+            }
+        } catch (err) {
+            showToast('error', 'Error de red');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadUsers);
+</script>
+{% endblock %}

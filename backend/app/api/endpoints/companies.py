@@ -4,7 +4,11 @@ from typing import List, Dict, Any
 from backend.app.core.database import get_dest_db
 from backend.app.models.models import (
     Company, SourceConnection, DestinationConnection, TableSelection,
-    FinalDestConnection, FinalTableSelection
+    FinalDestConnection, FinalTableSelection,
+    ColumnFilter, ComputedColumnRule,
+    MapeoCategoria, MapeoSubcategoria, MapeoLineaAsiento,
+    AccountMapping, DocumentTypeMapping,
+    UserCatalog, UserCatalogItem
 )
 from backend.app.schemas.company import (
     CompanyCreate, CompanySchema,
@@ -58,6 +62,189 @@ def delete_company(company_id: int, db: Session = Depends(get_dest_db)):
     db.delete(company)
     db.commit()
     return {"message": "Company deleted successfully"}
+
+
+@router.post("/{source_id}/clone", response_model=CompanySchema)
+def clone_company(
+    source_id: int,
+    company_in: CompanyCreate,
+    db: Session = Depends(get_dest_db)
+):
+    """Crea una nueva empresa copiando todas las configuraciones de una empresa existente."""
+    source = db.query(Company).filter(Company.id == source_id).first()
+    if not source:
+        raise HTTPException(status_code=404, detail="Source company not found")
+
+    # 1. Crear la nueva empresa
+    new_company = Company(**company_in.model_dump())
+    db.add(new_company)
+    db.flush()  # Para obtener el ID antes del commit
+
+    # Mapas de old_id → new_id para las FK internas
+    src_conn_map = {}    # old source_connection.id → new id
+    final_conn_map = {}  # old final_dest_connection.id → new id
+
+    # 2. Copiar SourceConnection
+    for sc in db.query(SourceConnection).filter(SourceConnection.company_id == source_id).all():
+        new_sc = SourceConnection(
+            company_id=new_company.id,
+            db_type=sc.db_type, host=sc.host, port=sc.port,
+            database_name=sc.database_name, username=sc.username,
+            password="",  # No copiar contraseñas
+            driver=sc.driver, extra_params=sc.extra_params,
+            is_active=sc.is_active
+        )
+        db.add(new_sc)
+        db.flush()
+        src_conn_map[sc.id] = new_sc.id
+
+    # 3. Copiar TableSelection con ColumnFilter y ComputedColumnRule
+    for ts in db.query(TableSelection).filter(TableSelection.company_id == source_id).all():
+        new_conn_id = src_conn_map.get(ts.source_connection_id)
+        if not new_conn_id:
+            continue
+        new_ts = TableSelection(
+            company_id=new_company.id, source_connection_id=new_conn_id,
+            table_schema=ts.table_schema, table_name=ts.table_name,
+            is_selected=ts.is_selected, extraction_order=ts.extraction_order,
+            custom_query=ts.custom_query, date_column=ts.date_column,
+            control_column=ts.control_column, control_column_type=ts.control_column_type,
+            description=ts.description
+        )
+        db.add(new_ts)
+        db.flush()
+
+        # Filtros de columna
+        for cf in db.query(ColumnFilter).filter(ColumnFilter.table_selection_id == ts.id).all():
+            db.add(ColumnFilter(
+                table_selection_id=new_ts.id,
+                column_name=cf.column_name, operator=cf.operator,
+                filter_value=cf.filter_value, filter_value2=cf.filter_value2,
+                is_active=cf.is_active
+            ))
+
+        # Columnas calculadas
+        for cr in db.query(ComputedColumnRule).filter(ComputedColumnRule.table_selection_id == ts.id).all():
+            db.add(ComputedColumnRule(
+                table_selection_id=new_ts.id,
+                new_column_name=cr.new_column_name, source_column=cr.source_column,
+                condition_value=cr.condition_value, result_value=cr.result_value,
+                default_value=cr.default_value, priority=cr.priority,
+                is_active=cr.is_active
+            ))
+
+    # 4. Copiar DestinationConnection
+    for dc in db.query(DestinationConnection).filter(DestinationConnection.company_id == source_id).all():
+        db.add(DestinationConnection(
+            company_id=new_company.id,
+            host=dc.host, port=dc.port, database_name=dc.database_name,
+            username=dc.username, password="",
+            is_active=dc.is_active
+        ))
+
+    # 5. Copiar FinalDestConnection
+    for fc in db.query(FinalDestConnection).filter(FinalDestConnection.company_id == source_id).all():
+        new_fc = FinalDestConnection(
+            company_id=new_company.id,
+            db_type=fc.db_type, host=fc.host, port=fc.port,
+            database_name=fc.database_name, username=fc.username, password="",
+            target_table=fc.target_table, target_schema=fc.target_schema,
+            is_active=fc.is_active
+        )
+        db.add(new_fc)
+        db.flush()
+        final_conn_map[fc.id] = new_fc.id
+
+    # 6. Copiar FinalTableSelection
+    for fts in db.query(FinalTableSelection).filter(FinalTableSelection.company_id == source_id).all():
+        new_fc_id = final_conn_map.get(fts.final_dest_connection_id)
+        if not new_fc_id:
+            continue
+        db.add(FinalTableSelection(
+            company_id=new_company.id, final_dest_connection_id=new_fc_id,
+            table_schema=fts.table_schema, table_name=fts.table_name,
+            is_selected=fts.is_selected, description=fts.description
+        ))
+
+    # 7. Copiar MapeoCategoria → MapeoSubcategoria → MapeoLineaAsiento
+    for cat in db.query(MapeoCategoria).filter(MapeoCategoria.company_id == source_id).all():
+        new_cat = MapeoCategoria(
+            company_id=new_company.id,
+            nombre=cat.nombre, descripcion=cat.descripcion,
+            is_active=cat.is_active
+        )
+        db.add(new_cat)
+        db.flush()
+
+        for sub in db.query(MapeoSubcategoria).filter(MapeoSubcategoria.categoria_id == cat.id).all():
+            new_sub = MapeoSubcategoria(
+                categoria_id=new_cat.id,
+                nombre=sub.nombre, descripcion=sub.descripcion,
+                tabla_origen=sub.tabla_origen, codigo_origen=sub.codigo_origen,
+                clave_asiento=sub.clave_asiento, mapeo_cabecera=sub.mapeo_cabecera,
+                tabla_destino_detalle=sub.tabla_destino_detalle,
+                tabla_destino_cabecera=sub.tabla_destino_cabecera,
+                col_destino_nasiento=sub.col_destino_nasiento,
+                col_destino_nidlin=sub.col_destino_nidlin,
+                schema_destino=sub.schema_destino,
+                generate_headers=sub.generate_headers,
+                generate_details=sub.generate_details,
+                asiento_inicial=sub.asiento_inicial,
+                filter_rules=sub.filter_rules,
+                is_active=sub.is_active
+            )
+            db.add(new_sub)
+            db.flush()
+
+            for linea in db.query(MapeoLineaAsiento).filter(MapeoLineaAsiento.subcategoria_id == sub.id).all():
+                db.add(MapeoLineaAsiento(
+                    subcategoria_id=new_sub.id,
+                    orden=linea.orden, nombre_linea=linea.nombre_linea,
+                    mapeo_detalle=linea.mapeo_detalle,
+                    condicion_aplicacion=linea.condicion_aplicacion,
+                    nivel=linea.nivel, is_active=linea.is_active
+                ))
+
+    # 8. Copiar AccountMapping
+    for am in db.query(AccountMapping).filter(AccountMapping.company_id == source_id).all():
+        db.add(AccountMapping(
+            company_id=new_company.id,
+            source_account_code=am.source_account_code,
+            source_account_name=am.source_account_name,
+            dest_account_code=am.dest_account_code,
+            dest_cost_center=am.dest_cost_center,
+            is_active=am.is_active
+        ))
+
+    # 9. Copiar DocumentTypeMapping
+    for dm in db.query(DocumentTypeMapping).filter(DocumentTypeMapping.company_id == source_id).all():
+        db.add(DocumentTypeMapping(
+            company_id=new_company.id,
+            source_doc_type=dm.source_doc_type,
+            dest_doc_type=dm.dest_doc_type,
+            description=dm.description,
+            is_active=dm.is_active
+        ))
+
+    # 10. Copiar UserCatalog → UserCatalogItem
+    for uc in db.query(UserCatalog).filter(UserCatalog.company_id == source_id).all():
+        new_uc = UserCatalog(
+            company_id=new_company.id,
+            name=uc.name, description=uc.description,
+            columns=uc.columns
+        )
+        db.add(new_uc)
+        db.flush()
+
+        for item in db.query(UserCatalogItem).filter(UserCatalogItem.catalog_id == uc.id).all():
+            db.add(UserCatalogItem(
+                catalog_id=new_uc.id,
+                data=item.data
+            ))
+
+    db.commit()
+    db.refresh(new_company)
+    return new_company
 
 
 # ─── SOURCE CONNECTION ───────────────────────────────────────────────────────

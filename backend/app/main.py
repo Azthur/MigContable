@@ -46,6 +46,14 @@ app.include_router(api_router, prefix="/api/v1")
 async def read_dashboard(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/login", response_class=HTMLResponse)
+async def read_login(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@app.get("/usuarios", response_class=HTMLResponse)
+async def read_usuarios(request: Request):
+    return templates.TemplateResponse("usuarios.html", {"request": request})
+
 @app.get("/config", response_class=HTMLResponse)
 async def read_config(request: Request):
     return templates.TemplateResponse("config.html", {"request": request})

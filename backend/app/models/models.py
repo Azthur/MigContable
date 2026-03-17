@@ -3,6 +3,20 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from backend.app.core.database import DestBase
 
+# ─── Usuarios ────────────────────────────────────────────────────────────────
+
+class User(DestBase):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    full_name = Column(String(255), nullable=True)
+    role = Column(String(50), default="operator")  # admin, operator
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
 
 # ─── Empresas ────────────────────────────────────────────────────────────────
 
@@ -332,6 +346,10 @@ class MapeoSubcategoria(DestBase):
     generate_details = Column(Boolean, default=True)
     # Número de asiento inicial configurable (opcional)
     asiento_inicial = Column(Integer, nullable=True)
+    # Control Incremental para generación — columna en tabla_origen que rastrea documentos migrados
+    control_column_origen = Column(String(200), nullable=True)
+    # Último valor de control migrado exitosamente al destino final
+    last_generated_control_value = Column(String(500), nullable=True)
     # Filtros de periodo/fecha por subcategoría (JSON array)
     # Formato: [{"column": "anos", "operator": "=", "value": "2026"},
     #           {"column": "C_mes", "operator": ">=", "value": "02"}]

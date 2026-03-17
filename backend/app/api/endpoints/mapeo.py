@@ -12,7 +12,7 @@ from typing import List, Optional
 from backend.app.core.database import get_dest_db
 from backend.app.models.models import (
     MapeoCategoria, MapeoSubcategoria, MapeoLineaAsiento,
-    ColumnFilter, TableSelection, MigrationControl,
+    ColumnFilter, TableSelection, SourceConnection, MigrationControl,
     AsientoContableGenerado, ComputedColumnRule
 )
 from pydantic import BaseModel
@@ -122,6 +122,15 @@ def delete_subcategoria(sub_id: int, db: Session = Depends(get_dest_db)):
     db_item.is_active = False
     db.commit()
     return {"message": "Eliminado"}
+
+@router.post("/subcategorias/{sub_id}/toggle")
+def toggle_subcategoria(sub_id: int, db: Session = Depends(get_dest_db)):
+    db_item = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == sub_id).first()
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Subcategoría no encontrada")
+    db_item.is_active = not db_item.is_active
+    db.commit()
+    return {"message": "Estado actualizado", "is_active": db_item.is_active}
 
 @router.post("/subcategorias/{sub_id}/duplicate", response_model=MapeoSubcategoriaSchema)
 def duplicate_subcategoria(sub_id: int, db: Session = Depends(get_dest_db)):
@@ -719,7 +728,7 @@ def _generate_subcategoria_cf_diariol(
             where_parts.append(f"{col_quoted} IS NULL")
         elif op == "IS NOT NULL":
             where_parts.append(f"{col_quoted} IS NOT NULL")
-        elif op == "BETWEEN" and val and val2:
+        elif op in ("BETWEEN", "RANGO_FECHAS") and val and val2:
             where_parts.append(f"{col_quoted} BETWEEN :{pkey}a AND :{pkey}b")
             query_params[f"{pkey}a"] = val
             query_params[f"{pkey}b"] = val2
@@ -748,7 +757,7 @@ def _generate_subcategoria_cf_diariol(
             
             if op == "IS NULL": where_parts.append(f"{col_quoted} IS NULL")
             elif op == "IS NOT NULL": where_parts.append(f"{col_quoted} IS NOT NULL")
-            elif op == "BETWEEN" and val and val2:
+            elif op in ("BETWEEN", "RANGO_FECHAS") and val and val2:
                 where_parts.append(f"{col_quoted} BETWEEN :p{i}a AND :p{i}b")
                 query_params[f"p{i}a"] = val
                 query_params[f"p{i}b"] = val2
@@ -790,6 +799,32 @@ def _generate_subcategoria_cf_diariol(
         if not clave_columns:
             clave_columns = [columns[0]] if columns else []
 
+    # ─── Control Incremental: excluir filas ya migradas ───
+    if getattr(sub, 'control_column_origen', None) and getattr(sub, 'last_generated_control_value', None):
+        ctrl_col = sub.control_column_origen
+        ctrl_val = sub.last_generated_control_value
+        ctrl_col_lower = ctrl_col.lower()
+        if ctrl_col_lower in [c.lower() for c in columns]:
+            # Find the actual column name (case-sensitive match)
+            actual_col = next((c for c in columns if c.lower() == ctrl_col_lower), ctrl_col)
+            before_count = len(df)
+            try:
+                # Try numeric comparison first, then string
+                df_ctrl = pd.to_numeric(df[actual_col], errors='coerce')
+                ctrl_numeric = pd.to_numeric(pd.Series([ctrl_val]), errors='coerce').iloc[0]
+                if pd.notna(ctrl_numeric):
+                    df = df[df_ctrl > ctrl_numeric]
+                else:
+                    df = df[df[actual_col].astype(str) > ctrl_val]
+            except Exception:
+                df = df[df[actual_col].astype(str) > ctrl_val]
+            after_count = len(df)
+            if before_count != after_count:
+                print(f"CONTROL INCREMENTAL: Filtradas {before_count - after_count} filas ya migradas (col={actual_col}, last_val={ctrl_val})")
+            if df.empty:
+                return 0, 0, []
+
+
     # Reflect destination tables
     from sqlalchemy import Table, MetaData, func
     from backend.app.core.database import dest_engine as engine  # migconta_db engine
@@ -827,9 +862,10 @@ def _generate_subcategoria_cf_diariol(
         if DetTable is not None:
             check_col_nasiento = sub.col_destino_nasiento or "nasiento"
             if check_col_nasiento in det_cols:
+                # Include MIGRADO entries in the max count to continue numbering after them
                 stmt_nas = db.query(func.max(getattr(DetTable.c, check_col_nasiento))).filter(
                     DetTable.c.company_id == company_id,
-                    DetTable.c.estado == "PENDIENTE"
+                    DetTable.c.estado.in_(["PENDIENTE", "1", "MIGRADO"])
                 )
                 last_nasiento_in_db = db.execute(stmt_nas).scalar() or 0
         
@@ -1667,22 +1703,31 @@ def list_origen_preview(
             items.append(row_dict)
         return items
 
-    subcats = []
+    tables_to_preview = set()
+    
     if subcategoria_id:
         sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == subcategoria_id).first()
-        if sub:
-            subcats.append(sub)
+        if sub and sub.tabla_origen:
+            tables_to_preview.add(sub.tabla_origen.lower().replace(" ", "_"))
     else:
-        result = db.execute(text("""
-            SELECT s.id
+        # Obtener todas las tablas seleccionadas en el Paso 1 para esta empresa
+        selections = db.query(TableSelection).join(SourceConnection).filter(
+            SourceConnection.company_id == company_id,
+            TableSelection.is_selected == True
+        ).all()
+        for sel in selections:
+            if sel.table_name:
+                tables_to_preview.add(sel.table_name.lower().replace(" ", "_"))
+        
+        # También incluir las de mapeo_subcategorias por retrocompatibilidad/mapeos extra
+        subcats_raw = db.execute(text("""
+            SELECT s.tabla_origen
             FROM mapeo_subcategorias s
             JOIN mapeo_categorias c ON s.categoria_id = c.id
-            WHERE c.company_id = :company_id
-              AND s.is_active = true
-        """), {"company_id": company_id})
-        sub_ids = [row[0] for row in result.fetchall()]
-        if sub_ids:
-            subcats = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id.in_(sub_ids)).all()
+            WHERE c.company_id = :company_id AND s.is_active = true AND s.tabla_origen IS NOT NULL
+        """), {"company_id": company_id}).fetchall()
+        for row in subcats_raw:
+            tables_to_preview.add(row[0].lower().replace(" ", "_"))
 
     results = []
     inspector = inspect(dest_engine)
@@ -1690,12 +1735,12 @@ def list_origen_preview(
     # Solo queremos una vista por tabla origen única para no duplicar si varias subcats usan la misma
     vistas = {}
 
-    for sub in subcats:
-        if not sub.tabla_origen:
+    for raw_table in tables_to_preview:
+        if not raw_table:
             continue
         
         # El ETL formatra el nombre así: "mitabla origen" -> "mitabla_origen"
-        table_name = sub.tabla_origen.lower().replace(" ", "_")
+        table_name = raw_table
         
         if table_name in vistas:
             continue

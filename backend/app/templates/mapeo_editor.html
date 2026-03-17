@@ -855,13 +855,14 @@
                     <option value=">=" ${data.operator === '>=' ? 'selected' : ''}>&gt;=</option>
                     <option value="<=" ${data.operator === '<=' ? 'selected' : ''}>&lt;=</option>
                     <option value="BETWEEN" ${data.operator === 'BETWEEN' ? 'selected' : ''}>BETWEEN</option>
+                    <option value="RANGO_FECHAS" ${data.operator === 'RANGO_FECHAS' ? 'selected' : ''}>Rango Fechas (Del - Al)</option>
                     <option value="IN" ${data.operator === 'IN' ? 'selected' : ''}>IN</option>
                     <option value="LIKE" ${data.operator === 'LIKE' ? 'selected' : ''}>LIKE</option>
                     <option value="IS NULL" ${data.operator === 'IS NULL' ? 'selected' : ''}>IS NULL</option>
                     <option value="IS NOT NULL" ${data.operator === 'IS NOT NULL' ? 'selected' : ''}>IS NOT NULL</option>
                 </select>
-                <input type="text" class="form-control form-control-sm fr-val" style="font-size:0.78rem; flex:2;" placeholder="Valor" value="${data.value || ''}">
-                <input type="text" class="form-control form-control-sm fr-val2" style="font-size:0.78rem; flex:1; display:${data.operator === 'BETWEEN' ? 'block' : 'none'};" placeholder="Hasta" value="${data.value2 || ''}">
+                <input type="${data.operator === 'RANGO_FECHAS' ? 'date' : 'text'}" class="form-control form-control-sm fr-val" style="font-size:0.78rem; flex:2;" placeholder="${data.operator === 'RANGO_FECHAS' ? 'Del (Fecha)' : 'Valor'}" value="${data.value || ''}">
+                <input type="${data.operator === 'RANGO_FECHAS' ? 'date' : 'text'}" class="form-control form-control-sm fr-val2" style="font-size:0.78rem; flex:1; display:${(data.operator === 'BETWEEN' || data.operator === 'RANGO_FECHAS') ? 'block' : 'none'};" placeholder="${data.operator === 'RANGO_FECHAS' ? 'Al (Fecha)' : 'Hasta'}" value="${data.value2 || ''}">
                 <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="this.parentElement.remove()" style="font-size:0.78rem">
                     <i class="bi bi-x-lg"></i>
                 </button>
@@ -871,8 +872,22 @@
 
         function toggleFrVal2(opSelect) {
             const row = opSelect.closest('.filter-rule-row');
+            const val = row.querySelector('.fr-val');
             const val2 = row.querySelector('.fr-val2');
-            val2.style.display = opSelect.value === 'BETWEEN' ? 'block' : 'none';
+
+            val2.style.display = (opSelect.value === 'BETWEEN' || opSelect.value === 'RANGO_FECHAS') ? 'block' : 'none';
+
+            if (opSelect.value === 'RANGO_FECHAS') {
+                val.type = 'date';
+                val2.type = 'date';
+                val.placeholder = 'Del (Fecha)';
+                val2.placeholder = 'Al (Fecha)';
+            } else {
+                val.type = 'text';
+                val2.type = 'text';
+                val.placeholder = 'Valor';
+                val2.placeholder = 'Hasta';
+            }
         }
 
         function collectFilterRules() {

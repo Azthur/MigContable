@@ -871,6 +871,8 @@
                             <option value="LARGO(Columna)">Longitud (N° caracteres)</option>
                             <option value="ESPACIOS(Columna)">Limpiar Espacios</option>
                             <option value="MAYUSC(Columna)">Convertir a Mayúsculas</option>
+                            <option value="ENCONTRAR('-', Columna)">Encontrar posición de texto</option>
+                            <option value="EXTRAER(Columna, 1, 3)">Extraer subcadena (posición, largo)</option>
                             <option value="REPETIR('0', 5)">Repetir Texto</option>
                             <option value="TEXTO(Columna)">Convertir a Texto</option>
                             <option value="AÑO(FechaCol)">Extraer Año de Fecha</option>
@@ -1621,13 +1623,14 @@
                 <option value=">=" ${data.operator === '>=' ? 'selected' : ''}>&gt;=</option>
                 <option value="<=" ${data.operator === '<=' ? 'selected' : ''}>&lt;=</option>
                 <option value="BETWEEN" ${data.operator === 'BETWEEN' ? 'selected' : ''}>BETWEEN</option>
+                <option value="RANGO_FECHAS" ${data.operator === 'RANGO_FECHAS' ? 'selected' : ''}>Rango Fechas (Del - Al)</option>
                 <option value="LIKE" ${data.operator === 'LIKE' ? 'selected' : ''}>LIKE</option>
                 <option value="IN" ${data.operator === 'IN' ? 'selected' : ''}>IN</option>
                 <option value="IS NULL" ${data.operator === 'IS NULL' ? 'selected' : ''}>IS NULL</option>
                 <option value="IS NOT NULL" ${data.operator === 'IS NOT NULL' ? 'selected' : ''}>IS NOT NULL</option>
             </select>
-            <input type="text" class="form-control-dark s2f-val" style="font-size:0.78rem; padding:4px 6px; flex:2;" placeholder="Valor" value="${data.value || ''}">
-            <input type="text" class="form-control-dark s2f-val2" style="font-size:0.78rem; padding:4px 6px; flex:1; display:${data.operator === 'BETWEEN' ? 'block' : 'none'};" placeholder="Hasta" value="${data.value2 || ''}">
+            <input type="${data.operator === 'RANGO_FECHAS' ? 'date' : 'text'}" class="form-control-dark s2f-val" style="font-size:0.78rem; padding:4px 6px; flex:2;" placeholder="${data.operator === 'RANGO_FECHAS' ? 'Del (Fecha)' : 'Valor'}" value="${data.value || ''}">
+            <input type="${data.operator === 'RANGO_FECHAS' ? 'date' : 'text'}" class="form-control-dark s2f-val2" style="font-size:0.78rem; padding:4px 6px; flex:1; display:${(data.operator === 'BETWEEN' || data.operator === 'RANGO_FECHAS') ? 'block' : 'none'};" placeholder="${data.operator === 'RANGO_FECHAS' ? 'Al (Fecha)' : 'Hasta'}" value="${data.value2 || ''}">
             <button class="btn-ghost btn-sm text-danger" onclick="this.parentElement.remove()" style="padding:2px 6px; font-size:0.78rem;">
                 <i class="bi bi-x-lg"></i>
             </button>
@@ -1637,8 +1640,22 @@
 
         function toggleStep2Val2(opSelect) {
             const row = opSelect.closest('.step2-filter-row');
+            const val = row.querySelector('.s2f-val');
             const val2 = row.querySelector('.s2f-val2');
-            val2.style.display = opSelect.value === 'BETWEEN' ? 'block' : 'none';
+
+            val2.style.display = (opSelect.value === 'BETWEEN' || opSelect.value === 'RANGO_FECHAS') ? 'block' : 'none';
+
+            if (opSelect.value === 'RANGO_FECHAS') {
+                val.type = 'date';
+                val2.type = 'date';
+                val.placeholder = 'Del (Fecha)';
+                val2.placeholder = 'Al (Fecha)';
+            } else {
+                val.type = 'text';
+                val2.type = 'text';
+                val.placeholder = 'Valor';
+                val2.placeholder = 'Hasta';
+            }
         }
 
         function collectStep2Filters() {
@@ -2771,7 +2788,7 @@
             }
 
             // Validar funciones que exigen comas (múltiples parámetros)
-            const multiParamFuncs = ["SI.CONJUNTO", "CONCAT", "RESTA", "MULTIPLICA", "DIVIDE", "BUSCARX", "BUSCARX_EXT"];
+            const multiParamFuncs = ["SI.CONJUNTO", "CONCAT", "RESTA", "MULTIPLICA", "DIVIDE", "BUSCARX", "BUSCARX_EXT", "EXTRAER", "ENCONTRAR"];
             for (let f of multiParamFuncs) {
                 if (val.toUpperCase().includes(f + "(")) {
                     // Extracting content inside parenthesis roughly without full AST parsing
