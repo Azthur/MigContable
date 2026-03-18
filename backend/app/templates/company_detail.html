@@ -1777,9 +1777,6 @@
                     const btn = document.getElementById('btnStep2');
                     if (btn) { btn.disabled = false; btn.innerHTML = origHtml; }
 
-                    document.getElementById('cfDiariolPanel').style.display = 'block';
-                    const container = document.getElementById('cfDiariolContainer');
-
                     const byTable = {};
                     errors.forEach(err => {
                         const tbl = err.table || 'desconocida';
@@ -1789,8 +1786,12 @@
 
                     window._validationErrors = errors;
                     window._validationByTable = byTable;
+                    
+                    document.getElementById('cfDiariolPanel').style.display = 'block';
+                    const valPanel = document.getElementById('validationResultPanel');
+                    if (valPanel) valPanel.style.display = 'block';
 
-                    _renderValidationErrors(errors, byTable);
+                    _renderValidationErrors(errors, byTable, 'validationResultPanel');
 
                     const uniqueFields = [...new Set(errors.map(e => e.field))];
 

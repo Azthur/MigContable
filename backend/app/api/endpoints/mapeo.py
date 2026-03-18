@@ -732,12 +732,14 @@ def _validate_records_against_schema(records: list, table_obj, table_label: str,
                 continue
             constraints = col_constraints[field]
 
-            # Check NOT NULL (solo None es realmente NULL, strings con espacios son válidos)
+            # Check NOT NULL (solo None es realmente NULL)
             if constraints["required"] and value is None:
                 err_dict = {
                     "field": field,
                     "row_index": idx,
                     "value": "NULL",
+
+
                     "error": f"Campo '{field}' es obligatorio (NOT NULL) pero tiene valor vacío/nulo",
                     "table": table_label,
                     "subcategoria_id": sub_id
@@ -917,14 +919,31 @@ def _generate_subcategoria_cf_diariol(
         except Exception: pass
 
     if ctrl_col and ctrl_val:
+        cols_split = [c.strip() for c in ctrl_col.split(",")]
+        actual_cols = []
+        for c in cols_split:
+            match = next((col for col in columns if col.lower() == c.lower()), None)
+            if match: actual_cols.append(match)
 
-        ctrl_col_lower = ctrl_col.lower()
-        if ctrl_col_lower in [c.lower() for c in columns]:
-            # Find the actual column name (case-sensitive match)
-            actual_col = next((c for c in columns if c.lower() == ctrl_col_lower), ctrl_col)
+        if len(actual_cols) == len(cols_split):
+            # Composite Key incremental tracking
             before_count = len(df)
             try:
-                # Try numeric comparison first, then string
+                # Build compound string index
+                df['_incremental_key'] = df[actual_cols].astype(str).agg('-'.join, axis=1)
+                df = df[df['_incremental_key'] > str(ctrl_val)]
+            except Exception as e:
+                print(f"Error en filtro incremental compuesto: {e}")
+            after_count = len(df)
+            if before_count != after_count:
+                print(f"CONTROL INCREMENTAL: Filtradas {before_count - after_count} filas ya migradas (cols={ctrl_col}, last_val={ctrl_val})")
+            if df.empty:
+                return 0, 0, []
+        elif len(actual_cols) == 1:
+            # Single key fallback
+            actual_col = actual_cols[0]
+            before_count = len(df)
+            try:
                 df_ctrl = pd.to_numeric(df[actual_col], errors='coerce')
                 ctrl_numeric = pd.to_numeric(pd.Series([ctrl_val]), errors='coerce').iloc[0]
                 if pd.notna(ctrl_numeric):
@@ -935,7 +954,7 @@ def _generate_subcategoria_cf_diariol(
                 df = df[df[actual_col].astype(str) > ctrl_val]
             after_count = len(df)
             if before_count != after_count:
-                print(f"CONTROL INCREMENTAL: Filtradas {before_count - after_count} filas ya migradas (col={actual_col}, last_val={ctrl_val})")
+                print(f"CONTROL INCREMENTAL: Filtradas {before_count - after_count} filas de fallback (col={actual_col}, last_val={ctrl_val})")
             if df.empty:
                 return 0, 0, []
 
@@ -974,10 +993,31 @@ def _generate_subcategoria_cf_diariol(
     nasiento_key = f"{company_id}-global"
     if nasiento_key not in counters_por_asiento:
         last_nasiento_in_db = 0
-        if DetTable is not None:
+        from backend.app.models.models import FinalDestConnection
+        from backend.app.services.connection_manager import ConnectionManager
+        from sqlalchemy import select
+        
+        # Connect to Target Database to get continuous numbering
+        final_conn = db.query(FinalDestConnection).filter(FinalDestConnection.company_id == company_id, FinalDestConnection.is_active == True).first()
+        if final_conn and DetTable is not None:
+            try:
+                conn_data = {"host": final_conn.host, "port": final_conn.port, "database_name": final_conn.database_name, "username": final_conn.username, "password": final_conn.password}
+                final_engine = ConnectionManager.get_dest_engine(conn_data)
+                check_col_nasiento = sub.col_destino_nasiento or "nasiento"
+                
+                with final_engine.connect() as f_conn:
+                    remote_metadata = MetaData()
+                    RemoteDetTable = Table(tabla_det_name, remote_metadata, autoload_with=final_engine)
+                    # Query Max
+                    r_stmt = select(func.max(getattr(RemoteDetTable.c, check_col_nasiento)))
+                    last_nasiento_in_db = f_conn.execute(r_stmt).scalar() or 0
+            except Exception as e:
+                print(f"Error fetching remote max nasiento: {e}")
+
+        # Fallback to local staging if remote max is 0
+        if last_nasiento_in_db == 0 and DetTable is not None:
             check_col_nasiento = sub.col_destino_nasiento or "nasiento"
             if check_col_nasiento in det_cols:
-                # Include MIGRADO entries in the max count to continue numbering after them
                 stmt_nas = db.query(func.max(getattr(DetTable.c, check_col_nasiento))).filter(
                     DetTable.c.company_id == company_id,
                     DetTable.c.estado.in_(["PENDIENTE", "1", "MIGRADO"])
@@ -1049,6 +1089,13 @@ def _generate_subcategoria_cf_diariol(
                     company_id, tabla_head_name,
                     sub.schema_destino or "public", db
                 )
+                
+                # Autofill required text fields with spaces to match DB insert defaults
+                for entry in diario_entries:
+                    for field, constraints in (head_dest_constraints or {}).items():
+                        if field in entry and entry[field] is None and constraints.get("required") and "CHAR" in str(constraints.get("type", "")).upper():
+                            entry[field] = " "
+                            
                 # Validar registros de cabecera
                 validation_errors = _validate_records_against_schema(
                     diario_entries, HeadTable,
@@ -1260,6 +1307,13 @@ def _generate_subcategoria_cf_diariol(
             company_id, tabla_det_name,
             sub.schema_destino or "public", db
         )
+        
+        # Autofill required text fields with spaces to match DB insert defaults
+        for entry in diariol_entries:
+            for field, constraints in (det_dest_constraints or {}).items():
+                if field in entry and entry[field] is None and constraints.get("required") and "CHAR" in str(constraints.get("type", "")).upper():
+                    entry[field] = " "
+                    
         validation_errors = _validate_records_against_schema(
             diariol_entries, DetTable,
             sub.tabla_destino_detalle or "cf_diariol", sub.id,
@@ -1300,6 +1354,53 @@ def _generate_subcategoria_cf_diariol(
             db.rollback()
             print(f"CRITICAL Error inserting detail records for subcat {sub.id}: {e}")
             return 0, 0, all_validation_errors
+
+    # ─── Actualizar Control Incremental y Asiento Inicial ───
+    try:
+        def _get_nas_safe(e):
+            try: return int(e.get("nasiento", 0))
+            except: return 0
+
+        max_nasiento = 0
+        if diariol_entries:
+            max_nasiento = max((_get_nas_safe(e) for e in diariol_entries), default=0)
+        elif diario_entries:
+            max_nasiento = max((_get_nas_safe(e) for e in diario_entries), default=0)
+
+        # Actualizamos el asiento inicial para visualización en el front
+        if max_nasiento > 0:
+            print(f"GUARDANDO ASIENTO INICIAL [subcat={sub.id}]: {max_nasiento}")
+            db.execute(
+                text("UPDATE mapeo_subcategorias SET asiento_inicial = :nas WHERE id = :id"),
+                {"nas": int(max_nasiento), "id": sub.id}
+            )
+            db.commit()
+
+        if 'ctrl_col' in locals() and ctrl_col and not df.empty:
+            cols_split = [c.strip() for c in ctrl_col.split(",")]
+            actual_cols = []
+            for c in cols_split:
+                match = next((col for col in df.columns if col.lower() == c.lower()), None)
+                if match: actual_cols.append(match)
+
+            if len(actual_cols) > 0:
+                valid_entries = [e for e in diariol_entries if e.get("estado") != "0"]
+                if valid_entries or not error_nasientos:
+                    max_val = None
+                    if len(actual_cols) > 1 and '_incremental_key' in df.columns:
+                        max_val = df['_incremental_key'].max()
+                    elif len(actual_cols) == 1:
+                        max_val = df[actual_cols[0]].max()
+
+                    if max_val is not None and str(max_val).strip() != "":
+                        print(f"GUARDANDO CONTROL INCREMENTAL [subcat={sub.id}]: {max_val}")
+                        db.execute(
+                            text("UPDATE mapeo_subcategorias SET last_generated_control_value = :val WHERE id = :id"),
+                            {"val": str(max_val), "id": sub.id}
+                        )
+                        db.commit()
+    except Exception as e:
+        print(f"Error actualizando control incremental o asiento inicial: {e}")
 
     return rows_inserted, len(header_df) if generate_headers else 0, all_validation_errors
 
@@ -2009,6 +2110,9 @@ def validate_staging_data(
             dest_constraints = _get_dest_constraints_from_final(
                 company_id, table_name, schema, db
             )
+            if dest_constraints is None:
+                raise HTTPException(status_code=500, detail=f"No se pudieron cargar las restricciones de {schema}.{table_name} desde el destino final")
+
 
             col_constraints = {}
             for col in tbl.columns:
@@ -2034,17 +2138,21 @@ def validate_staging_data(
                     "type": col_type
                 }
 
-            # Leer datos de staging para esta subcategoría
-            where_sql = "company_id = :company_id AND subcategoria_id = :sub_id AND estado = '1'"
+            # Leer datos de staging para esta subcategoría (0=Error, 1=Pendiente)
+            where_sql = "company_id = :company_id AND subcategoria_id = :sub_id AND estado IN ('0', '1')"
             params = {"company_id": company_id, "sub_id": sub.id}
 
+
+
             try:
-                count = db.execute(
-                    text(f"SELECT count(*) FROM {schema}.{table_name} WHERE {where_sql}"),
-                    params
-                ).scalar()
-            except Exception:
+                count_query = f"SELECT count(*) FROM {schema}.{table_name} WHERE {where_sql}"
+                count = db.execute(text(count_query), params).scalar()
+            except Exception as e:
+                import traceback
+                print(f"COUNT ERROR for {schema}.{table_name}:", e)
+                print(traceback.format_exc())
                 count = 0
+
 
             if count == 0:
                 continue
@@ -2079,8 +2187,23 @@ def validate_staging_data(
                 dest_constraints=dest_constraints
             )
 
+            print(f"[{schema}.{table_name}] RECORDS LOADED: {len(records)}, VIOLATIONS FOUND: {len(violations)}")
+            
+            # AUTO-CORRECTION: Si no hay violaciones, actualizar filas con estado='0' (Error) a estado='1' (Pendiente/Conforme)
+            if len(violations) == 0 and len(records) > 0:
+                print(f"[{schema}.{table_name}] Validado con éxito. Actualizando registros con estado '0' a '1'")
+                update_sql = f"UPDATE {schema}.{table_name} SET estado = '1' WHERE company_id = :company_id AND subcategoria_id = :sub_id AND estado = '0'"
+                db.execute(text(update_sql), {"company_id": company_id, "sub_id": sub.id})
+                db.commit()
+                
             if violations:
                 table_info = {
+
+                    "table": table_label_str,
+
+
+
+
                     "table": table_label_str,
                     "type": table_type,
                     "subcategoria": sub_label,
