@@ -8,7 +8,7 @@ from backend.app.models.models import (
     ColumnFilter, ComputedColumnRule,
     MapeoCategoria, MapeoSubcategoria, MapeoLineaAsiento,
     AccountMapping, DocumentTypeMapping,
-    UserCatalog, UserCatalogItem
+    UserCatalog, UserCatalogItem, MigrationControl
 )
 from backend.app.schemas.company import (
     CompanyCreate, CompanySchema,
@@ -241,6 +241,18 @@ def clone_company(
                 catalog_id=new_uc.id,
                 data=item.data
             ))
+
+    # 11. Copiar MigrationControl (para mantener el incremental)
+    for mc in db.query(MigrationControl).filter(MigrationControl.company_id == source_id).all():
+        db.add(MigrationControl(
+            company_id=new_company.id,
+            source_table=mc.source_table,
+            control_column=mc.control_column,
+            last_migrated_value=mc.last_migrated_value,
+            total_migrated=mc.total_migrated,
+            last_run_at=mc.last_run_at,
+            last_run_status=mc.last_run_status
+        ))
 
     db.commit()
     db.refresh(new_company)

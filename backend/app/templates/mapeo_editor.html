@@ -388,11 +388,20 @@
                     <div class="col-md-4">
                         <label class="form-label-small text-info"><i class="bi bi-list-ol me-1"></i>Columna destino
                             Correlativo Línea (nidlin):</label>
-                        <select id="colNidlinSelect" class="form-select form-select-sm"
-                            onchange="onGlobalColChange('nidlin')">
+                        <select id="colNidlinSelect" class="form-select form-select-sm" onchange="onGlobalColChange('nidlin')">
                             <option value="">-- Sin configurar --</option>
                         </select>
                     </div>
+                </div>
+                <div class="mt-2 p-2 border rounded bg-light">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label-small mb-0 fw-bold text-primary"><i class="bi bi-calculator"></i> Pares de Columnas para Cuadre Automático (DEBE vs HABER)</label>
+                        <button class="btn btn-sm btn-outline-primary py-0" onclick="addParRedondeo()"><i class="bi bi-plus"></i> Añadir Par</button>
+                    </div>
+                    <div id="paresRedondeoContainer" class="d-flex flex-column gap-2 mb-1"></div>
+                    <small class="text-muted d-block" style="font-size: 0.72rem;">
+                        <i class="bi bi-info-circle"></i> Agrega múltiples pares (ej. <b>Soles</b>: ndebe/nhaber, <b>Dólares</b>: ndebed/nhaberd). El sistema ajustará la diferencia matemática en las líneas marcadas para Absorber el Redondeo.
+                    </small>
                 </div>
                 <hr class="my-2">
                 <!-- Filtros de Periodo / Fecha por Subcategoría -->
@@ -538,6 +547,17 @@
                                 <button class="btn btn-sm btn-outline-primary py-0 px-2"
                                     title="Asistente de Expresiones" onclick="openFormulaHelper(this)" type="button"><i
                                         class="bi bi-magic"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-12">
+                            <div class="form-check form-switch bg-white border rounded px-3 py-2 d-inline-block">
+                                <input class="form-check-input ms-0 me-2 mt-1" type="checkbox" role="switch" id="detAplicaRedondeo">
+                                <label class="form-check-label form-label-small fw-bold mb-0 text-primary" for="detAplicaRedondeo">
+                                    <i class="bi bi-calculator me-1"></i>Esta línea absorbe automáticamente diferencias de redondeo (Cuadre de Ceros)
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -825,6 +845,9 @@
             // Cargar columnas del destino final según tablas configuradas
             await reloadDestColumns();
 
+            // Cargar pares de redondeo 
+            loadParesRedondeo();
+
             // Llenar selectores de correlativo con las opciones cargadas
             populateGlobalColSelects();
 
@@ -972,29 +995,29 @@
             selNid.innerHTML = empOpt + opts;
 
             // Ensure saved values are visible even if not in the current column list
-            if (subcategoriaData && subcategoriaData.col_destino_nasiento) {
-                if (!uniqueCols.some(c => c.column_name === subcategoriaData.col_destino_nasiento)) {
-                    const opt = document.createElement('option');
-                    opt.value = subcategoriaData.col_destino_nasiento;
-                    opt.textContent = subcategoriaData.col_destino_nasiento + ' (Guardado)';
-                    selNas.appendChild(opt);
+            const checkSaved = (selEl, savedVal) => {
+                if (savedVal) {
+                    if (!uniqueCols.some(c => c.column_name === savedVal)) {
+                        const opt = document.createElement('option');
+                        opt.value = savedVal;
+                        opt.textContent = savedVal + ' (Guardado)';
+                        selEl.appendChild(opt);
+                    }
+                    selEl.value = savedVal;
                 }
-                selNas.value = subcategoriaData.col_destino_nasiento;
-            }
-            if (subcategoriaData && subcategoriaData.col_destino_nidlin) {
-                if (!uniqueCols.some(c => c.column_name === subcategoriaData.col_destino_nidlin)) {
-                    const opt = document.createElement('option');
-                    opt.value = subcategoriaData.col_destino_nidlin;
-                    opt.textContent = subcategoriaData.col_destino_nidlin + ' (Guardado)';
-                    selNid.appendChild(opt);
-                }
-                selNid.value = subcategoriaData.col_destino_nidlin;
+            };
+            
+            if (subcategoriaData) {
+                checkSaved(selNas, subcategoriaData.col_destino_nasiento);
+                checkSaved(selNid, subcategoriaData.col_destino_nidlin);
             }
         }
 
         async function onGlobalColChange(type) {
-            const val = type === 'nasiento' ? document.getElementById('colNasientoSelect').value : document.getElementById('colNidlinSelect').value;
-            const body = type === 'nasiento' ? { col_destino_nasiento: val || null } : { col_destino_nidlin: val || null };
+            let val;
+            let body = {};
+            if (type === 'nasiento') { val = document.getElementById('colNasientoSelect').value; body.col_destino_nasiento = val || null; }
+            else if (type === 'nidlin') { val = document.getElementById('colNidlinSelect').value; body.col_destino_nidlin = val || null; }
 
             try {
                 const r = await fetch(`${API}/mapeo/subcategorias/${subcategoriaId}`, {
@@ -1004,9 +1027,76 @@
                 });
                 if (r.ok) {
                     if (type === 'nasiento') subcategoriaData.col_destino_nasiento = val || null;
-                    else subcategoriaData.col_destino_nidlin = val || null;
+                    else if (type === 'nidlin') subcategoriaData.col_destino_nidlin = val || null;
                 }
             } catch (e) { console.error('Error guardando config correlativo:', e); }
+        }
+
+        // ─── Pares de Redondeo ──────────────────────────────────────────────
+        function loadParesRedondeo() {
+            const container = document.getElementById('paresRedondeoContainer');
+            container.innerHTML = '';
+            const pares = subcategoriaData?.pares_redondeo || [];
+            if (pares.length > 0) {
+                pares.forEach(p => addParRedondeo(p.debe, p.haber));
+            }
+        }
+
+        function addParRedondeo(debeVal = '', haberVal = '') {
+            const container = document.getElementById('paresRedondeoContainer');
+            const row = document.createElement('div');
+            row.className = 'd-flex gap-2 align-items-center par-redondeo-row';
+            
+            const allCols = [...destColumnsCabecera, ...destColumnsDetalle];
+            const uniqueCols = Array.from(new Set(allCols.map(c => c.column_name)))
+                .map(name => allCols.find(c => c.column_name === name));
+            const opts = uniqueCols.map(c => `<option value="${c.column_name}">${c.column_name}${c.data_type ? ' (' + c.data_type + ')' : ''}</option>`).join('');
+            
+            row.innerHTML = `
+                <div style="flex:1">
+                    <select class="form-select form-select-sm par-debe border-success" onchange="saveParesRedondeo()">
+                        <option value="">-- Columna DEBE --</option>
+                        ${opts}
+                        ${debeVal && !uniqueCols.some(c => c.column_name===debeVal) ? '<option value="'+debeVal+'">'+debeVal+' (Guardado)</option>' : ''}
+                    </select>
+                </div>
+                <div style="flex:1">
+                    <select class="form-select form-select-sm par-haber border-danger" onchange="saveParesRedondeo()">
+                        <option value="">-- Columna HABER --</option>
+                        ${opts}
+                        ${haberVal && !uniqueCols.some(c => c.column_name===haberVal) ? '<option value="'+haberVal+'">'+haberVal+' (Guardado)</option>' : ''}
+                    </select>
+                </div>
+                <div>
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="this.parentElement.parentElement.remove(); saveParesRedondeo();" type="button"><i class="bi bi-trash"></i></button>
+                </div>
+            `;
+            
+            if(debeVal) row.querySelector('.par-debe').value = debeVal;
+            if(haberVal) row.querySelector('.par-haber').value = haberVal;
+            
+            container.appendChild(row);
+        }
+
+        async function saveParesRedondeo() {
+            const rows = document.querySelectorAll('.par-redondeo-row');
+            const pares = [];
+            rows.forEach(r => {
+                const debe = r.querySelector('.par-debe').value;
+                const haber = r.querySelector('.par-haber').value;
+                if (debe && haber) pares.push({ debe, haber });
+            });
+            
+            try {
+                const r = await fetch(`${API}/mapeo/subcategorias/${subcategoriaId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pares_redondeo: pares.length > 0 ? pares : null })
+                });
+                if (r.ok) {
+                    subcategoriaData.pares_redondeo = pares.length > 0 ? pares : null;
+                }
+            } catch (e) { console.error('Error guardando pares de redondeo:', e); }
         }
 
         async function onDestTableChange(nivel) {
@@ -1083,10 +1173,11 @@
                 const badges = mapDetalleKeys.slice(0, 5).map(k => `<span class="badge bg-light text-dark border me-1">${k}</span>`).join('');
                 const extra = mapDetalleKeys.length > 5 ? `<span class="badge bg-secondary">+${mapDetalleKeys.length - 5}</span>` : '';
                 const nivelBadge = l.nivel === 'CABECERA' ? '<span class="badge bg-warning text-dark me-2">CABECERA</span>' : '<span class="badge bg-info text-dark me-2">DETALLE</span>';
+                const redondeoIcon = l.aplica_ajuste_redondeo ? `<span class="badge bg-primary ms-2" title="Absorbe Redondeo"><i class="bi bi-calculator"></i></span>` : '';
 
                 return `<tr class="linea-row" onclick="openLineaModal(${l.id})">
             <td><span class="orden-badge">${l.orden}</span></td>
-            <td>${nivelBadge}<strong class="small">${l.nombre_linea || 'Sin nombre'}</strong></td>
+            <td>${nivelBadge}<strong class="small">${l.nombre_linea || 'Sin nombre'}</strong>${redondeoIcon}</td>
             <td>${badges}${extra} ${mapDetalleKeys.length === 0 ? '<span class="text-muted small">Sin mapeos</span>' : ''}</td>
             <td>
                 <button class="btn btn-outline-success btn-sm py-0 px-1" onclick="event.stopPropagation(); duplicateLinea(${l.id})" title="Duplicar línea"><i class="bi bi-files"></i></button>
@@ -1212,6 +1303,7 @@
                 document.getElementById('detFilaNombre').value = linea.nombre_linea || '';
                 document.getElementById('detNivel').value = linea.nivel || 'DETALLE';
                 document.getElementById('detCondicion').value = linea.condicion_aplicacion || '';
+                document.getElementById('detAplicaRedondeo').checked = !!linea.aplica_ajuste_redondeo;
 
                 const keys = Object.keys(mapeo);
                 if (keys.length === 0) {
@@ -1226,6 +1318,7 @@
                 document.getElementById('detFilaNombre').value = '';
                 document.getElementById('detNivel').value = 'DETALLE';
                 document.getElementById('detCondicion').value = '';
+                document.getElementById('detAplicaRedondeo').checked = false;
 
                 addDetalleMappingField('ccodcue', '');
                 addDetalleMappingField('ndebe', '');
@@ -1240,6 +1333,7 @@
             const nombre_linea = document.getElementById('detFilaNombre').value || null;
             const nivel = document.getElementById('detNivel').value || 'DETALLE';
             const condicion = document.getElementById('detCondicion').value.trim() || null;
+            const aplicaAjuste = document.getElementById('detAplicaRedondeo').checked;
 
             const mapData = {};
             let hasDuplicate = false;
@@ -1267,6 +1361,7 @@
                 nombre_linea: nombre_linea,
                 nivel: nivel,
                 condicion_aplicacion: condicion,
+                aplica_ajuste_redondeo: aplicaAjuste,
                 mapeo_detalle: mapData
             };
 
@@ -1338,6 +1433,7 @@
                 nombre_linea: (linea.nombre_linea ? linea.nombre_linea + ' (Copia)' : 'Copia de Línea'),
                 nivel: linea.nivel,
                 condicion_aplicacion: linea.condicion_aplicacion || null,
+                aplica_ajuste_redondeo: !!linea.aplica_ajuste_redondeo,
                 mapeo_detalle: linea.mapeo_detalle || {}
             };
 

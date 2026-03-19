@@ -306,6 +306,7 @@ class MapeoLineaAsientoBase(BaseModel):
     nombre_linea: Optional[str] = None
     mapeo_detalle: Optional[dict] = None
     condicion_aplicacion: Optional[str] = None
+    aplica_ajuste_redondeo: Optional[bool] = False
     nivel: str = "DETALLE"
     is_active: bool = True
 
@@ -331,6 +332,9 @@ class MapeoSubcategoriaBase(BaseModel):
     tabla_destino_cabecera: Optional[str] = None
     col_destino_nasiento: Optional[str] = None
     col_destino_nidlin: Optional[str] = None
+    col_destino_debe: Optional[str] = None
+    col_destino_haber: Optional[str] = None
+    pares_redondeo: Optional[List[dict]] = None
     generate_headers: bool = True
     generate_details: bool = True
     schema_destino: Optional[str] = "public"
@@ -354,6 +358,9 @@ class MapeoSubcategoriaUpdate(BaseModel):
     tabla_destino_cabecera: Optional[str] = None
     col_destino_nasiento: Optional[str] = None
     col_destino_nidlin: Optional[str] = None
+    col_destino_debe: Optional[str] = None
+    col_destino_haber: Optional[str] = None
+    pares_redondeo: Optional[List[dict]] = None
     generate_headers: Optional[bool] = None
     generate_details: Optional[bool] = None
     schema_destino: Optional[str] = None

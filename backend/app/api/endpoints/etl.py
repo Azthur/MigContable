@@ -202,6 +202,31 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
             # Ensure company_id exists
             if 'company_id' not in df.columns:
                 df['company_id'] = company_id
+                
+            # ── Calcular IDCONTROL unificado ──
+            try:
+                # Normalizar columnas del DF (quitar espacios y a minúsculas para comparar)
+                df.columns = [c.strip() for c in df.columns]
+                df_cols_lower = [c.lower() for c in df.columns]
+                
+                ctrl_cols = [c.strip().lower() for c in (sel.control_column or "CodCia,coddoc,nrodoc").split(",")]
+                actual_cols = [col for col in df.columns if col.lower() in ctrl_cols]
+                
+                if actual_cols:
+                    df['idcontrol'] = df[actual_cols].astype(str).agg('-'.join, axis=1)
+                    diag_msg = f" | [IDCONTROL OK] Cols: {actual_cols}"
+                else:
+                    df['idcontrol'] = None # Siempre crear la columna
+                    diag_msg = f" | [IDCONTROL NOT FOUND] Buscaba: {ctrl_cols} en: {df_cols_lower[:8]}"
+                
+                if hasattr(log, "message"):
+                    if log.message is None: log.message = ""
+                    log.message += diag_msg
+            except Exception as e:
+                df['idcontrol'] = None
+                if hasattr(log, "message"):
+                    if log.message is None: log.message = ""
+                    log.message += f" | [IDCONTROL ERROR] {e}"
             
             # ── Aplicar Columnas Calculadas (condicionales tipo Excel) ──
             computed_rules = db.query(ComputedColumnRule).filter(
@@ -304,6 +329,12 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                             except Exception as e:
                                 print(f"Error adding column {col_name}: {e}")
 
+        # ── Limpiar Datos para PostgreSQL ──
+        # Convertir strings vacíos a None para evitar errores de cast en columnas numéricas
+        # (psycopg2.errors.InvalidTextRepresentation: invalid input syntax for type double precision: "")
+        for col in df.select_dtypes(include=['object']).columns:
+            df[col] = df[col].apply(lambda x: None if x == "" else x)
+
         # Escribir en destino
         write_mode = 'replace' if full_refresh else 'append'
         df.to_sql(table_dest, dst_engine, if_exists=write_mode, index=False, chunksize=1000)
@@ -342,14 +373,21 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
             control.last_run_status = "OK"
 
         log.status = "SUCCESS"
-        log.message = f"Migrados {rows_count} registros de {sel.table_name} a tabla '{table_dest}'"
+        success_part = f"Migrados {rows_count} registros de {sel.table_name} a tabla '{table_dest}'"
+        if hasattr(log, "message") and log.message:
+            log.message += f" | {success_part}"
+        else:
+            log.message = success_part
+        
         log.records_processed = rows_count
         db.commit()
         return {"status": "OK", "message": log.message, "records": rows_count}
 
     except Exception as e:
+        import traceback
         log.status = "ERROR"
         log.message = str(e)
+        log.details = traceback.format_exc()
         db.commit()
         return {"status": "ERROR", "message": str(e)}
 

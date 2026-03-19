@@ -491,12 +491,17 @@
         </div>
         <div class="col-md-6">
             <div class="card-dark p-4 h-100">
-                <div class="d-flex align-items-center mb-3">
-                    <i class="bi bi-gear me-2" style="font-size:1.5rem; color: #f59e0b;"></i>
-                    <div>
-                        <h6 class="mb-0">Paso 2: Generar Asientos</h6>
-                        <small class="text-muted">migconta_db → cf_diariol (staging)</small>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-gear me-2" style="font-size:1.5rem; color: #f59e0b;"></i>
+                        <div>
+                            <h6 class="mb-0">Paso 2: Generar Asientos</h6>
+                            <small class="text-muted">migconta_db → cf_diariol (staging)</small>
+                        </div>
                     </div>
+                    <button class="btn btn-outline-danger btn-sm" onclick="clearLocalStaging()" style="font-size: 0.75rem; border-radius: 6px;">
+                        <i class="bi bi-trash me-1"></i> Vaciar / Reset
+                    </button>
                 </div>
                 <p class="text-muted small mb-3">Aplica el mapeo contable y genera asientos en la tabla cf_diariol
                     intermedia.</p>
@@ -531,6 +536,7 @@
                     onclick="runEtlStep2()" id="btnStep2">
                     <i class="bi bi-gear me-2"></i> Generar Asientos
                 </button>
+
                 <div id="step2Result" class="mt-2"></div>
             </div>
         </div>
@@ -1732,6 +1738,32 @@
             }
         }
 
+        async function clearLocalStaging() {
+            if (!confirm("¿Está seguro que desea VACIAR todos los asientos generados localmente para esta empresa? Esto reiniciará las pruebas en el sistema local sin tocar Contasis.")) return;
+            
+            const subcatId = document.getElementById('genSubcatSelect')?.value || '';
+            let url = `/api/v1/mapeo/clear-local-staging/${companyId}`;
+            if (subcatId) {
+                url += `?subcategoria_id=${subcatId}`;
+            }
+
+            try {
+                const res = await fetch(url, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('success', data.message || 'Datos locales vaciados correctamente.');
+                    if (document.getElementById('step2Result')) {
+                        document.getElementById('step2Result').innerHTML = '<div class="alert alert-success py-1 mt-2 mb-0">Asientos locales vaciados.</div>';
+                    }
+                    if (typeof loadCfDiariol === 'function') loadCfDiariol();
+                } else {
+                    showToast('error', data.detail || 'Error al vaciar datos locales.');
+                }
+            } catch (e) {
+                showToast('error', 'Error de red: ' + e.message);
+            }
+        }
+
         async function runEtlStep2() {
             const subcatId = document.getElementById('genSubcatSelect')?.value || '';
             const regen = document.getElementById('regenSwitch')?.checked || false;
@@ -1995,8 +2027,19 @@
         async function runEtlStep3() {
             const origHtml = '<i class="bi bi-send me-2"></i> Migrar a Contasis';
             setStepLoading('btnStep3', 'step3Result', 'Migrando al destino final...');
+            
+            const onlyDelete = document.getElementById('clearMigratedSwitch')?.checked || false;
+            let url = `/api/v1/mapeo/migrate-to-final/${companyId}`;
+            if (onlyDelete) {
+                if (!confirm("¿Está seguro que desea ELIMINAR de Contasis TODOS los asientos ya migrados? Esta acción borrará la data para reiniciar tus pruebas.")) {
+                    setStepResult('btnStep3', origHtml, 'step3Result', false, 'Operación cancelada.');
+                    return;
+                }
+                url += `?only_delete=true`;
+            }
+
             try {
-                const res = await fetch(`/api/v1/mapeo/migrate-to-final/${companyId}`, { method: 'POST' });
+                const res = await fetch(url, { method: 'POST' });
                 const data = await res.json();
                 if (res.ok) {
                     setStepResult('btnStep3', origHtml, 'step3Result', true,

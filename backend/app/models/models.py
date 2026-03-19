@@ -341,6 +341,10 @@ class MapeoSubcategoria(DestBase):
     col_destino_nasiento = Column(String(100), nullable=True) 
     col_destino_nidlin = Column(String(100), nullable=True)
     schema_destino = Column(String(100), nullable=True, default="public")
+    # Configuración para Ajustes de Redondeo
+    col_destino_debe = Column(String(100), nullable=True)
+    col_destino_haber = Column(String(100), nullable=True)
+    pares_redondeo = Column(JSON, nullable=True)
     # Controlar qué se genera por subcategoría
     generate_headers = Column(Boolean, default=True)
     generate_details = Column(Boolean, default=True)
@@ -381,6 +385,9 @@ class MapeoLineaAsiento(DestBase):
     # Condición de Excel/AST opcional para decidir si se evalúa y genera esta fila
     # Ej: "ccoddoc = '07'"
     condicion_aplicacion = Column(String(500), nullable=True)
+
+    # Indica si esta línea absorberá la diferencia de ceros/redondeos
+    aplica_ajuste_redondeo = Column(Boolean, default=False)
 
     # Nivel de agrupación al generar (CABECERA o DETALLE)
     nivel = Column(String(20), default="DETALLE")
