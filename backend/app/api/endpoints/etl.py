@@ -229,6 +229,16 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                     log.message += f" | [IDCONTROL ERROR] {e}"
             
             # ── Aplicar Columnas Calculadas (condicionales tipo Excel) ──
+            def _get_col_simple(col_name, dataframe):
+                """Busca una columna en el DataFrame ignorando mayúsculas/minúsculas y espacios."""
+                if not col_name:
+                    return None
+                col_clean = col_name.strip().upper()
+                for c in dataframe.columns:
+                    if c.strip().upper() == col_clean:
+                        return c
+                return None
+
             computed_rules = db.query(ComputedColumnRule).filter(
                 ComputedColumnRule.table_selection_id == table_selection_id,
                 ComputedColumnRule.is_active == True
@@ -251,59 +261,70 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                     
                     # Aplicar reglas en orden inverso de prioridad (última gana)
                     for rule in reversed(col_rules):
-                        val_upper = rule.condition_value.strip().upper()
-                        
-                        # ── BUSCARX: Tipo de Cambio ──
-                        if val_upper in ("BUSCARX_TC_VENTA", "BUSCARX_TC_COMPRA"):
-                            if rule.source_column in df.columns:
-                                tc_col = "venta" if "VENTA" in val_upper else "compra"
-                                from backend.app.models.models import TipoCambio
-                                tc_rows = db.query(TipoCambio).all()
-                                tc_map = {str(r.fecha): float(getattr(r, tc_col)) for r in tc_rows}
-                                df[new_col] = df[rule.source_column].astype(str).str[:10].map(tc_map)
-                                if default:
-                                    df[new_col] = df[new_col].fillna(float(default) if default.replace('.','',1).isdigit() else default)
-                                else:
-                                    df[new_col] = df[new_col].fillna(0)
+                        try:
+                            val_upper = rule.condition_value.strip().upper()
+                            
+                            # ── BUSCARX: Tipo de Cambio ──
+                            if val_upper in ("BUSCARX_TC_VENTA", "BUSCARX_TC_COMPRA"):
+                                if rule.source_column in df.columns:
+                                    tc_col = "venta" if "VENTA" in val_upper else "compra"
+                                    from backend.app.models.models import TipoCambio
+                                    tc_rows = db.query(TipoCambio).all()
+                                    tc_map = {str(r.fecha): float(getattr(r, tc_col)) for r in tc_rows}
+                                    df[new_col] = df[rule.source_column].astype(str).str[:10].map(tc_map)
+                                    if default:
+                                        df[new_col] = df[new_col].fillna(float(default) if default.replace('.','',1).isdigit() else default)
+                                    else:
+                                        df[new_col] = df[new_col].fillna(0)
 
-                        # ── Fórmulas Dinámicas: BUSCARX, LEFT, RIGHT, CONCAT, SI.CONJUNTO, Math ──
-                        elif any(val_upper.startswith(p) for p in [
-                            "CONCAT(", "LEFT(", "RIGHT(", "SI.CONJUNTO(", 
-                            "BUSCARX(", "BUSCARX_EXT(", "BUSCARX_LOCAL(", "SUMA(", "RESTA(", "MULTIPLICA(", "DIVIDE(", "REDONDEAR(",
-                            "LARGO(", "ESPACIOS(", "MAYUSC(", "REPETIR(", "TEXTO(", "AÑO(", "MES(", "Y(", "O("
-                        ]):
-                                    from backend.app.core.formula_parser import evaluate_formula_on_df
-                                    
-                                    df[new_col] = evaluate_formula_on_df(
-                                        df=df,
-                                        formula_str=rule.condition_value,
-                                        db=db,
-                                        company_id=company_id,
-                                        default=default if default else ""
-                                    )
+                            # ── Fórmulas Dinámicas: BUSCARX, LEFT, RIGHT, CONCAT, SI.CONJUNTO, Math ──
+                            elif any(val_upper.startswith(p) for p in [
+                                "CONCAT(", "LEFT(", "RIGHT(", "SI.CONJUNTO(", 
+                                "BUSCARX(", "BUSCARX_EXT(", "BUSCARX_LOCAL(", "SUMA(", "RESTA(", "MULTIPLICA(", "DIVIDE(", "REDONDEAR(", "ABS(",
+                                "LARGO(", "ESPACIOS(", "MAYUSC(", "REPETIR(", "TEXTO(", "AÑO(", "MES(", "Y(", "O("
+                            ]):
+                                        from backend.app.core.formula_parser import evaluate_formula_on_df
+                                        
+                                        df[new_col] = evaluate_formula_on_df(
+                                            df=df,
+                                            formula_str=rule.condition_value,
+                                            db=db,
+                                            company_id=company_id,
+                                            default=default if default else ""
+                                        )
 
-                        else:
-                            # ── Condicional simple tipo IF ──
-                            # Solo aplica si la columna origen tiene el valor exacto
-                            actual_src = get_col_simple(rule.source_column, df)
-                            if actual_src:
-                                mask = df[actual_src].astype(str).str.strip().str.upper() == val_upper
-                                df.loc[mask, new_col] = rule.result_value
-                            # Fill rest with default if computed column is still empty/NaN for those rows?
-                            # Logic usually initializes with default (line 221), so we just update matches.
+                            else:
+                                # ── Condicional simple tipo IF ──
+                                actual_src = _get_col_simple(rule.source_column, df)
+                                if actual_src:
+                                    mask = df[actual_src].astype(str).str.strip().str.upper() == val_upper
+                                    df.loc[mask, new_col] = rule.result_value
+                        except Exception as rule_err:
+                            rule_detail = f"Tabla: {sel.table_name} | Columna Calculada: '{new_col}' | Regla ID: {rule.id} | Col Origen: '{rule.source_column}' | Fórmula/Valor: '{rule.condition_value}' | Error: {rule_err}"
+                            print(f"ERROR en columna calculada: {rule_detail}")
+                            raise Exception(rule_detail)
         
         rows_count = len(df)
 
         if rows_count == 0:
+            table_dest_empty = sel.table_name.lower().replace(" ", "_")
             if full_refresh:
-                # Si piden full refresh y orgien está vacío, truncamos también
+                # Si piden full refresh y origen está vacío, truncamos también
                 try:
-                    table_dest_empty = sel.table_name.lower().replace(" ", "_")
                     from sqlalchemy import text
                     with dst_engine.begin() as conn:
                         conn.execute(text(f'TRUNCATE TABLE "{table_dest_empty}" RESTART IDENTITY CASCADE'))
                 except:
                     pass
+            else:
+                # Crear la tabla vacía si aún no existe, para que no falle el preview
+                from sqlalchemy import inspect as sa_inspect
+                insp = sa_inspect(dst_engine)
+                if not insp.has_table(table_dest_empty):
+                    try:
+                        df.head(0).to_sql(table_dest_empty, dst_engine, if_exists='replace', index=False)
+                    except Exception as e:
+                        print(f"Error creating empty table {table_dest_empty}: {e}")
             log.status = "SUCCESS"
             log.message = f"Sin registros {'nuevos ' if not full_refresh else ''}en {sel.table_name}"
             log.records_processed = 0
@@ -386,10 +407,10 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
     except Exception as e:
         import traceback
         log.status = "ERROR"
-        log.message = str(e)
+        log.message = f"[{sel.table_name}] {str(e)}"
         log.details = traceback.format_exc()
         db.commit()
-        return {"status": "ERROR", "message": str(e)}
+        return {"status": "ERROR", "message": log.message}
 
 
 @router.post("/run-incremental/{company_id}/{table_selection_id}")
@@ -404,14 +425,13 @@ def trigger_incremental_etl(company_id: int, table_selection_id: int,
 
 @router.post("/run-etl/")
 def trigger_etl(
-    background_tasks: BackgroundTasks,
     company_id: int,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
     full_refresh: bool = False,
     db: Session = Depends(get_dest_db)
 ):
-    """Triggers the ETL process in the background for a specific company."""
+    """Runs the ETL process synchronously so the frontend knows when it truly finishes."""
     company = db.query(Company).filter(Company.id == company_id).first()
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
@@ -419,8 +439,62 @@ def trigger_etl(
     sd_str = str(start_date) if start_date else None
     ed_str = str(end_date) if end_date else None
     
-    background_tasks.add_task(run_etl_job, company_id, sd_str, ed_str, full_refresh, db)
-    return {"message": f"ETL job started for {company.name}"}
+    # Run synchronously so the frontend progress bar reflects the real status
+    result = run_etl_job_sync(company_id, sd_str, ed_str, full_refresh, db)
+    return result
+
+
+def run_etl_job_sync(company_id: int, start_date: str, end_date: str, full_refresh: bool, db: Session):
+    """Synchronous ETL: runs all extractions and returns the result to the caller."""
+    company = db.query(Company).filter(Company.id == company_id).first()
+    source_conn = db.query(SourceConnection).filter(SourceConnection.company_id == company_id).first()
+    dest_conn = db.query(DestinationConnection).filter(DestinationConnection.company_id == company_id).first()
+
+    if not company or not source_conn or not dest_conn:
+        log = IntegLog(company_id=company_id, process_name="ETL Manual", status="ERROR",
+                       message="Configuración incompleta: Faltan conexiones origen o destino")
+        db.add(log); db.commit()
+        raise HTTPException(status_code=400, detail="Configuración incompleta: Faltan conexiones origen o destino")
+
+    refresh_msg = " (FULL REFRESH)" if full_refresh else ""
+    log = IntegLog(company_id=company_id, process_name="ETL Manual", status="RUNNING",
+                   message=f"Iniciando ETL{refresh_msg} para empresa {company.name}")
+    db.add(log); db.commit()
+
+    try:
+        selections = db.query(TableSelection).filter(
+            TableSelection.company_id == company_id,
+            TableSelection.is_selected == True
+        ).order_by(TableSelection.extraction_order).all()
+
+        if not selections:
+            raise Exception("No hay tablas seleccionadas para extraer")
+
+        total_records = 0
+        tables_processed = []
+        for sel in selections:
+            result = run_incremental_etl(company_id, sel.id, db, start_date, end_date, full_refresh=full_refresh)
+            recs = result.get("records", 0)
+            total_records += recs
+            tables_processed.append({"table": sel.table_name, "records": recs})
+
+        log.status = "SUCCESS"
+        log.message = f"ETL finalizado. {total_records} registros extraídos de {len(selections)} tablas."
+        log.records_processed = total_records
+        db.commit()
+
+        return {
+            "message": f"ETL completado: {total_records} registros extraídos de {len(selections)} tablas",
+            "records": total_records,
+            "tables": len(selections),
+            "details": tables_processed,
+            "status": "OK"
+        }
+    except Exception as e:
+        log.status = "ERROR"
+        log.message = str(e)
+        db.commit()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 def run_etl_job(company_id: int, start_date: str, end_date: str, full_refresh: bool, db: Session):
@@ -582,7 +656,7 @@ def generate_asientos_contables(
             if linea.cuenta_tipo == "FIJA":
                 ccodcue = linea.cuenta_fija
             else:
-                ccodcue = str(row_dict.get(linea.cuenta_columna, "")) if linea.cuenta_columna else None
+                ccodcue = str(row_dict.get(linea.cuenta_columna, "")).strip() if linea.cuenta_columna else None
 
             # Tipo de cambio
             ntc = 1.0
@@ -803,7 +877,13 @@ def run_full_etl(company_id: int, body: dict = {}, db: Session = Depends(get_des
                 "migrated": mig_result.get("migrated_lineas", 0)
             }
     except Exception as e:
-        results["paso3_migrar"] = {"status": "ERROR", "message": str(e), "migrated": 0}
+        failed_rows = []
+        err_msg = str(e)
+        if isinstance(e, HTTPException) and hasattr(e, "detail") and isinstance(e.detail, dict):
+            failed_rows = e.detail.get("failed_rows", [])
+            err_msg = e.detail.get("message", str(e))
+        
+        results["paso3_migrar"] = {"status": "ERROR", "message": err_msg, "migrated": 0, "failed_rows": failed_rows}
 
     overall_status = "OK" if all(
         r["status"] in ("OK", "SKIP") for r in results.values()

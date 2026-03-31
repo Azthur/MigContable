@@ -194,6 +194,110 @@ def duplicate_subcategoria(sub_id: int, db: Session = Depends(get_dest_db)):
     db.refresh(new_sub)
     return new_sub
 
+
+class CopyFromOtherCompanyRequest(BaseModel):
+    source_sub_id: int
+    target_categoria_id: int
+
+
+@router.post("/subcategorias/copy-from-other-company", response_model=MapeoSubcategoriaSchema)
+def copy_subcategoria_from_other_company(body: CopyFromOtherCompanyRequest, db: Session = Depends(get_dest_db)):
+    """Copia una subcategoría de otra empresa hacia una categoría de la empresa actual."""
+    original = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == body.source_sub_id).first()
+    if not original:
+        raise HTTPException(status_code=404, detail="Subcategoría origen no encontrada")
+
+    # Verificar que la categoría destino existe
+    target_cat = db.query(MapeoCategoria).filter(MapeoCategoria.id == body.target_categoria_id).first()
+    if not target_cat:
+        raise HTTPException(status_code=404, detail="Categoría destino no encontrada")
+
+    # Obtener nombre de la empresa origen para el nombre de la copia
+    source_cat = db.query(MapeoCategoria).filter(MapeoCategoria.id == original.categoria_id).first()
+    from backend.app.models.models import Company
+    source_company = db.query(Company).filter(Company.id == source_cat.company_id).first() if source_cat else None
+    source_label = source_company.name if source_company else "Otra empresa"
+
+    # Clonar la subcategoría
+    new_sub = MapeoSubcategoria(
+        categoria_id=body.target_categoria_id,
+        nombre=f"{original.nombre} (de {source_label})",
+        descripcion=original.descripcion,
+        tabla_origen=original.tabla_origen,
+        codigo_origen=original.codigo_origen,
+        schema_destino=original.schema_destino,
+        tabla_destino_detalle=original.tabla_destino_detalle,
+        tabla_destino_cabecera=original.tabla_destino_cabecera,
+        clave_asiento=original.clave_asiento,
+        col_destino_nasiento=original.col_destino_nasiento,
+        col_destino_nidlin=original.col_destino_nidlin,
+        col_destino_debe=original.col_destino_debe,
+        col_destino_haber=original.col_destino_haber,
+        pares_redondeo=original.pares_redondeo.copy() if original.pares_redondeo else None,
+        asiento_inicial=original.asiento_inicial,
+        generate_headers=original.generate_headers,
+        generate_details=original.generate_details,
+        mapeo_cabecera=original.mapeo_cabecera.copy() if original.mapeo_cabecera else None,
+        filter_rules=original.filter_rules.copy() if original.filter_rules else None,
+        control_column_origen=original.control_column_origen,
+        is_active=True
+    )
+    db.add(new_sub)
+    db.flush()
+
+    # Clonar las líneas de asiento
+    lineas = db.query(MapeoLineaAsiento).filter(
+        MapeoLineaAsiento.subcategoria_id == body.source_sub_id,
+        MapeoLineaAsiento.is_active == True
+    ).order_by(MapeoLineaAsiento.orden).all()
+
+    for linea in lineas:
+        new_linea = MapeoLineaAsiento(
+            subcategoria_id=new_sub.id,
+            orden=linea.orden,
+            nivel=linea.nivel,
+            condicion_aplicacion=linea.condicion_aplicacion,
+            nombre_linea=linea.nombre_linea,
+            aplica_ajuste_redondeo=linea.aplica_ajuste_redondeo,
+            mapeo_detalle=linea.mapeo_detalle.copy() if linea.mapeo_detalle else None,
+            is_active=True
+        )
+        db.add(new_linea)
+
+    db.commit()
+    db.refresh(new_sub)
+    return new_sub
+
+
+@router.get("/subcategorias-by-company/{company_id}")
+def list_subcategorias_by_company(company_id: int, db: Session = Depends(get_dest_db)):
+    """Lista todas las subcategorías de una empresa (para copiar desde otra empresa)."""
+    cats = db.query(MapeoCategoria).filter(
+        MapeoCategoria.company_id == company_id,
+        MapeoCategoria.is_active == True
+    ).all()
+    result = []
+    for cat in cats:
+        subs = db.query(MapeoSubcategoria).filter(
+            MapeoSubcategoria.categoria_id == cat.id,
+            MapeoSubcategoria.is_active == True
+        ).order_by(MapeoSubcategoria.nombre).all()
+        for sub in subs:
+            lineas_count = db.query(MapeoLineaAsiento).filter(
+                MapeoLineaAsiento.subcategoria_id == sub.id,
+                MapeoLineaAsiento.is_active == True
+            ).count()
+            result.append({
+                "id": sub.id,
+                "nombre": sub.nombre,
+                "categoria_nombre": cat.nombre,
+                "tabla_origen": sub.tabla_origen,
+                "codigo_origen": sub.codigo_origen,
+                "lineas_count": lineas_count
+            })
+    return result
+
+
 # ─── Líneas de Asiento ────────────────────────────────────────────────────────
 
 @router.get("/subcategorias/{sub_id}/lineas", response_model=List[MapeoLineaAsientoSchema])
@@ -1092,8 +1196,13 @@ def _generate_subcategoria_cf_diariol(
         val = row.get(f"_head_{field}")
         if pd.isna(val):
             return default
-        if isinstance(val, str) and val.strip() == "" and val != " " and val != "":
-            return default 
+        if isinstance(val, str):
+            if val.strip() == "" and len(val) > 0:
+                # Previene borrar " " intencionales del usuario
+                return val
+            val = val.strip()
+            if val == "":
+                return default 
         return val
 
     if generate_headers and HeadTable is not None:
@@ -1191,7 +1300,6 @@ def _generate_subcategoria_cf_diariol(
                 val = row_calc[col]
                 if pd.isna(val): return default
                 
-                # If truly empty string (length 0 or stripped is empty), handle accordingly
                 val_str = str(val).strip()
                 if val_str == "":
                     # Special handling for user's request: allow " " for strings only.
@@ -1203,10 +1311,9 @@ def _generate_subcategoria_cf_diariol(
                     return default
                 
                 if type_cast is str:
-                    # Clean account codes or codes that might come as floats (e.g. "701101.0")
-                    s_val = str(val)
+                    s_val = str(val).strip()
                     if s_val.endswith(".0"):
-                        s_val = s_val[:-2]
+                        s_val = s_val[:-2].strip()
                     return s_val
                 
                 # Numeric cast
@@ -1931,7 +2038,29 @@ def migrate_to_final(
                                     LocalDetTable.c.subcategoria_id == sub.id
                                 ).values(estado="MIGRADO"))
                             except Exception as e:
-                                print(f"Error bulk inserting details: {e}")
+                                error_msg = str(e)
+                                print(f"Error bulk inserting details: {error_msg}")
+                                # Try to identify the failing row based on KeyViolation (e.g. cper, ccodcue)
+                                failed_rows = []
+                                import re
+                                match = re.search(r'La llave \(([^)]+)\)=\(([^)]+)\)', error_msg)
+                                if match:
+                                    keys = [k.strip() for k in match.group(1).split(',')]
+                                    vals = [v.strip() for v in match.group(2).split(',')]
+                                    bad_dict = dict(zip(keys, vals))
+                                    for row in insert_list:
+                                        # Convert both to string and stripped for comparison
+                                        is_match = True
+                                        for k, v in bad_dict.items():
+                                            if k in row and str(row[k]).strip() != v:
+                                                is_match = False
+                                                break
+                                        if is_match:
+                                            # Found a suspect row
+                                            failed_rows.append(row)
+                                # Attach the failed rows to the exception so it propagates
+                                if failed_rows:
+                                    e.failed_rows = failed_rows
                                 raise e # Asegurar que el error llegue al bloque final
 
                 # --- UPDATE SUBCATEGORY CONTROL FIELDS AFTER SUCCESSFUL MIGRATIONS ---
@@ -1968,7 +2097,12 @@ def migrate_to_final(
 
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Error en migración al destino final: {str(e)}")
+        failed_rows = getattr(e, "failed_rows", [])
+        # We can't return an HTTPException right here if we are called by run_full_etl,
+        # but since we are sometimes called directly via /migrate-to-final, we must return valid JSON in the detail
+        import json
+        detail_obj = {"message": f"Error en migración al destino final: {str(e)}", "failed_rows": failed_rows}
+        raise HTTPException(status_code=500, detail=detail_obj)
 
 
 @router.get("/cf-diariol")
@@ -2191,7 +2325,7 @@ def list_origen_preview(
             
         try:
             if not inspector.has_table(table_name):
-                vistas[table_name] = {"table_name": table_name, "total": 0, "items": [], "error": f"Tabla '{table_name}' no existe aún en la base intermedia. Ejecute el Paso 1 primero."}
+                vistas[table_name] = {"table_name": table_name, "total": 0, "items": [], "error": f"La tabla '{table_name}' aún no ha sido extraída a la base intermedia. Haga clic en 'Paso 1: Extraer Datos' para importarla desde el origen."}
                 continue
 
             # Obtener todas las columnas

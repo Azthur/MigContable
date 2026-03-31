@@ -266,6 +266,36 @@
         </div>
     </div>
 
+    <!-- Modal Copiar de Otra Empresa -->
+    <div class="modal fade" id="copyFromOtherModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #059669, #10b981);">
+                    <h6 class="modal-title mb-0"><i class="bi bi-box-arrow-in-down me-2"></i>Copiar Subcategoría de Otra Empresa</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="copyTargetCatId">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Empresa origen</label>
+                        <select class="form-select" id="copySourceCompany" onchange="loadSubsFromOtherCompany()">
+                            <option value="">-- Seleccionar empresa --</option>
+                        </select>
+                    </div>
+                    <div id="copySubsList" style="max-height: 350px; overflow-y: auto;">
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-arrow-up-circle" style="font-size: 2rem;"></i>
+                            <p class="mt-2">Selecciona una empresa para ver sus subcategorías</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -313,6 +343,9 @@
                 <div class="d-flex gap-2">
                     <button class="btn btn-sm btn-light" onclick="openSubModal(${cat.id})">
                         <i class="bi bi-plus-lg me-1"></i>Nueva Subcategoría
+                    </button>
+                    <button class="btn btn-sm btn-outline-light" onclick="openCopyFromOtherModal(${cat.id})" title="Copiar subcategoría de otra empresa">
+                        <i class="bi bi-box-arrow-in-down me-1"></i>Copiar de otra empresa
                     </button>
                     <button class="btn btn-sm btn-outline-light" onclick="editCategoria(${JSON.stringify(cat).replace(/"/g, '&quot;')})">
                         <i class="bi bi-pencil"></i>
@@ -521,6 +554,100 @@
                 if (r.ok) {
                     loadCategorias();
                     Swal.fire('Duplicado', 'La subcategoría ha sido duplicada.', 'success');
+                } else {
+                    const e = await r.json();
+                    Swal.fire('Error', e.detail || JSON.stringify(e), 'error');
+                }
+            } catch (e) { Swal.fire('Error de red', e.message, 'error'); }
+        }
+
+        // ─── Copiar de Otra Empresa ──────────────────────────────────────────
+        const copyFromOtherModal = new bootstrap.Modal(document.getElementById('copyFromOtherModal'));
+
+        async function openCopyFromOtherModal(categoriaId) {
+            document.getElementById('copyTargetCatId').value = categoriaId;
+            document.getElementById('copySourceCompany').innerHTML = '<option value="">-- Seleccionar empresa --</option>';
+            document.getElementById('copySubsList').innerHTML = '<div class="text-center text-muted py-4"><i class="bi bi-arrow-up-circle" style="font-size: 2rem;"></i><p class="mt-2">Selecciona una empresa para ver sus subcategorías</p></div>';
+
+            // Cargar empresas (excluyendo la actual)
+            const r = await fetch(`${API}/companies/`);
+            const companies = await r.json();
+            const sel = document.getElementById('copySourceCompany');
+            companies.forEach(c => {
+                if (String(c.id) !== String(companyId)) {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.name;
+                    sel.appendChild(opt);
+                }
+            });
+            copyFromOtherModal.show();
+        }
+
+        async function loadSubsFromOtherCompany() {
+            const sourceCompanyId = document.getElementById('copySourceCompany').value;
+            const container = document.getElementById('copySubsList');
+            if (!sourceCompanyId) {
+                container.innerHTML = '<div class="text-center text-muted py-4"><i class="bi bi-arrow-up-circle" style="font-size: 2rem;"></i><p class="mt-2">Selecciona una empresa para ver sus subcategorías</p></div>';
+                return;
+            }
+            container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div> Cargando...</div>';
+            try {
+                const r = await fetch(`${API}/mapeo/subcategorias-by-company/${sourceCompanyId}`);
+                const subs = await r.json();
+                if (!subs.length) {
+                    container.innerHTML = '<div class="text-center text-muted py-4"><i class="bi bi-inbox" style="font-size: 2rem;"></i><p class="mt-2">Esta empresa no tiene subcategorías configuradas</p></div>';
+                    return;
+                }
+                container.innerHTML = subs.map(sub => `
+                    <div class="d-flex justify-content-between align-items-center p-2 mb-2 rounded" style="background: #f8f9fa; border-left: 3px solid #059669;">
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-diagram-2 text-success"></i>
+                                <strong class="small">${sub.nombre}</strong>
+                            </div>
+                            <small class="text-muted">
+                                <i class="bi bi-folder2 me-1"></i>${sub.categoria_nombre}
+                                ${sub.tabla_origen ? ` · <i class="bi bi-table me-1"></i>${sub.tabla_origen}` : ''}
+                                ${sub.codigo_origen ? ` · <span class="badge bg-secondary" style="font-size:0.65rem">${sub.codigo_origen}</span>` : ''}
+                                · ${sub.lineas_count} líneas
+                            </small>
+                        </div>
+                        <button class="btn btn-sm btn-success" onclick="executeCopyFromOther(${sub.id}, '${sub.nombre.replace(/'/g, "\\'")}')"
+                                title="Copiar esta subcategoría">
+                            <i class="bi bi-clipboard-plus me-1"></i>Copiar
+                        </button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                container.innerHTML = `<div class="text-center text-danger py-3"><i class="bi bi-exclamation-circle"></i> Error al cargar: ${e.message}</div>`;
+            }
+        }
+
+        async function executeCopyFromOther(sourceSubId, sourceSubName) {
+            const targetCatId = document.getElementById('copyTargetCatId').value;
+            const { isConfirmed } = await Swal.fire({
+                title: '¿Copiar Subcategoría?',
+                html: `Se copiará <strong>${sourceSubName}</strong> con todas sus líneas de asiento a la categoría seleccionada.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#059669',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="bi bi-clipboard-plus me-1"></i>Sí, copiar',
+                cancelButtonText: 'Cancelar'
+            });
+            if (!isConfirmed) return;
+
+            try {
+                const r = await fetch(`${API}/mapeo/subcategorias/copy-from-other-company`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ source_sub_id: sourceSubId, target_categoria_id: parseInt(targetCatId) })
+                });
+                if (r.ok) {
+                    copyFromOtherModal.hide();
+                    loadCategorias();
+                    Swal.fire('¡Copiado!', `La subcategoría "${sourceSubName}" ha sido copiada exitosamente.`, 'success');
                 } else {
                     const e = await r.json();
                     Swal.fire('Error', e.detail || JSON.stringify(e), 'error');

@@ -871,6 +871,7 @@
                             <option value="MULTIPLICA(Col1, Col2)">Multiplicación (*)</option>
                             <option value="DIVIDE(Col1, Col2)">División (/)</option>
                             <option value="REDONDEAR(Columna, 2)">Redondear (2 dec)</option>
+                            <option value="ABS(Columna)">Valor Absoluto (ABS)</option>
                             <option value="LEFT(Columna, 3)">Izquierda (3 caracteres)</option>
                             <option value="RIGHT(Columna, 4)">Derecha (4 caracteres)</option>
                             <option value="CONCAT(Col1, Col2)">Concatenar</option>
@@ -1531,18 +1532,75 @@
 
         function setStepLoading(btnId, resultId, msg) {
             const btn = document.getElementById(btnId);
-            if (btn) { btn.disabled = true; btn.innerHTML = `<span class="spinner-sm"></span> ${msg}`; }
+            if (btn) { btn.disabled = true; btn.innerHTML = `<span class="spinner-sm"></span> Ejecutando...`; }
             const res = document.getElementById(resultId);
-            if (res) res.innerHTML = `<div class="alert alert-info-dark mt-2"><div class="spinner-sm"></div> ${msg}</div>`;
+            if (!res) return;
+
+            res.innerHTML = `
+                <div class="card bg-black p-3 mt-2 border border-secondary" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+                    <div class="d-flex justify-content-between mb-2">
+                        <strong style="color: #60a5fa;"><i class="bi bi-hourglass-split me-2"></i>${msg}</strong>
+                        <span id="prog_pct_${resultId}" class="small text-muted fw-bold">0%</span>
+                    </div>
+                    <div class="progress" style="height: 10px; border-radius: 5px; background-color: #1f2937;">
+                        <div id="prog_bar_${resultId}" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%; transition: width 0.4s ease;"></div>
+                    </div>
+                </div>
+            `;
+
+            let pct = 0;
+            res.dataset.progressInterval = setInterval(() => {
+                pct += (95 - pct) * 0.15; // Asymptotic to 95%
+                if (pct >= 95) pct = 95;
+                const bar = document.getElementById(`prog_bar_${resultId}`);
+                const text = document.getElementById(`prog_pct_${resultId}`);
+                if (bar && text) {
+                    bar.style.width = `${Math.floor(pct)}%`;
+                    text.innerText = `${Math.floor(pct)}%`;
+                }
+            }, 500);
         }
 
         function setStepResult(btnId, originalHtml, resultId, success, msg) {
             const btn = document.getElementById(btnId);
             if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
             const res = document.getElementById(resultId);
-            if (res) res.innerHTML = success
-                ? `<div class="alert alert-success-dark mt-2"><i class="bi bi-check-circle me-1"></i>${msg}</div>`
-                : `<div class="alert alert-error-dark mt-2"><i class="bi bi-x-circle me-1"></i>${msg}</div>`;
+            if (!res) return;
+
+            if (res.dataset.progressInterval) {
+                clearInterval(parseInt(res.dataset.progressInterval));
+                delete res.dataset.progressInterval;
+            }
+
+            const renderFinal = () => {
+                res.innerHTML = success
+                    ? `<div class="card bg-black p-3 mt-2 border" style="border-color: #2ea043; border-radius: 8px; box-shadow: 0 4px 12px rgba(46,160,67,0.15);">
+                           <div class="text-success mb-1"><i class="bi bi-check-circle-fill me-2"></i><strong>Proceso Completado</strong></div>
+                           <div class="small text-light">${msg}</div>
+                       </div>`
+                    : `<div class="card bg-black p-3 mt-2 border" style="border-color: #f85149; border-radius: 8px; box-shadow: 0 4px 12px rgba(248,81,73,0.15);">
+                           <div class="text-danger mb-1"><i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Error en la ejecución</strong></div>
+                           <div class="small text-light">${msg}</div>
+                       </div>`;
+            };
+
+            const bar = document.getElementById(`prog_bar_${resultId}`);
+            const text = document.getElementById(`prog_pct_${resultId}`);
+            
+            if (bar && text) {
+                if (success) {
+                    bar.classList.remove('bg-primary');
+                    bar.classList.add('bg-success');
+                    bar.style.width = '100%';
+                    text.innerText = '100%';
+                } else {
+                    bar.classList.remove('bg-primary');
+                    bar.classList.add('bg-danger');
+                }
+                setTimeout(renderFinal, 600);
+            } else {
+                renderFinal();
+            }
         }
 
         async function runEtlStep1() {
@@ -2049,7 +2107,10 @@
                     document.getElementById('cfDiariolPanel').style.display = 'block';
                     loadCfDiariol(null, 'MIGRADO');
                 } else {
-                    setStepResult('btnStep3', origHtml, 'step3Result', false, data.detail || 'Error en migración');
+                    setStepResult('btnStep3', origHtml, 'step3Result', false, data.detail?.message || data.detail || 'Error en migración');
+                    if (data.detail && data.detail.failed_rows && data.detail.failed_rows.length > 0) {
+                        _renderMigrationFailedRows(data.detail.failed_rows);
+                    }
                 }
             } catch (e) {
                 setStepResult('btnStep3', origHtml, 'step3Result', false, 'Error de red: ' + e.message);
@@ -2094,12 +2155,77 @@
                     document.getElementById('fullResult').innerHTML = html;
                     document.getElementById('cfDiariolPanel').style.display = 'block';
                     loadCfDiariol();
+                    if (r.paso3_migrar?.failed_rows && r.paso3_migrar.failed_rows.length > 0) {
+                        _renderMigrationFailedRows(r.paso3_migrar.failed_rows);
+                    }
                 } else {
                     setStepResult('btnFull', origHtml, 'fullResult', false, data.detail || 'Error en proceso completo');
                 }
             } catch (e) {
                 setStepResult('btnFull', origHtml, 'fullResult', false, 'Error de red: ' + e.message);
             }
+        }
+        
+        function _renderMigrationFailedRows(failedRows) {
+            let container = document.getElementById('migrationFailedRowsContainer');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'migrationFailedRowsContainer';
+                container.className = 'mt-3';
+                const parent = document.getElementById('step3Result').parentNode;
+                parent.appendChild(container);
+            }
+            container.style.display = 'block';
+            
+            let html = `
+                <div class="card bg-black p-3 mb-3 border border-danger" style="border-radius:8px;">
+                    <h6 class="mb-2" style="color:#f87171;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Filas conflictivas detectadas en migración
+                        <span class="badge bg-danger ms-2">${failedRows.length} fila(s)</span>
+                    </h6>
+                    <div class="table-responsive">
+                        <table id="dt_mig_failed" class="table-dark-custom table-striped w-100" style="white-space:nowrap;">
+                            <thead>
+                                <tr>
+                                    <th>C_PER</th>
+                                    <th>C_MES</th>
+                                    <th>C_CODORI</th>
+                                    <th>N_ASIENTO</th>
+                                    <th>N_IDLIN</th>
+                                    <th>C_CODCUE</th>
+                                    <th>DEBE</th>
+                                    <th>HABER</th>
+                                    <th>C_GLOSA</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>`;
+            container.innerHTML = html;
+            
+            $('#dt_mig_failed').DataTable({
+                data: failedRows,
+                columns: [
+                    { data: 'cper', defaultContent: '-' },
+                    { data: 'cmes', defaultContent: '-' },
+                    { data: 'ccodori', defaultContent: '-' },
+                    { data: 'nasiento', className: 'text-center', defaultContent: '-' },
+                    { data: 'nidlin', className: 'text-center', defaultContent: '-' },
+                    { data: 'ccodcue', render: function(v) { return `<code style="color:#fbbf24;">${v === null ? 'NULL' : (v.trim() === '' ? '(vacío/espacios)' : v)}</code>`; }, defaultContent: '-' },
+                    { data: 'ndebe', render: $.fn.dataTable.render.number(',', '.', 2, ''), defaultContent: '0.00' },
+                    { data: 'nhaber', render: $.fn.dataTable.render.number(',', '.', 2, ''), defaultContent: '0.00' },
+                    { data: 'cglosa', defaultContent: '-' }
+                ],
+                deferRender: true,
+                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+                dom: '<"d-flex justify-content-between align-items-center mb-3"Bf>rt<"d-flex justify-content-between align-items-center mt-3"ip>',
+                buttons: [
+                    { extend: 'copy', className: 'btn btn-sm btn-outline-secondary' },
+                    { extend: 'excel', className: 'btn btn-sm btn-outline-success', title: 'Lineas_Error_Migracion' }
+                ],
+                pageLength: 5,
+                destroy: true
+            });
         }
 
         // ─── Staging Preview State ─────────────────────────────────────────

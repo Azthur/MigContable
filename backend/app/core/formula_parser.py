@@ -162,6 +162,10 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 try: digits = int(eval_ast(node.args[1]).iloc[0])
                 except: digits = 2
                 return src.round(digits)
+
+            elif func_id == "ABS" and len(node.args) >= 1:
+                src = pd.to_numeric(eval_ast(node.args[0]), errors='coerce').fillna(0)
+                return src.abs()
                 
             elif func_id == "LARGO" and len(node.args) >= 1:
                 src = eval_ast(node.args[0])

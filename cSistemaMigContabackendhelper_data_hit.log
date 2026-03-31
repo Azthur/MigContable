@@ -1105,3 +1105,375 @@ MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
 --- ENDPOINT START 42 --- table=vtaritem, company=6
 Found 6 table selections
 MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 7 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 7 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 7 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 7 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 7 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 10 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 10 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 10 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 10 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 10 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 10 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 10 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 10 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 10 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 10 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 45 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 45 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 45 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 45 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 7 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 7 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 45 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 45 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 10 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 10 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 46 --- table=tbl_conciliados, company=5
+Found 8 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 46 --- table=tbl_conciliados, company=5
+Found 8 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 47 --- table=ccbmvtos, company=5
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 47 --- table=ccbmvtos, company=5
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 45 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 45 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 46 --- table=tbl_conciliados, company=5
+Found 8 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 46 --- table=tbl_conciliados, company=5
+Found 8 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 10 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 43 --- table=tbl_conciliados, company=1
+Found 10 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 47 --- table=ccbmvtos, company=5
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 47 --- table=ccbmvtos, company=5
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 47 --- table=ccbmvtos, company=5
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 47 --- table=ccbmvtos, company=5
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 45 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 45 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 48 --- table=ccbmvtos, company=5
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 48 --- table=ccbmvtos, company=5
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 44 --- table=ccbmvtos, company=1
+Found 10 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 47 --- table=ccbmvtos, company=5
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 47 --- table=ccbmvtos, company=5
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 49 --- table=tbl_conciliados, company=6
+Found 8 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 49 --- table=tbl_conciliados, company=6
+Found 8 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 50 --- table=ccbmvtos, company=6
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 50 --- table=ccbmvtos, company=6
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 51 --- table=ccbmvtos, company=6
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 51 --- table=ccbmvtos, company=6
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 53 --- table=tbl_conciliados, company=4
+Found 8 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 53 --- table=tbl_conciliados, company=4
+Found 8 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 54 --- table=ccbmvtos, company=4
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 54 --- table=ccbmvtos, company=4
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 52 --- table=ccbmvtos, company=4
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 52 --- table=ccbmvtos, company=4
+Found 8 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
