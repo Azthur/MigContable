@@ -1,0 +1,541 @@
+{% extends "base.html" %}
+
+{% block title %}Automatizaciones - SistemaMigConta{% endblock %}
+{% block page_title %}Tareas en Segundo Plano{% endblock %}
+{% block breadcrumb %}Inicio › Automatizaciones{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card-dark p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="m-0"><i class="bi bi-clock-history me-2 text-warning"></i>Tareas Programadas</h5>
+                <button class="btn-accent btn-sm" onclick="showNewTaskModal()">
+                    <i class="bi bi-plus-lg me-1"></i> Nueva Tarea
+                </button>
+            </div>
+            <p class="text-muted small mb-4">Gestione los procesos transversales que se ejecutan automáticamente en segundo plano.</p>
+
+            <div class="table-responsive">
+                <table class="table-dark-custom" id="tasksTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Empresa / Parámetros</th>
+                            <th>Tipo Tarea</th>
+                            <th>Frecuencia</th>
+                            <th>Hora</th>
+                            <th>Estado</th>
+                            <th>Última Ejec.</th>
+                            <th>Siguiente Ejec. (Calculada)</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tasksBody">
+                        <tr><td colspan="9" class="text-center text-muted py-4"><span class="spinner-sm"></span> Cargando tareas...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Auditoría Global -->
+<div class="row g-4 mt-2 mb-4">
+    <div class="col-12">
+        <div class="card-dark p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="m-0"><i class="bi bi-shield-check me-2 text-info"></i>Auditoría Global de Automatizaciones</h5>
+                <div class="d-flex gap-2">
+                    <select class="form-select-dark form-select-sm w-auto" id="globalFilterStatus" onchange="loadGlobalLogs()">
+                        <option value="">-- Todos los Estados --</option>
+                        <option value="ERROR">❌ Errores</option>
+                        <option value="SUCCESS">✅ Exitosos</option>
+                    </select>
+                    <button class="btn-ghost btn-sm" onclick="loadGlobalLogs()">
+                        <i class="bi bi-arrow-clockwise"></i> Actualizar
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table-dark-custom mb-0">
+                    <thead style="position: sticky; top: 0; background: var(--bg-tertiary); z-index: 1;">
+                        <tr>
+                            <th>Tarea #</th>
+                            <th>Empresa</th>
+                            <th>Rutina</th>
+                            <th>Estado</th>
+                            <th>Mensaje / Detalles (Ejecución)</th>
+                            <th>Fecha/Hora</th>
+                        </tr>
+                    </thead>
+                    <tbody id="globalLogsBody">
+                        <tr><td colspan="6" class="text-center text-muted py-4"><span class="spinner-sm"></span> Cargando auditoría...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nueva/Editar Tarea -->
+<div class="modal fade modal-dark" id="modalScheduledTask" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title" id="modalTaskTitle"><i class="bi bi-calendar-plus me-2"></i>Nueva Automatización</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label-dark">Empresa (Opcional si es global)</label>
+                    <select class="form-select-dark" id="taskCompany" onchange="handleTaskTypeChange()">
+                        <option value="">-- Sin Empresa (Global) --</option>
+                    </select>
+                    <small class="text-secondary" style="font-size: 0.75rem;">Para ETL debe seleccionar una empresa. El TC_SUNAT puede ser global.</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-dark">Tipo de Tarea</label>
+                    <select class="form-select-dark" id="taskType" onchange="handleTaskTypeChange()">
+                        <option value="TC_SUNAT">Sincronizar Tipo de Cambio SUNAT</option>
+                        <option value="ETL_FULL">Proceso ETL Completo (Extraer/Generar/Migrar)</option>
+                        <option value="MES_ROTATION">Rotación Mensual (Reiniciar Asientos a 1)</option>
+                    </select>
+                </div>
+                <!-- Div for Subcategories -->
+                <div class="mb-3" id="subcatsDiv" style="display: none;">
+                    <label class="form-label-dark">Seleccionar Subcategorías (ETL)</label>
+                    <div id="taskSubcatCheckboxes" class="p-2 border border-secondary rounded" style="max-height: 120px; overflow-y: auto; background: var(--bg-tertiary);">
+                        <div class="text-muted small">Seleccione una empresa primero...</div>
+                    </div>
+                    <small class="text-secondary" style="font-size: 0.7rem;">Si no selecciona ninguna, procesará TODAS las subcategorías activas.</small>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label-dark">Frecuencia</label>
+                        <select class="form-select-dark" id="taskSchedule" onchange="handleScheduleChange()">
+                            <option value="DAILY">Diaria (Todos los días)</option>
+                            <option value="WEEKLY">Semanal</option>
+                            <option value="MONTHLY">Mensual</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label-dark">Hora de Ejecución (24h)</label>
+                        <input type="time" class="form-control-dark" id="taskTime" value="02:00">
+                    </div>
+                </div>
+                
+                <div class="row" id="scheduleDetailRow" style="display: none;">
+                    <div class="col-md-12 mb-3" id="weeklyDiv" style="display: none;">
+                        <label class="form-label-dark">Día de la Semana</label>
+                        <select class="form-select-dark" id="taskDayOfWeek">
+                            <option value="mon">Lunes</option>
+                            <option value="tue">Martes</option>
+                            <option value="wed">Miércoles</option>
+                            <option value="thu">Jueves</option>
+                            <option value="fri">Viernes</option>
+                            <option value="sat">Sábado</option>
+                            <option value="sun">Domingo</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12 mb-3" id="monthlyDiv" style="display: none;">
+                        <label class="form-label-dark">Día del Mes</label>
+                        <input type="number" class="form-control-dark" id="taskDayOfMonth" min="1" max="31" value="1">
+                        <small class="text-secondary" style="font-size: 0.70rem;">(Use 1 al 31. Si selecciona 31 y el mes tiene 30 días, correrá el último día del mes)</small>
+                    </div>
+                </div>
+                
+                <div class="mb-3 form-check form-switch" id="statusDiv" style="display:none;">
+                    <input class="form-check-input" type="checkbox" role="switch" id="taskIsActive" checked>
+                    <label class="form-check-label text-muted small" for="taskIsActive">Tarea Activa</label>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0">
+                <input type="hidden" id="currentTaskId" value="">
+                <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn-accent" onclick="saveTask()">Guardar Tarea</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Historial de Tareas -->
+<div class="modal fade modal-dark" id="modalTaskLogs" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title"><i class="bi bi-clock-history me-2"></i>Historial de Ejecución - Tarea #<span id="logTaskId"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive" style="max-height: 400px;">
+                    <table class="table-dark-custom m-0">
+                        <thead>
+                            <tr>
+                                <th>Estado</th>
+                                <th>Mensaje</th>
+                                <th>Inicio</th>
+                                <th>Fin</th>
+                                <th>Duración (s)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsBody">
+                            <tr><td colspan="5" class="text-center text-muted py-4"><span class="spinner-sm"></span> Cargando historial...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let allTasks = [];
+    let allCompaniesMap = {};
+    
+    async function loadTasks() {
+        try {
+            const res = await fetch('/api/v1/tasks');
+            if (res.ok) {
+                const tasks = await res.json();
+                allTasks = tasks;
+                const tbody = document.getElementById('tasksBody');
+                if (tasks.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">No hay tareas programadas.</td></tr>';
+                    return;
+                }
+                
+                let html = '';
+                tasks.forEach(t => {
+                    const statusBadge = t.is_active ? '<span class="badge-success">Activo</span>' : '<span class="badge-error">Inactivo</span>';
+                    const lastRun = t.last_run ? new Date(t.last_run).toLocaleString('es-CO') : 'Nunca';
+                    let nextRun = 'Calculando...';
+                    if (t.next_run && t.is_active) {
+                        try {
+                            const dateMatch = t.next_run.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
+                            if (dateMatch) {
+                                nextRun = new Date(dateMatch[1]).toLocaleString('es-CO');
+                            } else {
+                                nextRun = new Date(t.next_run).toLocaleString('es-CO');
+                            }
+                        } catch(e) { nextRun = t.next_run; }
+                    } else if (!t.is_active) {
+                        nextRun = 'Pausada';
+                    }
+                    
+                    let paramsText = '';
+                    if (t.task_type === 'ETL_FULL') {
+                        if (t.params && t.params.subcategoria_names && t.params.subcategoria_names.length > 0) {
+                             paramsText = `<br><small class="text-muted" style="white-space:normal;">Subcats: ${t.params.subcategoria_names.join(', ')}</small>`;
+                        } else if (t.params && t.params.subcategorias && t.params.subcategorias.length > 0) {
+                             paramsText = `<br><small class="text-muted">Subcats: ${t.params.subcategorias.length} seleccionadas</small>`;
+                        } else {
+                             paramsText = `<br><small class="text-muted">Subcats: Todas</small>`;
+                        }
+                    }
+                    
+                    let scheduleText = t.schedule_type;
+                    if (t.schedule_type === 'WEEKLY') scheduleText += ` (${t.day_of_week || 'mon'})`;
+                    if (t.schedule_type === 'MONTHLY') scheduleText += ` (Día ${t.day_of_month || 1})`;
+                    
+                    const companyName = t.company_id ? (allCompaniesMap[t.company_id] || 'Empresa ' + t.company_id) : '<span class="badge-info">Global</span>';
+                    
+                    html += `<tr>
+                        <td>${t.id}</td>
+                        <td style="max-width:250px;">${companyName}${paramsText}</td>
+                        <td><span class="badge-warning">${t.task_type}</span></td>
+                        <td>${scheduleText}</td>
+                        <td>${t.time_str}</td>
+                        <td>${statusBadge}</td>
+                        <td class="small text-muted">${lastRun}</td>
+                        <td class="small text-info fw-bold">${nextRun}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-secondary py-0 me-1" onclick="viewLogs(${t.id})" title="Ver Historial"><i class="bi bi-clock-history"></i></button>
+                            <button class="btn btn-sm btn-outline-info py-0 me-1" onclick="editTask(${t.id})" title="Editar"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteTask(${t.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html;
+            }
+        } catch (e) {
+            console.error("Error cargando tareas", e);
+        }
+    }
+
+    async function loadCompanies() {
+        try {
+            const res = await fetch('/api/v1/companies');
+            const data = await res.json();
+            const sel = document.getElementById('taskCompany');
+            sel.innerHTML = '<option value="">-- Sin Empresa (Global) --</option>';
+            data.forEach(c => {
+                allCompaniesMap[c.id] = c.name;
+                sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+            });
+            // Reload tasks now that we have names to map them
+            loadTasks();
+        } catch(e) {}
+    }
+
+    async function handleTaskTypeChange() {
+        const tType = document.getElementById('taskType').value;
+        const cId = document.getElementById('taskCompany').value;
+        const subDiv = document.getElementById('subcatsDiv');
+        const box = document.getElementById('taskSubcatCheckboxes');
+        
+        if (tType === 'ETL_FULL') {
+            subDiv.style.display = 'block';
+            if (!cId) {
+                box.innerHTML = '<div class="text-muted small">Seleccione una empresa primero...</div>';
+            } else {
+                box.innerHTML = '<div class="text-muted small"><span class="spinner-sm"></span> Cargando subcategorías...</div>';
+                try {
+                    const res = await fetch(`/api/v1/mapeo/categorias?company_id=${cId}`);
+                    if (!res.ok) throw new Error();
+                    const cats = await res.json();
+                    box.innerHTML = '';
+                    let count = 0;
+                    cats.forEach(cat => {
+                        (cat.subcategorias || []).forEach(sub => {
+                            if (!sub.is_active) return;
+                            count++;
+                            const label = `[${cat.nombre}] ${sub.nombre}`;
+                            box.innerHTML += `<div class="form-check mb-1">
+                                <input class="form-check-input subcat-chk" type="checkbox" value="${sub.id}" id="sc_${sub.id}">
+                                <label class="form-check-label text-muted small" for="sc_${sub.id}" style="font-size:0.75rem;">${label}</label>
+                            </div>`;
+                        });
+                    });
+                    if (count === 0) box.innerHTML = '<div class="text-muted small">No hay subcategorías activas.</div>';
+                    
+                    // Note: In edit mode, we will need to re-check the checkboxes, which is handled in editTask() after timeout.
+                } catch(e) {
+                    box.innerHTML = '<div class="text-danger small">Error cargando subcategorías</div>';
+                }
+            }
+        } else {
+            subDiv.style.display = 'none';
+        }
+    }
+
+    function handleScheduleChange() {
+        const sch = document.getElementById('taskSchedule').value;
+        const row = document.getElementById('scheduleDetailRow');
+        const weekly = document.getElementById('weeklyDiv');
+        const monthly = document.getElementById('monthlyDiv');
+        
+        row.style.display = (sch === 'WEEKLY' || sch === 'MONTHLY') ? 'flex' : 'none';
+        weekly.style.display = sch === 'WEEKLY' ? 'block' : 'none';
+        monthly.style.display = sch === 'MONTHLY' ? 'block' : 'none';
+    }
+
+    function showNewTaskModal() {
+        document.getElementById('currentTaskId').value = '';
+        document.getElementById('modalTaskTitle').innerHTML = '<i class="bi bi-calendar-plus me-2"></i>Nueva Automatización';
+        document.getElementById('taskCompany').value = '';
+        document.getElementById('taskType').value = 'TC_SUNAT';
+        document.getElementById('taskSchedule').value = 'DAILY';
+        document.getElementById('taskTime').value = '02:00';
+        document.getElementById('taskDayOfWeek').value = 'mon';
+        document.getElementById('taskDayOfMonth').value = '1';
+        document.getElementById('statusDiv').style.display = 'none';
+        document.getElementById('taskIsActive').checked = true;
+        handleTaskTypeChange();
+        handleScheduleChange();
+        
+        const modal = new bootstrap.Modal(document.getElementById('modalScheduledTask'));
+        modal.show();
+    }
+
+    async function editTask(id) {
+        const t = allTasks.find(x => x.id === id);
+        if(!t) return;
+        
+        document.getElementById('currentTaskId').value = t.id;
+        document.getElementById('modalTaskTitle').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Editar Tarea #${t.id}`;
+        document.getElementById('taskCompany').value = t.company_id || '';
+        document.getElementById('taskType').value = t.task_type;
+        document.getElementById('taskSchedule').value = t.schedule_type;
+        document.getElementById('taskTime').value = t.time_str;
+        document.getElementById('taskDayOfWeek').value = t.day_of_week || 'mon';
+        document.getElementById('taskDayOfMonth').value = t.day_of_month || '1';
+        document.getElementById('statusDiv').style.display = 'block';
+        document.getElementById('taskIsActive').checked = t.is_active;
+        
+        await handleTaskTypeChange();
+        handleScheduleChange();
+        
+        // Wait for subcategories render to check them
+        if (t.task_type === 'ETL_FULL' && t.params && t.params.subcategorias) {
+            setTimeout(() => {
+                t.params.subcategorias.forEach(subId => {
+                    const chk = document.getElementById('sc_' + subId);
+                    if (chk) chk.checked = true;
+                });
+            }, 500);
+        }
+        
+        const modal = new bootstrap.Modal(document.getElementById('modalScheduledTask'));
+        modal.show();
+    }
+
+    async function saveTask() {
+        const id = document.getElementById('currentTaskId').value;
+        const taskType = document.getElementById('taskType').value;
+        const companyIdRaw = document.getElementById('taskCompany').value;
+        
+        if (taskType === 'ETL_FULL' && !companyIdRaw) {
+            showToast('error', 'Debe seleccionar una empresa para ETL.');
+            return;
+        }
+        
+        let params = {};
+        if (taskType === 'ETL_FULL') {
+            const checkedBoxes = Array.from(document.querySelectorAll('.subcat-chk:checked'));
+            if (checkedBoxes.length > 0) {
+                params.subcategorias = checkedBoxes.map(el => parseInt(el.value));
+                params.subcategoria_names = checkedBoxes.map(el => {
+                     // The label contains the name
+                     const label = el.nextElementSibling.innerText.trim();
+                     return label.substring(label.indexOf(']') + 1).trim(); // remove category prefix if wanted, or keep it. Let's keep the raw Name only
+                });
+            }
+        }
+        
+        const payload = {
+            company_id: companyIdRaw ? parseInt(companyIdRaw) : null,
+            task_type: taskType,
+            schedule_type: document.getElementById('taskSchedule').value,
+            time_str: document.getElementById('taskTime').value,
+            day_of_week: document.getElementById('taskSchedule').value === 'WEEKLY' ? document.getElementById('taskDayOfWeek').value : null,
+            day_of_month: document.getElementById('taskSchedule').value === 'MONTHLY' ? parseInt(document.getElementById('taskDayOfMonth').value) : null,
+            params: Object.keys(params).length > 0 ? params : null
+        };
+        
+        if (id) {
+            payload.is_active = document.getElementById('taskIsActive').checked;
+        }
+        
+        try {
+            const res = await fetch(id ? `/api/v1/tasks/${id}` : '/api/v1/tasks', {
+                method: id ? 'PUT' : 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                showToast('success', id ? 'Tarea modificada exitosamente' : 'Tarea programada con éxito');
+                bootstrap.Modal.getInstance(document.getElementById('modalScheduledTask')).hide();
+                loadTasks();
+            } else {
+                const err = await res.json();
+                showToast('error', `Error: ${err.detail}`);
+            }
+        } catch(e) {
+            showToast('error', 'Error de red');
+        }
+    }
+    
+    async function loadGlobalLogs() {
+        const tbody = document.getElementById('globalLogsBody');
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4"><span class="spinner-sm"></span> Cargando auditoría...</td></tr>';
+        
+        const status = document.getElementById('globalFilterStatus').value;
+        const query = status ? `?status=${status}` : '';
+        
+        try {
+            const res = await fetch(`/api/v1/tasks/all/logs${query}`);
+            if (res.ok) {
+                const logs = await res.json();
+                if (logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No hay registros de ejecución aún.</td></tr>';
+                    return;
+                }
+                
+                let html = '';
+                logs.forEach(l => {
+                    const statusBadge = l.status === 'SUCCESS' ? '<span class="badge-success">Éxito</span>' : (l.status === 'ERROR' ? '<span class="badge-error">Error</span>' : `<span class="badge-warning">${l.status}</span>`);
+                    const start = l.started_at ? new Date(l.started_at).toLocaleString('es-CO') : '-';
+                    const comp = l.company_id ? (allCompaniesMap[l.company_id] || 'Empresa ' + l.company_id) : '<span class="badge-info">Global</span>';
+                    
+                    html += `<tr>
+                        <td><strong>#${l.task_id}</strong></td>
+                        <td>${comp}</td>
+                        <td><span class="badge-warning">${l.task_type}</span></td>
+                        <td>${statusBadge}</td>
+                        <td class="small" style="max-width: 300px; white-space: normal;">${l.message || ''}</td>
+                        <td class="small text-muted">${start}</td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html;
+            }
+        } catch(e) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Error cargando auditoría.</td></tr>';
+        }
+    }
+
+    async function viewLogs(id) {
+        document.getElementById('logTaskId').innerText = id;
+        document.getElementById('logsBody').innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4"><span class="spinner-sm"></span> Cargando...</td></tr>';
+        
+        const modal = new bootstrap.Modal(document.getElementById('modalTaskLogs'));
+        modal.show();
+        
+        try {
+            const res = await fetch(`/api/v1/tasks/${id}/logs`);
+            if (res.ok) {
+                const logs = await res.json();
+                const tbody = document.getElementById('logsBody');
+                if (logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No hay historial de ejecución aún.</td></tr>';
+                    return;
+                }
+                
+                let html = '';
+                logs.forEach(l => {
+                    const statusBadge = l.status === 'SUCCESS' ? '<span class="badge-success">Éxito</span>' : (l.status === 'ERROR' ? '<span class="badge-error">Error</span>' : `<span class="badge-warning">${l.status}</span>`);
+                    
+                    let start = l.started_at ? new Date(l.started_at) : null;
+                    let end = l.finished_at ? new Date(l.finished_at) : null;
+                    let duration = (start && end) ? ((end - start) / 1000).toFixed(1) : '-';
+                    
+                    html += `<tr>
+                        <td>${statusBadge}</td>
+                        <td class="small" style="max-width: 250px; white-space: normal;">${l.message || ''}</td>
+                        <td class="small text-muted">${start ? start.toLocaleString('es-CO') : '-'}</td>
+                        <td class="small text-muted">${end ? end.toLocaleString('es-CO') : '-'}</td>
+                        <td class="small text-center">${duration}</td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html;
+            }
+        } catch (e) {
+            document.getElementById('logsBody').innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4">Error al cargar historial.</td></tr>';
+        }
+    }
+    
+    async function deleteTask(id) {
+        if (!confirm("¿Eliminar esta automatización?")) return;
+        try {
+            const res = await fetch('/api/v1/tasks/' + id, {method: 'DELETE'});
+            if (res.ok) {
+                showToast('success', 'Eliminada');
+                loadTasks();
+            }
+        } catch (e) {}
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        loadCompanies().then(() => {
+            loadGlobalLogs();
+        });
+    });
+</script>
+{% endblock %}

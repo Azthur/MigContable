@@ -42,6 +42,17 @@ templates = Jinja2Templates(directory=templates_path)
 
 app.include_router(api_router, prefix="/api/v1")
 
+@app.on_event("startup")
+def on_startup():
+    from backend.app.core.scheduler import start_scheduler
+    start_scheduler()
+
+@app.on_event("shutdown")
+def on_shutdown():
+    from backend.app.core.scheduler import scheduler
+    if scheduler.running:
+        scheduler.shutdown()
+
 @app.get("/", response_class=HTMLResponse)
 async def read_dashboard(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
@@ -69,6 +80,10 @@ async def read_companies(request: Request):
 @app.get("/companies/{company_id}", response_class=HTMLResponse)
 async def read_company_detail(request: Request, company_id: int):
     return templates.TemplateResponse("company_detail.html", {"request": request})
+
+@app.get("/automatizaciones", response_class=HTMLResponse)
+async def read_automatizaciones(request: Request):
+    return templates.TemplateResponse("automatizaciones.html", {"request": request})
 
 @app.get("/catalogos", response_class=HTMLResponse)
 async def read_catalogos(request: Request):

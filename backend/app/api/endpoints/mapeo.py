@@ -549,6 +549,27 @@ def save_control_column(selection_id: int, body: dict, db: Session = Depends(get
 
 # ─── Columnas Calculadas (Condicionales) ──────────────────────────────────────
 
+@router.get("/table-selections/by-company-and-table/computed-columns")
+def get_computed_columns_by_company_and_table(company_id: int, table_name: str, db: Session = Depends(get_dest_db)):
+    """Obtiene las reglas de columnas calculadas de una tabla espec\u00edfica en otra empresa"""
+    sel = db.query(TableSelection).filter(
+        TableSelection.company_id == company_id,
+        TableSelection.table_name == table_name
+    ).first()
+    
+    if not sel:
+        return []
+        
+    rules = db.query(ComputedColumnRule).filter(
+        ComputedColumnRule.table_selection_id == sel.id
+    ).order_by(ComputedColumnRule.priority).all()
+    
+    return [{"id": None, "new_column_name": r.new_column_name,
+             "source_column": r.source_column, "condition_value": r.condition_value,
+             "result_value": r.result_value, "default_value": r.default_value,
+             "priority": r.priority, "is_active": r.is_active} for r in rules]
+
+
 @router.get("/table-selections/{selection_id}/computed-columns")
 def get_computed_columns(selection_id: int, db: Session = Depends(get_dest_db)):
     """Obtiene las reglas de columnas calculadas de una tabla"""
@@ -559,8 +580,6 @@ def get_computed_columns(selection_id: int, db: Session = Depends(get_dest_db)):
              "source_column": r.source_column, "condition_value": r.condition_value,
              "result_value": r.result_value, "default_value": r.default_value,
              "priority": r.priority, "is_active": r.is_active} for r in rules]
-
-
 @router.post("/table-selections/{selection_id}/computed-columns")
 def save_computed_columns(selection_id: int, body: dict, db: Session = Depends(get_dest_db)):
     """Guarda reglas de columnas calculadas (reemplaza todas las existentes)"""
@@ -691,6 +710,9 @@ def delete_subcategoria_asientos(company_id: int, subcategoria_id: int, db: Sess
             result_h = db.execute(stmt_del_h)
             deleted_head = result_h.rowcount
 
+    # Resetear el control incremental de generación para permitir que se vuelva a procesar toda la extracción
+    sub.last_generated_control_value = None
+    
     db.commit()
     return {
         "message": f"Eliminados {deleted_det} líneas y {deleted_head} cabeceras pendientes para subcategoría {sub.nombre}",
@@ -925,7 +947,7 @@ def _generate_subcategoria_cf_diariol(
         DetTable = None
 
     query_str = f'SELECT * FROM "{sub.tabla_origen.lower()}"'
-    where_parts = []
+    where_parts = [f"company_id = {company_id}"]
     query_params = {}
     
     # 1. Apply subcategory-level filter_rules (configured in mapping editor)
@@ -1016,6 +1038,18 @@ def _generate_subcategoria_cf_diariol(
             clave_columns = [columns[0]] if columns else []
 
     # ─── Control de Duplicados local (IDCONTROL) ───
+    error_idcontrols = []
+    if DetTable is not None and 'idcontrol' in DetTable.c:
+        try:
+            stmt_err = select(DetTable.c.idcontrol).where(
+                DetTable.c.company_id == company_id,
+                DetTable.c.subcategoria_id == sub.id,
+                DetTable.c.estado.in_(["0", "ERROR", "PENDIENTE"])
+            )
+            error_idcontrols = [str(r[0]) for r in db.execute(stmt_err).fetchall() if r[0]]
+        except Exception as e:
+            print(f"Error fetching error_idcontrols: {e}")
+
     if 'idcontrol' in df.columns and not df.empty and DetTable is not None:
         try:
             # Cross-company check: We do NOT filter by company_id OR subcategoria_id here,
@@ -1029,7 +1063,16 @@ def _generate_subcategoria_cf_diariol(
                      DetTable.c.estado.in_(["0", "1", "PENDIENTE", "MIGRADO"]),
                      DetTable.c.idcontrol.in_(idcontrols_in_df)
                 )
-            existing_ids = set(r[0] for r in db.execute(stmt_existing).fetchall() if r[0])
+            
+            existing_records = db.execute(stmt_existing).fetchall()
+            existing_ids = set()
+            for r in existing_records:
+                rid = str(r[0])
+                # Skip the duplicate check if it's an error from our own subcategory!
+                # This allows it to be re-processed.
+                if rid not in error_idcontrols:
+                    existing_ids.add(rid)
+                    
             if existing_ids:
                 before_count = len(df)
                 df = df[~df['idcontrol'].astype(str).isin(existing_ids)]
@@ -1071,7 +1114,11 @@ def _generate_subcategoria_cf_diariol(
             try:
                 # Build compound string index
                 df['_incremental_key'] = df[actual_cols].astype(str).agg('-'.join, axis=1)
-                df = df[df['_incremental_key'] > str(ctrl_val)]
+                
+                if 'idcontrol' in df.columns and error_idcontrols:
+                    df = df[(df['_incremental_key'] > str(ctrl_val)) | (df['idcontrol'].astype(str).isin(error_idcontrols))]
+                else:
+                    df = df[df['_incremental_key'] > str(ctrl_val)]
             except Exception as e:
                 print(f"Error en filtro incremental compuesto: {e}")
             after_count = len(df)
@@ -1086,12 +1133,25 @@ def _generate_subcategoria_cf_diariol(
             try:
                 df_ctrl = pd.to_numeric(df[actual_col], errors='coerce')
                 ctrl_numeric = pd.to_numeric(pd.Series([ctrl_val]), errors='coerce').iloc[0]
+                
+                has_ids = 'idcontrol' in df.columns and error_idcontrols
+                
                 if pd.notna(ctrl_numeric):
-                    df = df[df_ctrl > ctrl_numeric]
+                    if has_ids:
+                        df = df[(df_ctrl > ctrl_numeric) | (df['idcontrol'].astype(str).isin(error_idcontrols))]
+                    else:
+                        df = df[df_ctrl > ctrl_numeric]
+                else:
+                    if has_ids:
+                        df = df[(df[actual_col].astype(str) > ctrl_val) | (df['idcontrol'].astype(str).isin(error_idcontrols))]
+                    else:
+                        df = df[df[actual_col].astype(str) > ctrl_val]
+            except Exception:
+                has_ids = 'idcontrol' in df.columns and error_idcontrols
+                if has_ids:
+                    df = df[(df[actual_col].astype(str) > ctrl_val) | (df['idcontrol'].astype(str).isin(error_idcontrols))]
                 else:
                     df = df[df[actual_col].astype(str) > ctrl_val]
-            except Exception:
-                df = df[df[actual_col].astype(str) > ctrl_val]
             after_count = len(df)
             if before_count != after_count:
                 print(f"CONTROL INCREMENTAL: Filtradas {before_count - after_count} filas de fallback (col={actual_col}, last_val={ctrl_val})")
@@ -1127,6 +1187,31 @@ def _generate_subcategoria_cf_diariol(
         except Exception as e:
             print(f"Error cargando esquema detalle staging ({tabla_det_name}): {e}")
             DetTable = None
+
+    # Before generating new entries, wipe out the old failed ones we are about to regenerate
+    if error_idcontrols and not df.empty and 'idcontrol' in df.columns:
+        processing_errors = [eid for eid in error_idcontrols if eid in df['idcontrol'].astype(str).values]
+        if processing_errors:
+            print(f"Borrando {len(processing_errors)} registros fallidos antes de re-generar...")
+            if DetTable is not None:
+                try:
+                    db.execute(DetTable.delete().where(
+                        DetTable.c.company_id == company_id,
+                        DetTable.c.subcategoria_id == sub.id,
+                        DetTable.c.estado.in_(["0", "ERROR", "PENDIENTE"]),
+                        DetTable.c.idcontrol.in_(processing_errors)
+                    ))
+                except Exception as e: print(f"Error borrando re-generados detalle: {e}")
+            if HeadTable is not None and 'idcontrol' in head_cols:
+                try:
+                    db.execute(HeadTable.delete().where(
+                        HeadTable.c.company_id == company_id,
+                        HeadTable.c.subcategoria_id == sub.id,
+                        HeadTable.c.estado.in_(["0", "ERROR", "PENDIENTE"]),
+                        HeadTable.c.idcontrol.in_(processing_errors)
+                    ))
+                except Exception as e: print(f"Error borrando re-generados cabecera: {e}")
+            db.commit()
 
     # Asignar número de asiento
     # Use a unique key for the current company to track nasiento across subcategories
@@ -1817,12 +1902,15 @@ def clear_local_staging(
 def migrate_to_final(
     company_id: int,
     lote_id: Optional[str] = None,
-    only_delete: bool = False,
+    allow_overwrite: bool = False,
+    subcategoria_id: Optional[int] = None,
     db: Session = Depends(get_dest_db)
 ):
     """
     Migra registros PENDIENTE de cf_diariol (staging en migconta_db) al destino final de Contasis.
     Conecta a la BD de Contasis usando FinalDestConnection y hace INSERT bulk en cf_diariol.
+    Si subcategoria_id se provee, solo migra esa subcategoría.
+    Si allow_overwrite es True, eliminará los asientos coincidentes en Contasis antes de insertar para permitir modificaciones.
     """
     from backend.app.models.models import FinalDestConnection, MapeoCategoria, MapeoSubcategoria
     from backend.app.services.connection_manager import ConnectionManager
@@ -1837,10 +1925,13 @@ def migrate_to_final(
     if not final_conn:
         raise HTTPException(status_code=404, detail="No hay conexión destino final configurada para esta empresa")
 
-    subcategorias = db.query(MapeoSubcategoria).join(MapeoCategoria).filter(
+    query = db.query(MapeoSubcategoria).join(MapeoCategoria).filter(
         MapeoCategoria.company_id == company_id,
         MapeoSubcategoria.is_active == True
-    ).all()
+    )
+    if subcategoria_id:
+        query = query.filter(MapeoSubcategoria.id == subcategoria_id)
+    subcategorias = query.all()
     
     if not subcategorias:
         return {"message": "No hay subcategorías activas para migrar", "migrated_lineas": 0, "migrated_cabeceras": 0}
@@ -1855,6 +1946,7 @@ def migrate_to_final(
 
         migrated_lineas = 0
         migrated_cabeceras = 0
+        failed_rows_raw = []
         metadata_local = MetaData()
         metadata_final = MetaData()
 
@@ -1877,8 +1969,10 @@ def migrate_to_final(
                 try: FinalDetTable = Table(det_table_name, metadata_final, autoload_with=final_engine)
                 except: FinalDetTable = None
 
-                # Fetch Headers
-                target_estado = "MIGRADO" if only_delete else "1"
+                # Build unified target lists
+                target_estado = "1"
+                nasiento_col = sub.col_destino_nasiento or "nasiento"
+                cabeceras_rows = []
                 if LocalHeadTable is not None and FinalHeadTable is not None:
                     stmt_c = LocalHeadTable.select().where(
                         LocalHeadTable.c.company_id == company_id,
@@ -1887,117 +1981,58 @@ def migrate_to_final(
                     )
                     if lote_id: stmt_c = stmt_c.where(LocalHeadTable.c.lote_id == lote_id)
                     cabeceras_rows = db.execute(stmt_c).fetchall()
-                    
-                    if cabeceras_rows:
-                        # Find primary matching columns
-                        delete_keys = set()
-                        nasiento_col = sub.col_destino_nasiento or "nasiento"
-                        
-                        has_cper = "cper" in FinalHeadTable.columns
-                        has_cmes = "cmes" in FinalHeadTable.columns
-                        has_ccodori = "ccodori" in FinalHeadTable.columns
-                        has_nasiento = nasiento_col in FinalHeadTable.columns
 
-                        for row in cabeceras_rows:
-                            r_d = row._mapping
-                            cper = r_d.get('cper') if has_cper else None
-                            cmes = r_d.get('cmes') if has_cmes else None
-                            ccodori = r_d.get('ccodori') if has_ccodori else None
-                            nasiento = r_d.get(nasiento_col) if has_nasiento else None 
-                            
-                            # Only delete combinations if all 4 core keys are present locally and remotely
-                            if has_cper and has_cmes and has_ccodori and has_nasiento and cper and cmes and ccodori and nasiento is not None:
-                                delete_keys.add((cper, cmes, ccodori, nasiento))
-                                
-                        for (p, m, o, n) in delete_keys:
-                            final_db.execute(FinalHeadTable.delete().where(
-                                FinalHeadTable.c.cper == p,
-                                FinalHeadTable.c.cmes == m,
-                                FinalHeadTable.c.ccodori == o,
-                                getattr(FinalHeadTable.c, nasiento_col) == n
-                            ))
-                            if FinalDetTable is not None:
-                                final_db.execute(FinalDetTable.delete().where(
-                                    FinalDetTable.c.cper == p,
-                                    FinalDetTable.c.cmes == m,
-                                    FinalDetTable.c.ccodori == o,
-                                    getattr(FinalDetTable.c, nasiento_col) == n
-                                ))
-
-                        if only_delete and delete_keys:
-                            try:
-                                db.execute(LocalHeadTable.update().where(
-                                    LocalHeadTable.c.company_id == company_id,
-                                    LocalHeadTable.c.estado == "MIGRADO",
-                                    LocalHeadTable.c.subcategoria_id == sub.id
-                                ).values(estado="1"))
-                                if LocalDetTable is not None:
-                                    db.execute(LocalDetTable.update().where(
-                                        LocalDetTable.c.company_id == company_id,
-                                        LocalDetTable.c.estado == "MIGRADO",
-                                        LocalDetTable.c.subcategoria_id == sub.id
-                                    ).values(estado="1"))
-                            except Exception as e:
-                                print(f"Error actualizando estados en only_delete: {e}")
-
-                        # Build insertion mapping matching final remote table definition
-                        remote_head_cols = [c.name for c in FinalHeadTable.columns]
-                        insert_list = []
-                        for row in cabeceras_rows:
-                            r_d = row._mapping
-                            insert_item = {k: v for k, v in r_d.items() if k in remote_head_cols}
-                            insert_list.append(insert_item)
-                            
-                        if not only_delete and insert_list:
-                            try:
-                                final_db.execute(FinalHeadTable.insert(), insert_list)
-                                migrated_cabeceras += len(insert_list)
-                                db.execute(LocalHeadTable.update().where(
-                                    LocalHeadTable.c.company_id == company_id,
-                                    LocalHeadTable.c.estado == "1",
-                                    LocalHeadTable.c.subcategoria_id == sub.id
-                                ).values(estado="MIGRADO"))
-                            except Exception as e:
-                                print(f"Error bulk inserting headers: {e}")
-
-                # Fetch details
-                target_estado_l = "MIGRADO" if only_delete else "1"
+                detalle_rows = []
                 if LocalDetTable is not None and FinalDetTable is not None:
                     stmt_l = LocalDetTable.select().where(
                         LocalDetTable.c.company_id == company_id,
-                        LocalDetTable.c.estado == target_estado_l,
+                        LocalDetTable.c.estado == target_estado,
                         LocalDetTable.c.subcategoria_id == sub.id
                     )
                     if lote_id: stmt_l = stmt_l.where(LocalDetTable.c.lote_id == lote_id)
                     detalle_rows = db.execute(stmt_l).fetchall()
-                    
-                    if detalle_rows:
-                        if 'delete_keys' not in locals():
-                            delete_keys = set()
-                        
-                        has_cper_d = "cper" in FinalDetTable.columns
-                        has_cmes_d = "cmes" in FinalDetTable.columns
-                        has_ccodori_d = "ccodori" in FinalDetTable.columns
-                        has_nasiento_d = nasiento_col in FinalDetTable.columns
 
-                        for row in detalle_rows:
-                            r_d = row._mapping
-                            cper = r_d.get('cper') if has_cper_d else None
-                            cmes = r_d.get('cmes') if has_cmes_d else None
-                            ccodori = r_d.get('ccodori') if has_ccodori_d else None
-                            nasiento = r_d.get(nasiento_col) if has_nasiento_d else None 
-                            if has_cper_d and has_cmes_d and has_ccodori_d and has_nasiento_d and cper and cmes and ccodori and nasiento is not None:
-                                delete_keys.add((cper, cmes, str(ccodori).strip(), nasiento))
+                # Detect migration mode based on subcategory configuration:
+                # Mode A (seat-by-seat): generate_headers=True → standard accounting (cf_diario + cf_diariol)
+                # Mode B (row-by-row):   generate_headers=False → single table direct insert (cg_entitrib, etc.)
+                has_accounting_keys = bool(getattr(sub, 'generate_headers', True))
 
-                        if only_delete and delete_keys:
-                            try:
-                                for (p, m, o, n) in delete_keys:
-                                    final_db.execute(FinalDetTable.delete().where(
-                                        FinalDetTable.c.cper == p,
-                                        FinalDetTable.c.cmes == m,
-                                        FinalDetTable.c.ccodori == o,
-                                        getattr(FinalDetTable.c, nasiento_col) == n
-                                    ))
+                remote_head_cols = [c.name for c in FinalHeadTable.columns] if FinalHeadTable is not None else []
+                remote_det_cols = [c.name for c in FinalDetTable.columns] if FinalDetTable is not None else []
+
+                if has_accounting_keys:
+                    # ═══ MODE A: Seat-by-seat migration (standard cf_diario/cf_diariol) ═══
+                    seats = {}
+                    for row in cabeceras_rows:
+                        r_d = row._mapping
+                        ccodori_val = str(r_d.get('ccodori')).strip() if r_d.get('ccodori') is not None else None
+                        seat_key = (r_d.get('cper'), r_d.get('cmes'), ccodori_val, r_d.get(nasiento_col))
+                        seats[seat_key] = {'header': r_d, 'details': []}
+
+                    for row in detalle_rows:
+                        r_d = row._mapping
+                        ccodori_val = str(r_d.get('ccodori')).strip() if r_d.get('ccodori') is not None else None
+                        seat_key = (r_d.get('cper'), r_d.get('cmes'), ccodori_val, r_d.get(nasiento_col))
+                        if seat_key not in seats:
+                            seats[seat_key] = {'header': None, 'details': []}
+                        seats[seat_key]['details'].append(r_d)
+
+                    for seat_key, data in seats.items():
+                        if any(x is None for x in seat_key):
+                            failed_rows_raw.append({"seat": "Clave Incompleta", "error": "Llaves maestras (cper, cmes, ccodori o nasiento) vacías"})
+                            continue
+
+                        p, m, o, n = seat_key
+                        try:
+                            with final_db.begin_nested():
+                                if allow_overwrite:
+                                    if FinalDetTable is not None:
+                                        final_db.execute(FinalDetTable.delete().where(
+                                            FinalDetTable.c.cper == p,
+                                            FinalDetTable.c.cmes == m,
+                                            FinalDetTable.c.ccodori == o,
+                                            getattr(FinalDetTable.c, nasiento_col) == n
+                                        ))
                                     if FinalHeadTable is not None:
                                         final_db.execute(FinalHeadTable.delete().where(
                                             FinalHeadTable.c.cper == p,
@@ -2005,70 +2040,110 @@ def migrate_to_final(
                                             FinalHeadTable.c.ccodori == o,
                                             getattr(FinalHeadTable.c, nasiento_col) == n
                                         ))
-                                db.execute(LocalDetTable.update().where(
-                                    LocalDetTable.c.company_id == company_id,
-                                    LocalDetTable.c.estado == "MIGRADO",
-                                    LocalDetTable.c.subcategoria_id == sub.id
-                                ).values(estado="1"))
-                            except Exception as e:
-                                print(f"Error actualizando estados en only_delete detalles: {e}")
 
-                        remote_det_cols = [c.name for c in FinalDetTable.columns]
-                        insert_list = []
-                        for row in detalle_rows:
-                            r_d = row._mapping
-                            insert_item = {}
-                            for k, v in r_d.items():
-                                if k in remote_det_cols:
-                                    # Safe type cast fallback since mapping raw tables
-                                    if v is not None and hasattr(v, '__float__') and not isinstance(v, str) and str(FinalDetTable.columns[k].type) in ['NUMERIC', 'FLOAT', 'INTEGER']:
-                                        try: insert_item[k] = float(v)
-                                        except: insert_item[k] = None
-                                    else:
-                                        insert_item[k] = v
-                            insert_list.append(insert_item)
-                            
-                        if not only_delete and insert_list:
-                            try:
-                                final_db.execute(FinalDetTable.insert(), insert_list)
-                                migrated_lineas += len(insert_list)
-                                db.execute(LocalDetTable.update().where(
-                                    LocalDetTable.c.company_id == company_id,
-                                    LocalDetTable.c.estado == "1",
-                                    LocalDetTable.c.subcategoria_id == sub.id
+                                if data['header'] and FinalHeadTable is not None:
+                                    h_dict = {k: v for k, v in data['header'].items() if k in remote_head_cols}
+                                    final_db.execute(FinalHeadTable.insert(), [h_dict])
+
+                                if data['details'] and FinalDetTable is not None:
+                                    d_list = []
+                                    for d in data['details']:
+                                        insert_item = {}
+                                        for k, v in d.items():
+                                            if k in remote_det_cols:
+                                                if v is not None and hasattr(v, '__float__') and not isinstance(v, str) and str(FinalDetTable.columns[k].type) in ['NUMERIC', 'FLOAT', 'INTEGER']:
+                                                    try: insert_item[k] = float(v)
+                                                    except: insert_item[k] = None
+                                                else:
+                                                    insert_item[k] = v
+                                        d_list.append(insert_item)
+                                    final_db.execute(FinalDetTable.insert(), d_list)
+
+                            if data['header'] and LocalHeadTable is not None:
+                                db.execute(LocalHeadTable.update().where(
+                                    LocalHeadTable.c.company_id == company_id,
+                                    LocalHeadTable.c.subcategoria_id == sub.id,
+                                    LocalHeadTable.c.cper == p,
+                                    LocalHeadTable.c.cmes == m,
+                                    LocalHeadTable.c.ccodori == o,
+                                    getattr(LocalHeadTable.c, nasiento_col) == n
                                 ).values(estado="MIGRADO"))
-                            except Exception as e:
-                                error_msg = str(e)
-                                print(f"Error bulk inserting details: {error_msg}")
-                                # Try to identify the failing row based on KeyViolation (e.g. cper, ccodcue)
-                                failed_rows = []
-                                import re
-                                match = re.search(r'La llave \(([^)]+)\)=\(([^)]+)\)', error_msg)
-                                if match:
-                                    keys = [k.strip() for k in match.group(1).split(',')]
-                                    vals = [v.strip() for v in match.group(2).split(',')]
-                                    bad_dict = dict(zip(keys, vals))
-                                    for row in insert_list:
-                                        # Convert both to string and stripped for comparison
-                                        is_match = True
-                                        for k, v in bad_dict.items():
-                                            if k in row and str(row[k]).strip() != v:
-                                                is_match = False
-                                                break
-                                        if is_match:
-                                            # Found a suspect row
-                                            failed_rows.append(row)
-                                # Attach the failed rows to the exception so it propagates
-                                if failed_rows:
-                                    e.failed_rows = failed_rows
-                                raise e # Asegurar que el error llegue al bloque final
+                                migrated_cabeceras += 1
 
-                # --- UPDATE SUBCATEGORY CONTROL FIELDS AFTER SUCCESSFUL MIGRATIONS ---
+                            if data['details'] and LocalDetTable is not None:
+                                db.execute(LocalDetTable.update().where(
+                                    LocalDetTable.c.company_id == company_id,
+                                    LocalDetTable.c.subcategoria_id == sub.id,
+                                    LocalDetTable.c.cper == p,
+                                    LocalDetTable.c.cmes == m,
+                                    LocalDetTable.c.ccodori == o,
+                                    getattr(LocalDetTable.c, nasiento_col) == n
+                                ).values(estado="MIGRADO"))
+                                migrated_lineas += len(data['details'])
+
+                        except Exception as e:
+                            failed_rows_raw.append({"seat": f"{p}-{m}-{o}-{n}", "error": str(e)})
+
+                else:
+                    # ═══ MODE B: Direct row-by-row bulk insert (single table, no accounting keys) ═══
+                    # Used for tables like cg_entitrib that don't follow the cf_diario pattern
+                    all_rows = list(detalle_rows) + list(cabeceras_rows)
+                    if not all_rows:
+                        continue
+
+                    # Determine which local and final tables to use
+                    active_local = LocalDetTable if LocalDetTable is not None else LocalHeadTable
+                    active_final = FinalDetTable if FinalDetTable is not None else FinalHeadTable
+                    active_remote_cols = remote_det_cols if remote_det_cols else remote_head_cols
+
+                    if active_local is None or active_final is None:
+                        failed_rows_raw.append({"seat": "Config", "error": f"No se encontró tabla local/final para subcategoría {sub.nombre}"})
+                        continue
+
+                    # Determine a unique key column for overwrite (idcontrol or first available)
+                    upsert_col = None
+                    if allow_overwrite:
+                        for candidate in ['idcontrol', 'codaux', 'rucaux']:
+                            if candidate in active_final.columns and candidate in active_local.columns:
+                                upsert_col = candidate
+                                break
+
+                    for row in all_rows:
+                        r_d = row._mapping
+                        row_label = str(r_d.get('idcontrol', r_d.get('codaux', '?')))[:30]
+                        try:
+                            with final_db.begin_nested():
+                                # Optional overwrite: delete existing row by key
+                                if allow_overwrite and upsert_col and r_d.get(upsert_col) is not None:
+                                    final_db.execute(active_final.delete().where(
+                                        getattr(active_final.c, upsert_col) == r_d.get(upsert_col)
+                                    ))
+
+                                insert_item = {}
+                                for k, v in r_d.items():
+                                    if k in active_remote_cols:
+                                        if v is not None and hasattr(v, '__float__') and not isinstance(v, str) and str(active_final.columns[k].type) in ['NUMERIC', 'FLOAT', 'INTEGER']:
+                                            try: insert_item[k] = float(v)
+                                            except: insert_item[k] = None
+                                        else:
+                                            insert_item[k] = v
+                                final_db.execute(active_final.insert(), [insert_item])
+
+                            # Mark as migrated locally
+                            db.execute(active_local.update().where(
+                                active_local.c.company_id == company_id,
+                                active_local.c.subcategoria_id == sub.id,
+                                active_local.c.id == r_d.get('id')
+                            ).values(estado="MIGRADO"))
+                            migrated_lineas += 1
+
+                        except Exception as e:
+                            failed_rows_raw.append({"seat": row_label, "error": str(e)})
+
+                # Update subcategory tracking states
                 try:
                     from sqlalchemy import func
-                    # 1. Update asiento_inicial based on max nasiento
                     if LocalHeadTable is not None:
-                        nasiento_col = sub.col_destino_nasiento or "nasiento"
                         stmt_max = db.query(func.max(getattr(LocalHeadTable.c, nasiento_col))).filter(
                             LocalHeadTable.c.company_id == company_id,
                             LocalHeadTable.c.subcategoria_id == sub.id,
@@ -2077,16 +2152,39 @@ def migrate_to_final(
                         max_nasiento = db.execute(stmt_max).scalar()
                         if max_nasiento is not None:
                             sub.asiento_inicial = int(max_nasiento) + 1
-
-                    # 2. Update last_generated_control_value based on local staging max instead of breaking the transaction
-                    if getattr(sub, 'control_column_origen', None) and LocalHeadTable is not None:
-                        # Safely skip doing bad selects on SQL server tables. This is handled by ETL now.
-                        pass
                 except Exception as e:
                     print(f"Error updating subcategory control fields for {sub.nombre}: {e}")
-                    db.rollback() # Ensure transaction is clean if it fails
 
+        # Commit everything successful (local states)
         db.commit()
+
+        # Sanitize failed rows
+        sanitized_rows = []
+        if failed_rows_raw:
+            import json
+            from decimal import Decimal
+            from datetime import datetime as _dt, date as _date
+
+            def _sanitize_value(v):
+                if v is None: return None
+                if isinstance(v, Decimal): return float(v)
+                if isinstance(v, (_dt, _date)): return str(v)
+                if isinstance(v, bytes): return v.decode("utf-8", errors="replace")
+                return v
+
+            for row in failed_rows_raw:
+                if isinstance(row, dict):
+                    sanitized_rows.append({k: _sanitize_value(v) for k, v in row.items()})
+                else:
+                    sanitized_rows.append(str(row))
+
+            raise HTTPException(
+                status_code=500, 
+                detail={
+                    "message": f"Migración parcial: {migrated_lineas} líneas migradas y {migrated_cabeceras} cabeceras. Hubo errores en {len(failed_rows_raw)} asientos.",
+                    "failed_rows": sanitized_rows
+                }
+            )
 
         return {
             "message": f"Migración exitosa: {migrated_lineas} líneas y {migrated_cabeceras} cabeceras",
@@ -2095,14 +2193,11 @@ def migrate_to_final(
             "lote_id": lote_id
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
-        failed_rows = getattr(e, "failed_rows", [])
-        # We can't return an HTTPException right here if we are called by run_full_etl,
-        # but since we are sometimes called directly via /migrate-to-final, we must return valid JSON in the detail
-        import json
-        detail_obj = {"message": f"Error en migración al destino final: {str(e)}", "failed_rows": failed_rows}
-        raise HTTPException(status_code=500, detail=detail_obj)
+        raise HTTPException(status_code=500, detail={"message": f"Fallo catastrófico en migración: {str(e)}", "failed_rows": []})
 
 
 @router.get("/cf-diariol")

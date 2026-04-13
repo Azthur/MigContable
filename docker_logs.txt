@@ -1,0 +1,508 @@
+﻿WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:02,930 INFO sqlalchemy.engine.Engine [cached since 155.4s ago] {'table_name': 'SELECT "C_car", "rucaux" FROM "ccbrgdoc"', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:02,931 INFO sqlalchemy.engine.Engine SELECT "C_car", "rucaux" FROM "ccbrgdoc"
+2026-04-13 15:12:02,931 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-04-13 15:12:02,987 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:03,029 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:03,029 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:03,029 INFO sqlalchemy.engine.Engine [cached since 155.5s ago] {'table_name': 'SELECT "C_car", "nomaux" FROM "ccbrgdoc"', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:03,030 INFO sqlalchemy.engine.Engine SELECT "C_car", "nomaux" FROM "ccbrgdoc"
+2026-04-13 15:12:03,030 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-04-13 15:12:03,115 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:03,154 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:03,154 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:03,154 INFO sqlalchemy.engine.Engine [cached since 155.7s ago] {'table_name': 'SELECT "C_car", "mes" FROM "ccbrgdoc"', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:03,155 INFO sqlalchemy.engine.Engine SELECT "C_car", "mes" FROM "ccbrgdoc"
+2026-04-13 15:12:03,155 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-04-13 15:12:03,337 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:03,381 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:03,381 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:03,382 INFO sqlalchemy.engine.Engine [cached since 155.9s ago] {'table_name': 'SELECT "C_car", "flgest" FROM "ccbrgdoc"', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:03,382 INFO sqlalchemy.engine.Engine SELECT "C_car", "flgest" FROM "ccbrgdoc"
+2026-04-13 15:12:03,382 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-04-13 15:12:03,431 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:03,472 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:03,472 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:03,473 INFO sqlalchemy.engine.Engine [cached since 156s ago] {'table_name': 'SELECT "C_car", "impnet" FROM "ccbrgdoc"', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:03,473 INFO sqlalchemy.engine.Engine SELECT "C_car", "impnet" FROM "ccbrgdoc"
+2026-04-13 15:12:03,474 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-04-13 15:12:03,528 INFO sqlalchemy.engine.Engine ROLLBACK
+WARN type mapping df_pending: Execution failed on sql 'INSERT INTO temp_update_vtaritem_6 ("CodCia", anos, coddoc, nrodoc, nroitm, fchdoc, nrogui, nroped, codmat, desmat, nota01, nota02, nota03, nota04, nota05, undvta, facequ, lote, expdte, glosa00, glosa01, glosa02, glosa03, glosa04, candes, preuni, d1, d2, d3, impigv, implin, "FlgEst", "ILinea", nrolote, fchlote, _migration_id, company_id, idcontrol, "C_car", "C_coddoc", codref1, "C_moneda", "C_numercomprobante", "C_puntoventa", "c_Seriedoc", "C_tipocambiosunat", c_total, "C_Dscto", "C_Vtareal", "c_S_total", "C_S_Dscto", "C_S_Vtareal", "c_D_total", "C_D_Dscto", "C_D_Vtareal", "C_Producto", "C_PrudctoCodigo", "C_VTA_TERCEROS", "C_VTA_RELACIONADA", "C_DSCTO_TERCERO", "C_DSCTO_RELACIONADO", tipocliente, "T_tipmon", "C_CuentotalA", "C_igvporcentaje", "C_totalfactura", "C_S_totalfactura", "C_igvimporte", "C_D_totalfactura", "C_S_igvimporte", "C_D_igvimporte", "C_tipoNC", "C_SerieNC", "C_numeroNC", "C_fechaNC", "C_ctaigv", "C_DSCTO_T", "C_CTABASE_F", "C_CTADESCUENTO_F", "C_RUC", "C_RAZONSOCIAL", "C_mes", "C_estado1", c_estado, "C_glosa", "C_fechaEmision", "C_fechaNC_Contasis", "C_basetotal", "C_S_basetotal", "C_D_basetotal", "c_Seriedoc_F", "C_numercomprobante_F") VALUES (:CodCia, :anos, :coddoc, :nrodoc, :nroitm, :fchdoc, :nrogui, :nroped, :codmat, :desmat, :nota01, :nota02, :nota03, :nota04, :nota05, :undvta, :facequ, :lote, :expdte, :glosa00, :glosa01, :glosa02, :glosa03, :glosa04, :candes, :preuni, :d1, :d2, :d3, :impigv, :implin, :FlgEst, :ILinea, :nrolote, :fchlote, :_migration_id, :company_id, :idcontrol, :C_car, :C_coddoc, :codref1, :C_moneda, :C_numercomprobante, :C_puntoventa, :c_Seriedoc, :C_tipocambiosunat, :c_total, :C_Dscto, :C_Vtareal, :c_S_total, :C_S_Dscto, :C_S_Vtareal, :c_D_total, :C_D_Dscto, :C_D_Vtareal, :C_Producto, :C_PrudctoCodigo, :C_VTA_TERCEROS, :C_VTA_RELACIONADA, :C_DSCTO_TERCERO, :C_DSCTO_RELACIONADO, :tipocliente, :T_tipmon, :C_CuentotalA, :C_igvporcentaje, :C_totalfactura, :C_S_totalfactura, :C_igvimporte, :C_D_totalfactura, :C_S_igvimporte, :C_D_igvimporte, :C_tipoNC, :C_SerieNC, :C_numeroNC, :C_fechaNC, :C_ctaigv, :C_DSCTO_T, :C_CTABASE_F, :C_CTADESCUENTO_F, :C_RUC, :C_RAZONSOCIAL, :C_mes, :C_estado1, :c_estado, :C_glosa, :C_fechaEmision, :C_fechaNC_Contasis, :C_basetotal, :C_S_basetotal, :C_D_basetotal, :c_Seriedoc_F, :C_numercomprobante_F)': (psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type bigint: ""
+LINE 1: ...14.87', '002', 'SIC02', '703211002', '703221002', '', '', 'T...
+                                                             ^
+
+[SQL: INSERT INTO temp_update_vtaritem_6 ("CodCia", anos, coddoc, nrodoc, nroitm, fchdoc, nrogui, nroped, codmat, desmat, nota01, nota02, nota03, nota04, nota05, undvta, facequ, lote, expdte, glosa00, glosa01, glosa02, glosa03, glosa04, candes, preuni, d1, ... 635308 characters truncated ... (C_S_basetotal__345)s, %(C_D_basetotal__345)s, %(c_Seriedoc_F__345)s, %(C_numercomprobante_F__345)s)]
+[parameters: {'C_RUC__0': '20603286899', 'codref1__0': '    ', 'ILinea__0': 0.0, 'candes__0': 1.0, 'C_DSCTO_RELACIONADO__0': '74121', 'C_D_igvimporte__0': '4.42', 'C_D_Dscto__0': '0.0', 'fchlote__0': datetime.datetime(1900, 1, 1, 0, 0), 'glosa04__0': '                                                                                                                                                      ', 'nota05__0': '                                                                                                                                                                                    ', 'anos__0': '2026', 'C_coddoc__0': '01', 'C_S_Vtareal__0': '84.75', 'C_numercomprobante__0': '0006794', 'c_Seriedoc__0': 'FA01', 'd3__0': 0.0, 'T_tipmon__0': 'ST', 'nroped__0': '        ', 'idcontrol__0': '003-FACT-A010006794', 'nrogui__0': '          ', 'expdte__0': '                              ', 'C_D_basetotal__0': '24.57', 'C_DSCTO_TERCERO__0': '74111', 'C_Producto__0': '000', 'C_numeroNC__0': ' ', 'C_car__0': 'FACTA010006794', 'c_total__0': 84.75, 'facequ__0': 1.0, 'C_RAZONSOCIAL__0': 'B Y B FARMA SAC.', 'C_glosa__0': 'R.V DEL MAJESTIC -FACT-A010006794-DESARROLLO DE EXPEDIENTES', 'preuni__0': 100.0, 'C_SerieNC__0': ' ', '_migration_id__0': '13099fde-a107-4380-b520-d64db77420ca', 'C_moneda__0': 'S', 'C_VTA_RELACIONADA__0': '70122101', 'codmat__0': '0003                ', 'c_Seriedoc_F__0': '0000000000000000FA01', 'c_estado__0': '', 'nota02__0': '                                                                                                                                                                                    ', 'C_Vtareal__0': 84.75, 'd1__0': 0.0, 'company_id__0': 6, 'glosa01__0': '                                                                                                                                                      ', 'C_D_Vtareal__0': '24.57', 'impigv__0': 0.0, 'C_ctaigv__0': '401111', 'C_CTABASE_F__0': '70121101', 'nota03__0': '                                                                                                                                                                                    ', 'C_tipocambiosunat__0': 3.449, 'nroitm__0': 0.0 ... 31732 parameters truncated ... 'glosa01__345': '33 CAJAS X 06 UND                                                                                                                                     ', 'C_D_Vtareal__345': '864.14', 'impigv__345': 0.0, 'C_ctaigv__345': '401111', 'C_CTABASE_F__345': '70121101', 'nota03__345': '                                                                                                                                                      ', 'C_tipocambiosunat__345': 3.495, 'nroitm__345': 1.0, 'C_igvimporte__345': 0.49, 'C_numercomprobante_F__345': '00000000000000000005', 'C_S_totalfactura__345': '3.2', 'tipocliente__345': 'T', 'C_puntoventa__345': 'F01', 'C_basetotal__345': 2.71, 'CodCia__345': '003', 'c_S_total__345': '3020.17', 'nota04__345': '                                                                                                                                                      ', 'glosa02__345': '                                                                                                                                                      ', 'undvta__345': 'UNID ', 'coddoc__345': 'N/A ', 'implin__345': 3563.8, 'C_DSCTO_T__345': 'NO', 'fchdoc__345': datetime.datetime(2026, 4, 1, 0, 0), 'FlgEst__345': ' ', 'nota01__345': 'PT/LOTE: 2123075                                                                                                                                      ', 'C_VTA_TERCEROS__345': '70121101', 'C_CTADESCUENTO_F__345': '74111', 'C_S_basetotal__345': '2.71', 'C_PrudctoCodigo__345': 'VTAC01', 'nrodoc__345': 'F010000005', 'C_fechaNC__345': datetime.datetime(2025, 11, 28, 0, 0), 'C_estado1__345': 'C', 'C_Dscto__345': 0.0, 'd2__345': 0.0, 'glosa03__345': '                                                                                                                                                      ', 'C_S_igvimporte__345': '0.49', 'C_tipoNC__345': '01', 'C_fechaEmision__345': '2026-04-01', 'C_igvporcentaje__345': 18.0, 'C_totalfactura__345': 3.2, 'lote__345': '                    ', 'C_CuentotalA__345': '121201', 'C_D_totalfactura__345': '0.92', 'glosa00__345': 'PT/LOTE: 2123075                                                                                                                                      ', 'C_mes__345': '01', 'C_S_Dscto__345': '0.0', 'nrolote__345': '2123075             ', 'c_D_total__345': '864.14', 'desmat__345': 'ALCOHOL PURO 96┬░ GALONERA X 4LT.                                                                                                                                                    ', 'C_fechaNC_Contasis__345': '2025-11-28'}]
+(Background on this error at: https://sqlalche.me/e/20/9h9h)
+Error reevaluando formulas en pendientes: (psycopg2.errors.DatatypeMismatch) column "C_VTA_TERCEROS" is of type bigint but expression is of type text
+LINE 3: ...igo" = temp."C_PrudctoCodigo", "C_VTA_TERCEROS" = temp."C_VT...
+                                                             ^
+HINT:  You will need to rewrite or cast the expression.
+
+[SQL: 
+                                UPDATE "vtaritem" t
+                                SET "C_car" = temp."C_car", "C_coddoc" = temp."C_coddoc", "codref1" = temp."codref1", "C_moneda" = temp."C_moneda", "C_numercomprobante" = temp."C_numercomprobante", "C_puntoventa" = temp."C_puntoventa", "c_Seriedoc" = temp."c_Seriedoc", "C_tipocambiosunat" = temp."C_tipocambiosunat", "c_total" = temp."c_total", "C_Dscto" = temp."C_Dscto", "C_Vtareal" = temp."C_Vtareal", "c_S_total" = temp."c_S_total", "C_S_Dscto" = temp."C_S_Dscto", "C_S_Vtareal" = temp."C_S_Vtareal", "c_D_total" = temp."c_D_total", "C_D_Dscto" = temp."C_D_Dscto", "C_D_Vtareal" = temp."C_D_Vtareal", "C_Producto" = temp."C_Producto", "C_PrudctoCodigo" = temp."C_PrudctoCodigo", "C_VTA_TERCEROS" = temp."C_VTA_TERCEROS", "C_VTA_RELACIONADA" = temp."C_VTA_RELACIONADA", "C_DSCTO_TERCERO" = temp."C_DSCTO_TERCERO", "C_DSCTO_RELACIONADO" = temp."C_DSCTO_RELACIONADO", "tipocliente" = temp."tipocliente", "T_tipmon" = temp."T_tipmon", "C_CuentotalA" = temp."C_CuentotalA", "C_igvporcentaje" = temp."C_igvporcentaje", "C_totalfactura" = temp."C_totalfactura", "C_S_totalfactura" = temp."C_S_totalfactura", "C_igvimporte" = temp."C_igvimporte", "C_D_totalfactura" = temp."C_D_totalfactura", "C_S_igvimporte" = temp."C_S_igvimporte", "C_D_igvimporte" = temp."C_D_igvimporte", "C_tipoNC" = temp."C_tipoNC", "C_SerieNC" = temp."C_SerieNC", "C_numeroNC" = temp."C_numeroNC", "C_fechaNC" = temp."C_fechaNC", "C_ctaigv" = temp."C_ctaigv", "C_DSCTO_T" = temp."C_DSCTO_T", "C_CTABASE_F" = temp."C_CTABASE_F", "C_CTADESCUENTO_F" = temp."C_CTADESCUENTO_F", "C_RUC" = temp."C_RUC", "C_RAZONSOCIAL" = temp."C_RAZONSOCIAL", "C_mes" = temp."C_mes", "C_estado1" = temp."C_estado1", "c_estado" = temp."c_estado", "C_glosa" = temp."C_glosa", "C_fechaEmision" = temp."C_fechaEmision", "C_fechaNC_Contasis" = temp."C_fechaNC_Contasis", "C_basetotal" = temp."C_basetotal", "C_S_basetotal" = temp."C_S_basetotal", "C_D_basetotal" = temp."C_D_basetotal", "c_Seriedoc_F" = temp."c_Seriedoc_F", "C_numercomprobante_F" = temp."C_numercomprobante_F"
+                                FROM "temp_update_vtaritem_6" temp
+                                WHERE t."_migration_id" = temp."_migration_id"
+                            ]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-04-13 15:12:04,030 INFO sqlalchemy.engine.Engine UPDATE integ_logs SET status=%(status)s, message=%(message)s WHERE integ_logs.id = %(integ_logs_id)s
+2026-04-13 15:12:04,030 INFO sqlalchemy.engine.Engine [cached since 159.5s ago] {'status': 'SUCCESS', 'message': 'Sin registros nuevos en VtaRItem', 'integ_logs_id': 2022}
+2026-04-13 15:12:04,031 INFO sqlalchemy.engine.Engine COMMIT
+2026-04-13 15:12:04,033 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:04,033 INFO sqlalchemy.engine.Engine SELECT integ_logs.id AS integ_logs_id, integ_logs.company_id AS integ_logs_company_id, integ_logs.process_name AS integ_logs_process_name, integ_logs.status AS integ_logs_status, integ_logs.message AS integ_logs_message, integ_logs.details AS integ_logs_details, integ_logs.records_processed AS integ_logs_records_processed, integ_logs.created_at AS integ_logs_created_at 
+FROM integ_logs 
+WHERE integ_logs.id = %(pk_1)s
+2026-04-13 15:12:04,033 INFO sqlalchemy.engine.Engine [cached since 159.5s ago] {'pk_1': 2022}
+2026-04-13 15:12:04,034 INFO sqlalchemy.engine.Engine SELECT table_selections.id AS table_selections_id, table_selections.company_id AS table_selections_company_id, table_selections.source_connection_id AS table_selections_source_connection_id, table_selections.table_schema AS table_selections_table_schema, table_selections.table_name AS table_selections_table_name, table_selections.is_selected AS table_selections_is_selected, table_selections.extraction_order AS table_selections_extraction_order, table_selections.custom_query AS table_selections_custom_query, table_selections.date_column AS table_selections_date_column, table_selections.control_column AS table_selections_control_column, table_selections.control_column_type AS table_selections_control_column_type, table_selections.description AS table_selections_description, table_selections.created_at AS table_selections_created_at 
+FROM table_selections 
+WHERE table_selections.id = %(pk_1)s
+2026-04-13 15:12:04,034 INFO sqlalchemy.engine.Engine [cached since 159.7s ago] {'pk_1': 32}
+2026-04-13 15:12:04,035 INFO sqlalchemy.engine.Engine SELECT table_selections.id AS table_selections_id, table_selections.company_id AS table_selections_company_id, table_selections.source_connection_id AS table_selections_source_connection_id, table_selections.table_schema AS table_selections_table_schema, table_selections.table_name AS table_selections_table_name, table_selections.is_selected AS table_selections_is_selected, table_selections.extraction_order AS table_selections_extraction_order, table_selections.custom_query AS table_selections_custom_query, table_selections.date_column AS table_selections_date_column, table_selections.control_column AS table_selections_control_column, table_selections.control_column_type AS table_selections_control_column_type, table_selections.description AS table_selections_description, table_selections.created_at AS table_selections_created_at 
+FROM table_selections 
+WHERE table_selections.id = %(pk_1)s
+2026-04-13 15:12:04,035 INFO sqlalchemy.engine.Engine [cached since 159.7s ago] {'pk_1': 33}
+2026-04-13 15:12:04,036 INFO sqlalchemy.engine.Engine SELECT table_selections.id AS table_selections_id, table_selections.company_id AS table_selections_company_id, table_selections.source_connection_id AS table_selections_source_connection_id, table_selections.table_schema AS table_selections_table_schema, table_selections.table_name AS table_selections_table_name, table_selections.is_selected AS table_selections_is_selected, table_selections.extraction_order AS table_selections_extraction_order, table_selections.custom_query AS table_selections_custom_query, table_selections.date_column AS table_selections_date_column, table_selections.control_column AS table_selections_control_column, table_selections.control_column_type AS table_selections_control_column_type, table_selections.description AS table_selections_description, table_selections.created_at AS table_selections_created_at 
+FROM table_selections 
+WHERE table_selections.id = %(id_1)s 
+ LIMIT %(param_1)s
+2026-04-13 15:12:04,036 INFO sqlalchemy.engine.Engine [cached since 159.8s ago] {'id_1': 33, 'param_1': 1}
+2026-04-13 15:12:04,036 INFO sqlalchemy.engine.Engine SELECT source_connections.id AS source_connections_id, source_connections.company_id AS source_connections_company_id, source_connections.db_type AS source_connections_db_type, source_connections.host AS source_connections_host, source_connections.port AS source_connections_port, source_connections.database_name AS source_connections_database_name, source_connections.username AS source_connections_username, source_connections.password AS source_connections_password, source_connections.driver AS source_connections_driver, source_connections.extra_params AS source_connections_extra_params, source_connections.is_active AS source_connections_is_active, source_connections.last_tested_at AS source_connections_last_tested_at, source_connections.last_test_status AS source_connections_last_test_status, source_connections.last_test_message AS source_connections_last_test_message, source_connections.created_at AS source_connections_created_at 
+FROM source_connections 
+WHERE source_connections.company_id = %(company_id_1)s 
+ LIMIT %(param_1)s
+2026-04-13 15:12:04,037 INFO sqlalchemy.engine.Engine [cached since 163.5s ago] {'company_id_1': 6, 'param_1': 1}
+2026-04-13 15:12:04,037 INFO sqlalchemy.engine.Engine SELECT destination_connections.id AS destination_connections_id, destination_connections.company_id AS destination_connections_company_id, destination_connections.host AS destination_connections_host, destination_connections.port AS destination_connections_port, destination_connections.database_name AS destination_connections_database_name, destination_connections.username AS destination_connections_username, destination_connections.password AS destination_connections_password, destination_connections.is_active AS destination_connections_is_active, destination_connections.last_tested_at AS destination_connections_last_tested_at, destination_connections.last_test_status AS destination_connections_last_test_status, destination_connections.last_test_message AS destination_connections_last_test_message, destination_connections.created_at AS destination_connections_created_at 
+FROM destination_connections 
+WHERE destination_connections.company_id = %(company_id_1)s 
+ LIMIT %(param_1)s
+2026-04-13 15:12:04,037 INFO sqlalchemy.engine.Engine [cached since 163.4s ago] {'company_id_1': 6, 'param_1': 1}
+2026-04-13 15:12:04,038 INFO sqlalchemy.engine.Engine SELECT column_filters.id AS column_filters_id, column_filters.table_selection_id AS column_filters_table_selection_id, column_filters.column_name AS column_filters_column_name, column_filters.operator AS column_filters_operator, column_filters.filter_value AS column_filters_filter_value, column_filters.filter_value2 AS column_filters_filter_value2, column_filters.is_active AS column_filters_is_active, column_filters.created_at AS column_filters_created_at 
+FROM column_filters 
+WHERE column_filters.table_selection_id = %(table_selection_id_1)s AND column_filters.is_active = true
+2026-04-13 15:12:04,038 INFO sqlalchemy.engine.Engine [cached since 159.8s ago] {'table_selection_id_1': 33}
+2026-04-13 15:12:04,038 INFO sqlalchemy.engine.Engine SELECT migration_controls.id AS migration_controls_id, migration_controls.company_id AS migration_controls_company_id, migration_controls.source_table AS migration_controls_source_table, migration_controls.control_column AS migration_controls_control_column, migration_controls.last_migrated_value AS migration_controls_last_migrated_value, migration_controls.total_migrated AS migration_controls_total_migrated, migration_controls.last_run_at AS migration_controls_last_run_at, migration_controls.last_run_status AS migration_controls_last_run_status, migration_controls.last_run_message AS migration_controls_last_run_message, migration_controls.created_at AS migration_controls_created_at 
+FROM migration_controls 
+WHERE migration_controls.company_id = %(company_id_1)s AND migration_controls.source_table = %(source_table_1)s 
+ LIMIT %(param_1)s
+2026-04-13 15:12:04,039 INFO sqlalchemy.engine.Engine [cached since 159.8s ago] {'company_id_1': 6, 'source_table_1': 'CbdMAuxi', 'param_1': 1}
+2026-04-13 15:12:04,042 INFO sqlalchemy.engine.Engine INSERT INTO integ_logs (company_id, process_name, status, message, details, records_processed) VALUES (%(company_id)s, %(process_name)s, %(status)s, %(message)s, %(details)s, %(records_processed)s) RETURNING integ_logs.id, integ_logs.created_at
+2026-04-13 15:12:04,042 INFO sqlalchemy.engine.Engine [cached since 159.8s ago] {'company_id': 6, 'process_name': 'ETL Incremental - CbdMAuxi', 'status': 'RUNNING', 'message': 'DEBUG: p_style=qmark query=SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ? | Iniciando extracci├│n...', 'details': None, 'records_processed': 0}
+2026-04-13 15:12:04,043 INFO sqlalchemy.engine.Engine COMMIT
+2026-04-13 15:12:04,046 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:04,046 INFO sqlalchemy.engine.Engine SELECT computed_column_rules.id AS computed_column_rules_id, computed_column_rules.table_selection_id AS computed_column_rules_table_selection_id, computed_column_rules.new_column_name AS computed_column_rules_new_column_name, computed_column_rules.source_column AS computed_column_rules_source_column, computed_column_rules.condition_value AS computed_column_rules_condition_value, computed_column_rules.result_value AS computed_column_rules_result_value, computed_column_rules.default_value AS computed_column_rules_default_value, computed_column_rules.priority AS computed_column_rules_priority, computed_column_rules.is_active AS computed_column_rules_is_active, computed_column_rules.created_at AS computed_column_rules_created_at 
+FROM computed_column_rules 
+WHERE computed_column_rules.table_selection_id = %(table_selection_id_1)s AND computed_column_rules.is_active = true ORDER BY computed_column_rules.priority
+2026-04-13 15:12:04,046 INFO sqlalchemy.engine.Engine [cached since 159.8s ago] {'table_selection_id_1': 33}
+2026-04-13 15:12:04,047 INFO sqlalchemy.engine.Engine SELECT source_connections.id AS source_connections_id, source_connections.company_id AS source_connections_company_id, source_connections.db_type AS source_connections_db_type, source_connections.host AS source_connections_host, source_connections.port AS source_connections_port, source_connections.database_name AS source_connections_database_name, source_connections.username AS source_connections_username, source_connections.password AS source_connections_password, source_connections.driver AS source_connections_driver, source_connections.extra_params AS source_connections_extra_params, source_connections.is_active AS source_connections_is_active, source_connections.last_tested_at AS source_connections_last_tested_at, source_connections.last_test_status AS source_connections_last_test_status, source_connections.last_test_message AS source_connections_last_test_message, source_connections.created_at AS source_connections_created_at 
+docker : /app/backend/app/api/endpoints/etl.py:242: UserWarning: pandas only supports SQLAlchemy connectable 
+(engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please 
+consider using SQLAlchemy.
+En línea: 1 Carácter: 1
++ docker logs sistemamigconta-app --tail 500 2>&1 | Out-File -FilePath  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (/app/backend/ap...ing SQLAlchemy.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  df = pd.read_sql(query, raw_conn, params=tuple(params))
+FROM source_connections 
+WHERE source_connections.id = %(pk_1)s
+2026-04-13 15:12:04,047 INFO sqlalchemy.engine.Engine [cached since 159.8s ago] {'pk_1': 6}
+2026-04-13 15:12:04,048 INFO sqlalchemy.engine.Engine SELECT destination_connections.id AS destination_connections_id, destination_connections.company_id AS destination_connections_company_id, destination_connections.host AS destination_connections_host, destination_connections.port AS destination_connections_port, destination_connections.database_name AS destination_connections_database_name, destination_connections.username AS destination_connections_username, destination_connections.password AS destination_connections_password, destination_connections.is_active AS destination_connections_is_active, destination_connections.last_tested_at AS destination_connections_last_tested_at, destination_connections.last_test_status AS destination_connections_last_test_status, destination_connections.last_test_message AS destination_connections_last_test_message, destination_connections.created_at AS destination_connections_created_at 
+FROM destination_connections 
+WHERE destination_connections.id = %(pk_1)s
+2026-04-13 15:12:04,048 INFO sqlalchemy.engine.Engine [cached since 159.8s ago] {'pk_1': 6}
+2026-04-13 15:12:04,112 INFO sqlalchemy.engine.Engine SELECT table_selections.id AS table_selections_id, table_selections.company_id AS table_selections_company_id, table_selections.source_connection_id AS table_selections_source_connection_id, table_selections.table_schema AS table_selections_table_schema, table_selections.table_name AS table_selections_table_name, table_selections.is_selected AS table_selections_is_selected, table_selections.extraction_order AS table_selections_extraction_order, table_selections.custom_query AS table_selections_custom_query, table_selections.date_column AS table_selections_date_column, table_selections.control_column AS table_selections_control_column, table_selections.control_column_type AS table_selections_control_column_type, table_selections.description AS table_selections_description, table_selections.created_at AS table_selections_created_at 
+FROM table_selections 
+WHERE table_selections.id = %(pk_1)s
+2026-04-13 15:12:04,112 INFO sqlalchemy.engine.Engine [cached since 159.8s ago] {'pk_1': 33}
+DEBUG ETL: Incremental computing rules for cbdmauxi
+DEBUG ETL: df_pending length is 630
+DEBUG ETL: Running __apply_computed_rules
+2026-04-13 15:12:04,274 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:04,275 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:04,275 INFO sqlalchemy.engine.Engine [cached since 156.8s ago] {'table_name': 'SELECT "codaux", "codcia" FROM "ccbrgdoc"', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:04,276 INFO sqlalchemy.engine.Engine SELECT "codaux", "codcia" FROM "ccbrgdoc"
+2026-04-13 15:12:04,276 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-04-13 15:12:04,458 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:04,749 INFO sqlalchemy.engine.Engine SELECT integ_logs.id AS integ_logs_id, integ_logs.company_id AS integ_logs_company_id, integ_logs.process_name AS integ_logs_process_name, integ_logs.status AS integ_logs_status, integ_logs.message AS integ_logs_message, integ_logs.details AS integ_logs_details, integ_logs.records_processed AS integ_logs_records_processed, integ_logs.created_at AS integ_logs_created_at 
+FROM integ_logs 
+WHERE integ_logs.id = %(pk_1)s
+2026-04-13 15:12:04,750 INFO sqlalchemy.engine.Engine [cached since 160.2s ago] {'pk_1': 2023}
+DEBUG ETL: log.message is now DEBUG: p_style=qmark query=SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ? | Iniciando extracci├│n... | F├│rmulas actualizadas en 630 registros pendientes
+2026-04-13 15:12:04,756 INFO sqlalchemy.engine.Engine UPDATE integ_logs SET status=%(status)s, message=%(message)s WHERE integ_logs.id = %(integ_logs_id)s
+2026-04-13 15:12:04,756 INFO sqlalchemy.engine.Engine [cached since 160.2s ago] {'status': 'SUCCESS', 'message': 'Sin registros nuevos en CbdMAuxi DEBUG: p_style=qmark query=SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ? | Iniciando extracci├│n... | F├│rmulas actualizadas en 630 registros pendientes', 'integ_logs_id': 2023}
+2026-04-13 15:12:04,756 INFO sqlalchemy.engine.Engine COMMIT
+2026-04-13 15:12:04,759 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:04,760 INFO sqlalchemy.engine.Engine SELECT integ_logs.id AS integ_logs_id, integ_logs.company_id AS integ_logs_company_id, integ_logs.process_name AS integ_logs_process_name, integ_logs.status AS integ_logs_status, integ_logs.message AS integ_logs_message, integ_logs.details AS integ_logs_details, integ_logs.records_processed AS integ_logs_records_processed, integ_logs.created_at AS integ_logs_created_at 
+FROM integ_logs 
+WHERE integ_logs.id = %(pk_1)s
+2026-04-13 15:12:04,760 INFO sqlalchemy.engine.Engine [cached since 160.2s ago] {'pk_1': 2023}
+2026-04-13 15:12:04,761 INFO sqlalchemy.engine.Engine SELECT table_selections.id AS table_selections_id, table_selections.company_id AS table_selections_company_id, table_selections.source_connection_id AS table_selections_source_connection_id, table_selections.table_schema AS table_selections_table_schema, table_selections.table_name AS table_selections_table_name, table_selections.is_selected AS table_selections_is_selected, table_selections.extraction_order AS table_selections_extraction_order, table_selections.custom_query AS table_selections_custom_query, table_selections.date_column AS table_selections_date_column, table_selections.control_column AS table_selections_control_column, table_selections.control_column_type AS table_selections_control_column_type, table_selections.description AS table_selections_description, table_selections.created_at AS table_selections_created_at 
+FROM table_selections 
+WHERE table_selections.id = %(pk_1)s
+2026-04-13 15:12:04,761 INFO sqlalchemy.engine.Engine [cached since 160.4s ago] {'pk_1': 33}
+2026-04-13 15:12:04,762 INFO sqlalchemy.engine.Engine SELECT integ_logs.id AS integ_logs_id, integ_logs.company_id AS integ_logs_company_id, integ_logs.process_name AS integ_logs_process_name, integ_logs.details AS integ_logs_details, integ_logs.created_at AS integ_logs_created_at 
+FROM integ_logs 
+WHERE integ_logs.id = %(pk_1)s
+2026-04-13 15:12:04,762 INFO sqlalchemy.engine.Engine [cached since 149.5s ago] {'pk_1': 2015}
+2026-04-13 15:12:04,763 INFO sqlalchemy.engine.Engine UPDATE integ_logs SET status=%(status)s, message=%(message)s, records_processed=%(records_processed)s WHERE integ_logs.id = %(integ_logs_id)s
+2026-04-13 15:12:04,763 INFO sqlalchemy.engine.Engine [cached since 158.1s ago] {'status': 'SUCCESS', 'message': 'ETL finalizado. 0 registros extra├¡dos de 8 tablas.', 'records_processed': 0, 'integ_logs_id': 2015}
+2026-04-13 15:12:04,764 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     172.18.0.1:56618 - "POST /api/v1/etl/run-etl/?company_id=6 HTTP/1.1" 200 OK
+2026-04-13 15:12:08,119 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,119 INFO sqlalchemy.engine.Engine SELECT table_selections.id AS table_selections_id, table_selections.company_id AS table_selections_company_id, table_selections.source_connection_id AS table_selections_source_connection_id, table_selections.table_schema AS table_selections_table_schema, table_selections.table_name AS table_selections_table_name, table_selections.is_selected AS table_selections_is_selected, table_selections.extraction_order AS table_selections_extraction_order, table_selections.custom_query AS table_selections_custom_query, table_selections.date_column AS table_selections_date_column, table_selections.control_column AS table_selections_control_column, table_selections.control_column_type AS table_selections_control_column_type, table_selections.description AS table_selections_description, table_selections.created_at AS table_selections_created_at 
+FROM table_selections JOIN source_connections ON source_connections.id = table_selections.source_connection_id 
+WHERE source_connections.company_id = %(company_id_1)s AND table_selections.is_selected = true
+2026-04-13 15:12:08,119 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'company_id_1': 6}
+2026-04-13 15:12:08,121 INFO sqlalchemy.engine.Engine 
+            SELECT s.tabla_origen
+            FROM mapeo_subcategorias s
+            JOIN mapeo_categorias c ON s.categoria_id = c.id
+            WHERE c.company_id = %(company_id)s AND s.is_active = true AND s.tabla_origen IS NOT NULL
+        
+2026-04-13 15:12:08,121 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'company_id': 6}
+2026-04-13 15:12:08,121 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,121 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:08,121 INFO sqlalchemy.engine.Engine [cached since 160.6s ago] {'table_name': 'ccbtabla', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:08,122 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,123 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,123 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_attribute.attname AS name, pg_catalog.format_type(pg_catalog.pg_attribute.atttypid, pg_catalog.pg_attribute.atttypmod) AS format_type, (SELECT pg_catalog.pg_get_expr(pg_catalog.pg_attrdef.adbin, pg_catalog.pg_attrdef.adrelid) AS pg_get_expr_1 
+FROM pg_catalog.pg_attrdef 
+WHERE pg_catalog.pg_attrdef.adrelid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attrdef.adnum = pg_catalog.pg_attribute.attnum AND pg_catalog.pg_attribute.atthasdef) AS "default", pg_catalog.pg_attribute.attnotnull AS not_null, pg_catalog.pg_class.relname AS table_name, pg_catalog.pg_description.description AS comment, pg_catalog.pg_attribute.attgenerated AS generated, (SELECT json_build_object(%(json_build_object_2)s, pg_catalog.pg_attribute.attidentity = %(attidentity_1)s, %(json_build_object_3)s, pg_catalog.pg_sequence.seqstart, %(json_build_object_4)s, pg_catalog.pg_sequence.seqincrement, %(json_build_object_5)s, pg_catalog.pg_sequence.seqmin, %(json_build_object_6)s, pg_catalog.pg_sequence.seqmax, %(json_build_object_7)s, pg_catalog.pg_sequence.seqcache, %(json_build_object_8)s, pg_catalog.pg_sequence.seqcycle) AS json_build_object_1 
+FROM pg_catalog.pg_sequence 
+WHERE pg_catalog.pg_attribute.attidentity != %(attidentity_2)s AND pg_catalog.pg_sequence.seqrelid = CAST(CAST(pg_catalog.pg_get_serial_sequence(CAST(CAST(pg_catalog.pg_attribute.attrelid AS REGCLASS) AS TEXT), pg_catalog.pg_attribute.attname) AS REGCLASS) AS OID)) AS identity_options, CASE WHEN (pg_catalog.pg_attribute.attcollation != %(attcollation_1)s AND (SELECT pg_catalog.pg_type.typcollation 
+FROM pg_catalog.pg_type 
+WHERE pg_catalog.pg_type.oid = pg_catalog.pg_attribute.atttypid) != pg_catalog.pg_attribute.attcollation) THEN (SELECT pg_catalog.pg_collation.collname 
+FROM pg_catalog.pg_collation 
+WHERE pg_catalog.pg_collation.oid = pg_catalog.pg_attribute.attcollation) ELSE NULL END AS collation 
+FROM pg_catalog.pg_class LEFT OUTER JOIN pg_catalog.pg_attribute ON pg_catalog.pg_class.oid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attribute.attnum > %(attnum_1)s AND NOT pg_catalog.pg_attribute.attisdropped LEFT OUTER JOIN pg_catalog.pg_description ON pg_catalog.pg_description.objoid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_description.objsubid = pg_catalog.pg_attribute.attnum JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s AND pg_catalog.pg_class.relname IN (%(filter_names_1)s) ORDER BY pg_catalog.pg_class.relname, pg_catalog.pg_attribute.attnum
+2026-04-13 15:12:08,123 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'json_build_object_2': 'always', 'attidentity_1': 'a', 'json_build_object_3': 'start', 'json_build_object_4': 'increment', 'json_build_object_5': 'minvalue', 'json_build_object_6': 'maxvalue', 'json_build_object_7': 'cache', 'json_build_object_8': 'cycle', 'attidentity_2': '', 'attcollation_1': 0, 'attnum_1': 0, 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog', 'filter_names_1': 'ccbtabla'}
+2026-04-13 15:12:08,124 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname AS name, pg_catalog.format_type(pg_catalog.pg_type.typbasetype, pg_catalog.pg_type.typtypmod) AS attype, NOT pg_catalog.pg_type.typnotnull AS nullable, pg_catalog.pg_type.typdefault AS "default", pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AS visible, pg_catalog.pg_namespace.nspname AS schema, domain_constraints.condefs, domain_constraints.connames, pg_catalog.pg_collation.collname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace LEFT OUTER JOIN pg_catalog.pg_collation ON pg_catalog.pg_type.typcollation = pg_catalog.pg_collation.oid LEFT OUTER JOIN (SELECT pg_catalog.pg_constraint.contypid AS contypid, array_agg(pg_catalog.pg_get_constraintdef(pg_catalog.pg_constraint.oid, %(pg_get_constraintdef_1)s)) AS condefs, array_agg(CAST(pg_catalog.pg_constraint.conname AS TEXT)) AS connames 
+FROM pg_catalog.pg_constraint 
+WHERE pg_catalog.pg_constraint.contypid != %(contypid_1)s GROUP BY pg_catalog.pg_constraint.contypid) AS domain_constraints ON pg_catalog.pg_type.oid = domain_constraints.contypid 
+WHERE pg_catalog.pg_type.typtype = %(typtype_1)s ORDER BY pg_catalog.pg_namespace.nspname, pg_catalog.pg_type.typname
+2026-04-13 15:12:08,125 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'pg_get_constraintdef_1': True, 'contypid_1': 0, 'typtype_1': 'd'}
+2026-04-13 15:12:08,125 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname AS name, pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AS visible, pg_catalog.pg_namespace.nspname AS schema, lbl_agg.labels AS labels 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace LEFT OUTER JOIN (SELECT pg_catalog.pg_enum.enumtypid AS enumtypid, array_agg(CAST(pg_catalog.pg_enum.enumlabel AS TEXT) ORDER BY pg_catalog.pg_enum.enumsortorder) AS labels 
+FROM pg_catalog.pg_enum GROUP BY pg_catalog.pg_enum.enumtypid) AS lbl_agg ON pg_catalog.pg_type.oid = lbl_agg.enumtypid 
+WHERE pg_catalog.pg_type.typtype = %(typtype_1)s ORDER BY pg_catalog.pg_namespace.nspname, pg_catalog.pg_type.typname
+2026-04-13 15:12:08,126 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'typtype_1': 'e'}
+2026-04-13 15:12:08,126 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,127 INFO sqlalchemy.engine.Engine SELECT count(*) FROM "ccbtabla" WHERE company_id = %(company_id)s
+2026-04-13 15:12:08,127 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'company_id': 6}
+2026-04-13 15:12:08,128 INFO sqlalchemy.engine.Engine SELECT * FROM "ccbtabla" WHERE company_id = %(company_id)s LIMIT %(limit)s OFFSET %(skip)s
+2026-04-13 15:12:08,128 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'company_id': 6, 'limit': 1000000, 'skip': 0}
+2026-04-13 15:12:08,129 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,129 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:08,129 INFO sqlalchemy.engine.Engine [cached since 160.6s ago] {'table_name': 'ccbmvtos', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:08,130 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,131 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,131 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_attribute.attname AS name, pg_catalog.format_type(pg_catalog.pg_attribute.atttypid, pg_catalog.pg_attribute.atttypmod) AS format_type, (SELECT pg_catalog.pg_get_expr(pg_catalog.pg_attrdef.adbin, pg_catalog.pg_attrdef.adrelid) AS pg_get_expr_1 
+FROM pg_catalog.pg_attrdef 
+WHERE pg_catalog.pg_attrdef.adrelid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attrdef.adnum = pg_catalog.pg_attribute.attnum AND pg_catalog.pg_attribute.atthasdef) AS "default", pg_catalog.pg_attribute.attnotnull AS not_null, pg_catalog.pg_class.relname AS table_name, pg_catalog.pg_description.description AS comment, pg_catalog.pg_attribute.attgenerated AS generated, (SELECT json_build_object(%(json_build_object_2)s, pg_catalog.pg_attribute.attidentity = %(attidentity_1)s, %(json_build_object_3)s, pg_catalog.pg_sequence.seqstart, %(json_build_object_4)s, pg_catalog.pg_sequence.seqincrement, %(json_build_object_5)s, pg_catalog.pg_sequence.seqmin, %(json_build_object_6)s, pg_catalog.pg_sequence.seqmax, %(json_build_object_7)s, pg_catalog.pg_sequence.seqcache, %(json_build_object_8)s, pg_catalog.pg_sequence.seqcycle) AS json_build_object_1 
+FROM pg_catalog.pg_sequence 
+WHERE pg_catalog.pg_attribute.attidentity != %(attidentity_2)s AND pg_catalog.pg_sequence.seqrelid = CAST(CAST(pg_catalog.pg_get_serial_sequence(CAST(CAST(pg_catalog.pg_attribute.attrelid AS REGCLASS) AS TEXT), pg_catalog.pg_attribute.attname) AS REGCLASS) AS OID)) AS identity_options, CASE WHEN (pg_catalog.pg_attribute.attcollation != %(attcollation_1)s AND (SELECT pg_catalog.pg_type.typcollation 
+FROM pg_catalog.pg_type 
+WHERE pg_catalog.pg_type.oid = pg_catalog.pg_attribute.atttypid) != pg_catalog.pg_attribute.attcollation) THEN (SELECT pg_catalog.pg_collation.collname 
+FROM pg_catalog.pg_collation 
+WHERE pg_catalog.pg_collation.oid = pg_catalog.pg_attribute.attcollation) ELSE NULL END AS collation 
+FROM pg_catalog.pg_class LEFT OUTER JOIN pg_catalog.pg_attribute ON pg_catalog.pg_class.oid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attribute.attnum > %(attnum_1)s AND NOT pg_catalog.pg_attribute.attisdropped LEFT OUTER JOIN pg_catalog.pg_description ON pg_catalog.pg_description.objoid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_description.objsubid = pg_catalog.pg_attribute.attnum JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s AND pg_catalog.pg_class.relname IN (%(filter_names_1)s) ORDER BY pg_catalog.pg_class.relname, pg_catalog.pg_attribute.attnum
+2026-04-13 15:12:08,131 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'json_build_object_2': 'always', 'attidentity_1': 'a', 'json_build_object_3': 'start', 'json_build_object_4': 'increment', 'json_build_object_5': 'minvalue', 'json_build_object_6': 'maxvalue', 'json_build_object_7': 'cache', 'json_build_object_8': 'cycle', 'attidentity_2': '', 'attcollation_1': 0, 'attnum_1': 0, 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog', 'filter_names_1': 'ccbmvtos'}
+2026-04-13 15:12:08,133 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,134 INFO sqlalchemy.engine.Engine SELECT count(*) FROM "ccbmvtos" WHERE company_id = %(company_id)s
+2026-04-13 15:12:08,134 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'company_id': 6}
+2026-04-13 15:12:08,141 INFO sqlalchemy.engine.Engine SELECT * FROM "ccbmvtos" WHERE company_id = %(company_id)s LIMIT %(limit)s OFFSET %(skip)s
+2026-04-13 15:12:08,141 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'company_id': 6, 'limit': 1000000, 'skip': 0}
+2026-04-13 15:12:08,159 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,160 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:08,160 INFO sqlalchemy.engine.Engine [cached since 160.7s ago] {'table_name': 'ccbrgdoc', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:08,160 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,161 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,161 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_attribute.attname AS name, pg_catalog.format_type(pg_catalog.pg_attribute.atttypid, pg_catalog.pg_attribute.atttypmod) AS format_type, (SELECT pg_catalog.pg_get_expr(pg_catalog.pg_attrdef.adbin, pg_catalog.pg_attrdef.adrelid) AS pg_get_expr_1 
+FROM pg_catalog.pg_attrdef 
+WHERE pg_catalog.pg_attrdef.adrelid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attrdef.adnum = pg_catalog.pg_attribute.attnum AND pg_catalog.pg_attribute.atthasdef) AS "default", pg_catalog.pg_attribute.attnotnull AS not_null, pg_catalog.pg_class.relname AS table_name, pg_catalog.pg_description.description AS comment, pg_catalog.pg_attribute.attgenerated AS generated, (SELECT json_build_object(%(json_build_object_2)s, pg_catalog.pg_attribute.attidentity = %(attidentity_1)s, %(json_build_object_3)s, pg_catalog.pg_sequence.seqstart, %(json_build_object_4)s, pg_catalog.pg_sequence.seqincrement, %(json_build_object_5)s, pg_catalog.pg_sequence.seqmin, %(json_build_object_6)s, pg_catalog.pg_sequence.seqmax, %(json_build_object_7)s, pg_catalog.pg_sequence.seqcache, %(json_build_object_8)s, pg_catalog.pg_sequence.seqcycle) AS json_build_object_1 
+FROM pg_catalog.pg_sequence 
+WHERE pg_catalog.pg_attribute.attidentity != %(attidentity_2)s AND pg_catalog.pg_sequence.seqrelid = CAST(CAST(pg_catalog.pg_get_serial_sequence(CAST(CAST(pg_catalog.pg_attribute.attrelid AS REGCLASS) AS TEXT), pg_catalog.pg_attribute.attname) AS REGCLASS) AS OID)) AS identity_options, CASE WHEN (pg_catalog.pg_attribute.attcollation != %(attcollation_1)s AND (SELECT pg_catalog.pg_type.typcollation 
+FROM pg_catalog.pg_type 
+WHERE pg_catalog.pg_type.oid = pg_catalog.pg_attribute.atttypid) != pg_catalog.pg_attribute.attcollation) THEN (SELECT pg_catalog.pg_collation.collname 
+FROM pg_catalog.pg_collation 
+WHERE pg_catalog.pg_collation.oid = pg_catalog.pg_attribute.attcollation) ELSE NULL END AS collation 
+FROM pg_catalog.pg_class LEFT OUTER JOIN pg_catalog.pg_attribute ON pg_catalog.pg_class.oid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attribute.attnum > %(attnum_1)s AND NOT pg_catalog.pg_attribute.attisdropped LEFT OUTER JOIN pg_catalog.pg_description ON pg_catalog.pg_description.objoid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_description.objsubid = pg_catalog.pg_attribute.attnum JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s AND pg_catalog.pg_class.relname IN (%(filter_names_1)s) ORDER BY pg_catalog.pg_class.relname, pg_catalog.pg_attribute.attnum
+2026-04-13 15:12:08,161 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'json_build_object_2': 'always', 'attidentity_1': 'a', 'json_build_object_3': 'start', 'json_build_object_4': 'increment', 'json_build_object_5': 'minvalue', 'json_build_object_6': 'maxvalue', 'json_build_object_7': 'cache', 'json_build_object_8': 'cycle', 'attidentity_2': '', 'attcollation_1': 0, 'attnum_1': 0, 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog', 'filter_names_1': 'ccbrgdoc'}
+2026-04-13 15:12:08,163 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,164 INFO sqlalchemy.engine.Engine SELECT count(*) FROM "ccbrgdoc" WHERE company_id = %(company_id)s
+2026-04-13 15:12:08,164 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'company_id': 6}
+2026-04-13 15:12:08,183 INFO sqlalchemy.engine.Engine SELECT * FROM "ccbrgdoc" WHERE company_id = %(company_id)s LIMIT %(limit)s OFFSET %(skip)s
+2026-04-13 15:12:08,183 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'company_id': 6, 'limit': 1000000, 'skip': 0}
+2026-04-13 15:12:08,304 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,304 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:08,304 INFO sqlalchemy.engine.Engine [cached since 160.8s ago] {'table_name': 'postarje', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:08,305 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,305 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,305 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_attribute.attname AS name, pg_catalog.format_type(pg_catalog.pg_attribute.atttypid, pg_catalog.pg_attribute.atttypmod) AS format_type, (SELECT pg_catalog.pg_get_expr(pg_catalog.pg_attrdef.adbin, pg_catalog.pg_attrdef.adrelid) AS pg_get_expr_1 
+FROM pg_catalog.pg_attrdef 
+WHERE pg_catalog.pg_attrdef.adrelid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attrdef.adnum = pg_catalog.pg_attribute.attnum AND pg_catalog.pg_attribute.atthasdef) AS "default", pg_catalog.pg_attribute.attnotnull AS not_null, pg_catalog.pg_class.relname AS table_name, pg_catalog.pg_description.description AS comment, pg_catalog.pg_attribute.attgenerated AS generated, (SELECT json_build_object(%(json_build_object_2)s, pg_catalog.pg_attribute.attidentity = %(attidentity_1)s, %(json_build_object_3)s, pg_catalog.pg_sequence.seqstart, %(json_build_object_4)s, pg_catalog.pg_sequence.seqincrement, %(json_build_object_5)s, pg_catalog.pg_sequence.seqmin, %(json_build_object_6)s, pg_catalog.pg_sequence.seqmax, %(json_build_object_7)s, pg_catalog.pg_sequence.seqcache, %(json_build_object_8)s, pg_catalog.pg_sequence.seqcycle) AS json_build_object_1 
+FROM pg_catalog.pg_sequence 
+WHERE pg_catalog.pg_attribute.attidentity != %(attidentity_2)s AND pg_catalog.pg_sequence.seqrelid = CAST(CAST(pg_catalog.pg_get_serial_sequence(CAST(CAST(pg_catalog.pg_attribute.attrelid AS REGCLASS) AS TEXT), pg_catalog.pg_attribute.attname) AS REGCLASS) AS OID)) AS identity_options, CASE WHEN (pg_catalog.pg_attribute.attcollation != %(attcollation_1)s AND (SELECT pg_catalog.pg_type.typcollation 
+FROM pg_catalog.pg_type 
+WHERE pg_catalog.pg_type.oid = pg_catalog.pg_attribute.atttypid) != pg_catalog.pg_attribute.attcollation) THEN (SELECT pg_catalog.pg_collation.collname 
+FROM pg_catalog.pg_collation 
+WHERE pg_catalog.pg_collation.oid = pg_catalog.pg_attribute.attcollation) ELSE NULL END AS collation 
+FROM pg_catalog.pg_class LEFT OUTER JOIN pg_catalog.pg_attribute ON pg_catalog.pg_class.oid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attribute.attnum > %(attnum_1)s AND NOT pg_catalog.pg_attribute.attisdropped LEFT OUTER JOIN pg_catalog.pg_description ON pg_catalog.pg_description.objoid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_description.objsubid = pg_catalog.pg_attribute.attnum JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s AND pg_catalog.pg_class.relname IN (%(filter_names_1)s) ORDER BY pg_catalog.pg_class.relname, pg_catalog.pg_attribute.attnum
+2026-04-13 15:12:08,305 INFO sqlalchemy.engine.Engine [cached since 140.8s ago] {'json_build_object_2': 'always', 'attidentity_1': 'a', 'json_build_object_3': 'start', 'json_build_object_4': 'increment', 'json_build_object_5': 'minvalue', 'json_build_object_6': 'maxvalue', 'json_build_object_7': 'cache', 'json_build_object_8': 'cycle', 'attidentity_2': '', 'attcollation_1': 0, 'attnum_1': 0, 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog', 'filter_names_1': 'postarje'}
+2026-04-13 15:12:08,307 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,308 INFO sqlalchemy.engine.Engine SELECT count(*) FROM "postarje" WHERE company_id = %(company_id)s
+2026-04-13 15:12:08,308 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'company_id': 6}
+2026-04-13 15:12:08,309 INFO sqlalchemy.engine.Engine SELECT * FROM "postarje" WHERE company_id = %(company_id)s LIMIT %(limit)s OFFSET %(skip)s
+2026-04-13 15:12:08,309 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'company_id': 6, 'limit': 1000000, 'skip': 0}
+2026-04-13 15:12:08,312 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,312 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:08,312 INFO sqlalchemy.engine.Engine [cached since 160.8s ago] {'table_name': 'admcaja', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:08,313 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,313 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,313 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_attribute.attname AS name, pg_catalog.format_type(pg_catalog.pg_attribute.atttypid, pg_catalog.pg_attribute.atttypmod) AS format_type, (SELECT pg_catalog.pg_get_expr(pg_catalog.pg_attrdef.adbin, pg_catalog.pg_attrdef.adrelid) AS pg_get_expr_1 
+FROM pg_catalog.pg_attrdef 
+WHERE pg_catalog.pg_attrdef.adrelid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attrdef.adnum = pg_catalog.pg_attribute.attnum AND pg_catalog.pg_attribute.atthasdef) AS "default", pg_catalog.pg_attribute.attnotnull AS not_null, pg_catalog.pg_class.relname AS table_name, pg_catalog.pg_description.description AS comment, pg_catalog.pg_attribute.attgenerated AS generated, (SELECT json_build_object(%(json_build_object_2)s, pg_catalog.pg_attribute.attidentity = %(attidentity_1)s, %(json_build_object_3)s, pg_catalog.pg_sequence.seqstart, %(json_build_object_4)s, pg_catalog.pg_sequence.seqincrement, %(json_build_object_5)s, pg_catalog.pg_sequence.seqmin, %(json_build_object_6)s, pg_catalog.pg_sequence.seqmax, %(json_build_object_7)s, pg_catalog.pg_sequence.seqcache, %(json_build_object_8)s, pg_catalog.pg_sequence.seqcycle) AS json_build_object_1 
+FROM pg_catalog.pg_sequence 
+WHERE pg_catalog.pg_attribute.attidentity != %(attidentity_2)s AND pg_catalog.pg_sequence.seqrelid = CAST(CAST(pg_catalog.pg_get_serial_sequence(CAST(CAST(pg_catalog.pg_attribute.attrelid AS REGCLASS) AS TEXT), pg_catalog.pg_attribute.attname) AS REGCLASS) AS OID)) AS identity_options, CASE WHEN (pg_catalog.pg_attribute.attcollation != %(attcollation_1)s AND (SELECT pg_catalog.pg_type.typcollation 
+FROM pg_catalog.pg_type 
+WHERE pg_catalog.pg_type.oid = pg_catalog.pg_attribute.atttypid) != pg_catalog.pg_attribute.attcollation) THEN (SELECT pg_catalog.pg_collation.collname 
+FROM pg_catalog.pg_collation 
+WHERE pg_catalog.pg_collation.oid = pg_catalog.pg_attribute.attcollation) ELSE NULL END AS collation 
+FROM pg_catalog.pg_class LEFT OUTER JOIN pg_catalog.pg_attribute ON pg_catalog.pg_class.oid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attribute.attnum > %(attnum_1)s AND NOT pg_catalog.pg_attribute.attisdropped LEFT OUTER JOIN pg_catalog.pg_description ON pg_catalog.pg_description.objoid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_description.objsubid = pg_catalog.pg_attribute.attnum JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s AND pg_catalog.pg_class.relname IN (%(filter_names_1)s) ORDER BY pg_catalog.pg_class.relname, pg_catalog.pg_attribute.attnum
+2026-04-13 15:12:08,313 INFO sqlalchemy.engine.Engine [cached since 140.8s ago] {'json_build_object_2': 'always', 'attidentity_1': 'a', 'json_build_object_3': 'start', 'json_build_object_4': 'increment', 'json_build_object_5': 'minvalue', 'json_build_object_6': 'maxvalue', 'json_build_object_7': 'cache', 'json_build_object_8': 'cycle', 'attidentity_2': '', 'attcollation_1': 0, 'attnum_1': 0, 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog', 'filter_names_1': 'admcaja'}
+2026-04-13 15:12:08,315 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,315 INFO sqlalchemy.engine.Engine SELECT count(*) FROM "admcaja" WHERE company_id = %(company_id)s
+2026-04-13 15:12:08,315 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'company_id': 6}
+2026-04-13 15:12:08,316 INFO sqlalchemy.engine.Engine SELECT * FROM "admcaja" WHERE company_id = %(company_id)s LIMIT %(limit)s OFFSET %(skip)s
+2026-04-13 15:12:08,316 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'company_id': 6, 'limit': 1000000, 'skip': 0}
+2026-04-13 15:12:08,318 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,318 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:08,318 INFO sqlalchemy.engine.Engine [cached since 160.8s ago] {'table_name': 'tbl_conciliados', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:08,318 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,319 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,319 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_attribute.attname AS name, pg_catalog.format_type(pg_catalog.pg_attribute.atttypid, pg_catalog.pg_attribute.atttypmod) AS format_type, (SELECT pg_catalog.pg_get_expr(pg_catalog.pg_attrdef.adbin, pg_catalog.pg_attrdef.adrelid) AS pg_get_expr_1 
+FROM pg_catalog.pg_attrdef 
+WHERE pg_catalog.pg_attrdef.adrelid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attrdef.adnum = pg_catalog.pg_attribute.attnum AND pg_catalog.pg_attribute.atthasdef) AS "default", pg_catalog.pg_attribute.attnotnull AS not_null, pg_catalog.pg_class.relname AS table_name, pg_catalog.pg_description.description AS comment, pg_catalog.pg_attribute.attgenerated AS generated, (SELECT json_build_object(%(json_build_object_2)s, pg_catalog.pg_attribute.attidentity = %(attidentity_1)s, %(json_build_object_3)s, pg_catalog.pg_sequence.seqstart, %(json_build_object_4)s, pg_catalog.pg_sequence.seqincrement, %(json_build_object_5)s, pg_catalog.pg_sequence.seqmin, %(json_build_object_6)s, pg_catalog.pg_sequence.seqmax, %(json_build_object_7)s, pg_catalog.pg_sequence.seqcache, %(json_build_object_8)s, pg_catalog.pg_sequence.seqcycle) AS json_build_object_1 
+FROM pg_catalog.pg_sequence 
+WHERE pg_catalog.pg_attribute.attidentity != %(attidentity_2)s AND pg_catalog.pg_sequence.seqrelid = CAST(CAST(pg_catalog.pg_get_serial_sequence(CAST(CAST(pg_catalog.pg_attribute.attrelid AS REGCLASS) AS TEXT), pg_catalog.pg_attribute.attname) AS REGCLASS) AS OID)) AS identity_options, CASE WHEN (pg_catalog.pg_attribute.attcollation != %(attcollation_1)s AND (SELECT pg_catalog.pg_type.typcollation 
+FROM pg_catalog.pg_type 
+WHERE pg_catalog.pg_type.oid = pg_catalog.pg_attribute.atttypid) != pg_catalog.pg_attribute.attcollation) THEN (SELECT pg_catalog.pg_collation.collname 
+FROM pg_catalog.pg_collation 
+WHERE pg_catalog.pg_collation.oid = pg_catalog.pg_attribute.attcollation) ELSE NULL END AS collation 
+FROM pg_catalog.pg_class LEFT OUTER JOIN pg_catalog.pg_attribute ON pg_catalog.pg_class.oid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attribute.attnum > %(attnum_1)s AND NOT pg_catalog.pg_attribute.attisdropped LEFT OUTER JOIN pg_catalog.pg_description ON pg_catalog.pg_description.objoid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_description.objsubid = pg_catalog.pg_attribute.attnum JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s AND pg_catalog.pg_class.relname IN (%(filter_names_1)s) ORDER BY pg_catalog.pg_class.relname, pg_catalog.pg_attribute.attnum
+2026-04-13 15:12:08,319 INFO sqlalchemy.engine.Engine [cached since 140.8s ago] {'json_build_object_2': 'always', 'attidentity_1': 'a', 'json_build_object_3': 'start', 'json_build_object_4': 'increment', 'json_build_object_5': 'minvalue', 'json_build_object_6': 'maxvalue', 'json_build_object_7': 'cache', 'json_build_object_8': 'cycle', 'attidentity_2': '', 'attcollation_1': 0, 'attnum_1': 0, 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog', 'filter_names_1': 'tbl_conciliados'}
+2026-04-13 15:12:08,320 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,321 INFO sqlalchemy.engine.Engine SELECT count(*) FROM "tbl_conciliados" WHERE company_id = %(company_id)s
+2026-04-13 15:12:08,321 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'company_id': 6}
+2026-04-13 15:12:08,327 INFO sqlalchemy.engine.Engine SELECT * FROM "tbl_conciliados" WHERE company_id = %(company_id)s LIMIT %(limit)s OFFSET %(skip)s
+2026-04-13 15:12:08,327 INFO sqlalchemy.engine.Engine [cached since 140.6s ago] {'company_id': 6, 'limit': 1000000, 'skip': 0}
+2026-04-13 15:12:08,491 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,491 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:08,491 INFO sqlalchemy.engine.Engine [cached since 161s ago] {'table_name': 'vtaritem', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:08,492 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,493 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,493 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_attribute.attname AS name, pg_catalog.format_type(pg_catalog.pg_attribute.atttypid, pg_catalog.pg_attribute.atttypmod) AS format_type, (SELECT pg_catalog.pg_get_expr(pg_catalog.pg_attrdef.adbin, pg_catalog.pg_attrdef.adrelid) AS pg_get_expr_1 
+FROM pg_catalog.pg_attrdef 
+WHERE pg_catalog.pg_attrdef.adrelid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attrdef.adnum = pg_catalog.pg_attribute.attnum AND pg_catalog.pg_attribute.atthasdef) AS "default", pg_catalog.pg_attribute.attnotnull AS not_null, pg_catalog.pg_class.relname AS table_name, pg_catalog.pg_description.description AS comment, pg_catalog.pg_attribute.attgenerated AS generated, (SELECT json_build_object(%(json_build_object_2)s, pg_catalog.pg_attribute.attidentity = %(attidentity_1)s, %(json_build_object_3)s, pg_catalog.pg_sequence.seqstart, %(json_build_object_4)s, pg_catalog.pg_sequence.seqincrement, %(json_build_object_5)s, pg_catalog.pg_sequence.seqmin, %(json_build_object_6)s, pg_catalog.pg_sequence.seqmax, %(json_build_object_7)s, pg_catalog.pg_sequence.seqcache, %(json_build_object_8)s, pg_catalog.pg_sequence.seqcycle) AS json_build_object_1 
+FROM pg_catalog.pg_sequence 
+WHERE pg_catalog.pg_attribute.attidentity != %(attidentity_2)s AND pg_catalog.pg_sequence.seqrelid = CAST(CAST(pg_catalog.pg_get_serial_sequence(CAST(CAST(pg_catalog.pg_attribute.attrelid AS REGCLASS) AS TEXT), pg_catalog.pg_attribute.attname) AS REGCLASS) AS OID)) AS identity_options, CASE WHEN (pg_catalog.pg_attribute.attcollation != %(attcollation_1)s AND (SELECT pg_catalog.pg_type.typcollation 
+FROM pg_catalog.pg_type 
+WHERE pg_catalog.pg_type.oid = pg_catalog.pg_attribute.atttypid) != pg_catalog.pg_attribute.attcollation) THEN (SELECT pg_catalog.pg_collation.collname 
+FROM pg_catalog.pg_collation 
+WHERE pg_catalog.pg_collation.oid = pg_catalog.pg_attribute.attcollation) ELSE NULL END AS collation 
+FROM pg_catalog.pg_class LEFT OUTER JOIN pg_catalog.pg_attribute ON pg_catalog.pg_class.oid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attribute.attnum > %(attnum_1)s AND NOT pg_catalog.pg_attribute.attisdropped LEFT OUTER JOIN pg_catalog.pg_description ON pg_catalog.pg_description.objoid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_description.objsubid = pg_catalog.pg_attribute.attnum JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s AND pg_catalog.pg_class.relname IN (%(filter_names_1)s) ORDER BY pg_catalog.pg_class.relname, pg_catalog.pg_attribute.attnum
+2026-04-13 15:12:08,493 INFO sqlalchemy.engine.Engine [cached since 140.9s ago] {'json_build_object_2': 'always', 'attidentity_1': 'a', 'json_build_object_3': 'start', 'json_build_object_4': 'increment', 'json_build_object_5': 'minvalue', 'json_build_object_6': 'maxvalue', 'json_build_object_7': 'cache', 'json_build_object_8': 'cycle', 'attidentity_2': '', 'attcollation_1': 0, 'attnum_1': 0, 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog', 'filter_names_1': 'vtaritem'}
+2026-04-13 15:12:08,495 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,495 INFO sqlalchemy.engine.Engine SELECT count(*) FROM "vtaritem" WHERE company_id = %(company_id)s
+2026-04-13 15:12:08,495 INFO sqlalchemy.engine.Engine [cached since 140.5s ago] {'company_id': 6}
+2026-04-13 15:12:08,511 INFO sqlalchemy.engine.Engine SELECT * FROM "vtaritem" WHERE company_id = %(company_id)s LIMIT %(limit)s OFFSET %(skip)s
+2026-04-13 15:12:08,511 INFO sqlalchemy.engine.Engine [cached since 140.5s ago] {'company_id': 6, 'limit': 1000000, 'skip': 0}
+2026-04-13 15:12:08,553 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,553 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:08,553 INFO sqlalchemy.engine.Engine [cached since 161.1s ago] {'table_name': 'cbdmauxi', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:08,554 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,554 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:08,554 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_attribute.attname AS name, pg_catalog.format_type(pg_catalog.pg_attribute.atttypid, pg_catalog.pg_attribute.atttypmod) AS format_type, (SELECT pg_catalog.pg_get_expr(pg_catalog.pg_attrdef.adbin, pg_catalog.pg_attrdef.adrelid) AS pg_get_expr_1 
+FROM pg_catalog.pg_attrdef 
+WHERE pg_catalog.pg_attrdef.adrelid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attrdef.adnum = pg_catalog.pg_attribute.attnum AND pg_catalog.pg_attribute.atthasdef) AS "default", pg_catalog.pg_attribute.attnotnull AS not_null, pg_catalog.pg_class.relname AS table_name, pg_catalog.pg_description.description AS comment, pg_catalog.pg_attribute.attgenerated AS generated, (SELECT json_build_object(%(json_build_object_2)s, pg_catalog.pg_attribute.attidentity = %(attidentity_1)s, %(json_build_object_3)s, pg_catalog.pg_sequence.seqstart, %(json_build_object_4)s, pg_catalog.pg_sequence.seqincrement, %(json_build_object_5)s, pg_catalog.pg_sequence.seqmin, %(json_build_object_6)s, pg_catalog.pg_sequence.seqmax, %(json_build_object_7)s, pg_catalog.pg_sequence.seqcache, %(json_build_object_8)s, pg_catalog.pg_sequence.seqcycle) AS json_build_object_1 
+FROM pg_catalog.pg_sequence 
+WHERE pg_catalog.pg_attribute.attidentity != %(attidentity_2)s AND pg_catalog.pg_sequence.seqrelid = CAST(CAST(pg_catalog.pg_get_serial_sequence(CAST(CAST(pg_catalog.pg_attribute.attrelid AS REGCLASS) AS TEXT), pg_catalog.pg_attribute.attname) AS REGCLASS) AS OID)) AS identity_options, CASE WHEN (pg_catalog.pg_attribute.attcollation != %(attcollation_1)s AND (SELECT pg_catalog.pg_type.typcollation 
+FROM pg_catalog.pg_type 
+WHERE pg_catalog.pg_type.oid = pg_catalog.pg_attribute.atttypid) != pg_catalog.pg_attribute.attcollation) THEN (SELECT pg_catalog.pg_collation.collname 
+FROM pg_catalog.pg_collation 
+WHERE pg_catalog.pg_collation.oid = pg_catalog.pg_attribute.attcollation) ELSE NULL END AS collation 
+FROM pg_catalog.pg_class LEFT OUTER JOIN pg_catalog.pg_attribute ON pg_catalog.pg_class.oid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attribute.attnum > %(attnum_1)s AND NOT pg_catalog.pg_attribute.attisdropped LEFT OUTER JOIN pg_catalog.pg_description ON pg_catalog.pg_description.objoid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_description.objsubid = pg_catalog.pg_attribute.attnum JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s AND pg_catalog.pg_class.relname IN (%(filter_names_1)s) ORDER BY pg_catalog.pg_class.relname, pg_catalog.pg_attribute.attnum
+2026-04-13 15:12:08,555 INFO sqlalchemy.engine.Engine [cached since 141s ago] {'json_build_object_2': 'always', 'attidentity_1': 'a', 'json_build_object_3': 'start', 'json_build_object_4': 'increment', 'json_build_object_5': 'minvalue', 'json_build_object_6': 'maxvalue', 'json_build_object_7': 'cache', 'json_build_object_8': 'cycle', 'attidentity_2': '', 'attcollation_1': 0, 'attnum_1': 0, 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog', 'filter_names_1': 'cbdmauxi'}
+2026-04-13 15:12:08,556 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:08,557 INFO sqlalchemy.engine.Engine SELECT count(*) FROM "cbdmauxi" WHERE company_id = %(company_id)s
+2026-04-13 15:12:08,557 INFO sqlalchemy.engine.Engine [cached since 140.5s ago] {'company_id': 6}
+2026-04-13 15:12:08,594 INFO sqlalchemy.engine.Engine SELECT * FROM "cbdmauxi" WHERE company_id = %(company_id)s LIMIT %(limit)s OFFSET %(skip)s
+2026-04-13 15:12:08,594 INFO sqlalchemy.engine.Engine [cached since 140.5s ago] {'company_id': 6, 'limit': 1000000, 'skip': 0}
+INFO:     172.18.0.1:56618 - "GET /api/v1/mapeo/origen-preview?company_id=6&limit=1000000&skip=0 HTTP/1.1" 200 OK
+2026-04-13 15:12:09,486 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:14,549 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:14,550 INFO sqlalchemy.engine.Engine SELECT mapeo_subcategorias.id AS mapeo_subcategorias_id, mapeo_subcategorias.categoria_id AS mapeo_subcategorias_categoria_id, mapeo_subcategorias.nombre AS mapeo_subcategorias_nombre, mapeo_subcategorias.descripcion AS mapeo_subcategorias_descripcion, mapeo_subcategorias.tabla_origen AS mapeo_subcategorias_tabla_origen, mapeo_subcategorias.codigo_origen AS mapeo_subcategorias_codigo_origen, mapeo_subcategorias.clave_asiento AS mapeo_subcategorias_clave_asiento, mapeo_subcategorias.mapeo_cabecera AS mapeo_subcategorias_mapeo_cabecera, mapeo_subcategorias.tabla_destino_detalle AS mapeo_subcategorias_tabla_destino_detalle, mapeo_subcategorias.tabla_destino_cabecera AS mapeo_subcategorias_tabla_destino_cabecera, mapeo_subcategorias.col_destino_nasiento AS mapeo_subcategorias_col_destino_nasiento, mapeo_subcategorias.col_destino_nidlin AS mapeo_subcategorias_col_destino_nidlin, mapeo_subcategorias.schema_destino AS mapeo_subcategorias_schema_destino, mapeo_subcategorias.col_destino_debe AS mapeo_subcategorias_col_destino_debe, mapeo_subcategorias.col_destino_haber AS mapeo_subcategorias_col_destino_haber, mapeo_subcategorias.pares_redondeo AS mapeo_subcategorias_pares_redondeo, mapeo_subcategorias.generate_headers AS mapeo_subcategorias_generate_headers, mapeo_subcategorias.generate_details AS mapeo_subcategorias_generate_details, mapeo_subcategorias.asiento_inicial AS mapeo_subcategorias_asiento_inicial, mapeo_subcategorias.control_column_origen AS mapeo_subcategorias_control_column_origen, mapeo_subcategorias.last_generated_control_value AS mapeo_subcategorias_last_generated_control_value, mapeo_subcategorias.filter_rules AS mapeo_subcategorias_filter_rules, mapeo_subcategorias.is_active AS mapeo_subcategorias_is_active, mapeo_subcategorias.created_at AS mapeo_subcategorias_created_at 
+FROM mapeo_subcategorias 
+WHERE mapeo_subcategorias.id = %(id_1)s 
+ LIMIT %(param_1)s
+2026-04-13 15:12:14,550 INFO sqlalchemy.engine.Engine [cached since 143s ago] {'id_1': 42, 'param_1': 1}
+2026-04-13 15:12:14,551 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:14,551 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-04-13 15:12:14,551 INFO sqlalchemy.engine.Engine [cached since 167.1s ago] {'table_name': 'vtaritem', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-04-13 15:12:14,552 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:14,553 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:14,553 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_attribute.attname AS name, pg_catalog.format_type(pg_catalog.pg_attribute.atttypid, pg_catalog.pg_attribute.atttypmod) AS format_type, (SELECT pg_catalog.pg_get_expr(pg_catalog.pg_attrdef.adbin, pg_catalog.pg_attrdef.adrelid) AS pg_get_expr_1 
+FROM pg_catalog.pg_attrdef 
+WHERE pg_catalog.pg_attrdef.adrelid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attrdef.adnum = pg_catalog.pg_attribute.attnum AND pg_catalog.pg_attribute.atthasdef) AS "default", pg_catalog.pg_attribute.attnotnull AS not_null, pg_catalog.pg_class.relname AS table_name, pg_catalog.pg_description.description AS comment, pg_catalog.pg_attribute.attgenerated AS generated, (SELECT json_build_object(%(json_build_object_2)s, pg_catalog.pg_attribute.attidentity = %(attidentity_1)s, %(json_build_object_3)s, pg_catalog.pg_sequence.seqstart, %(json_build_object_4)s, pg_catalog.pg_sequence.seqincrement, %(json_build_object_5)s, pg_catalog.pg_sequence.seqmin, %(json_build_object_6)s, pg_catalog.pg_sequence.seqmax, %(json_build_object_7)s, pg_catalog.pg_sequence.seqcache, %(json_build_object_8)s, pg_catalog.pg_sequence.seqcycle) AS json_build_object_1 
+FROM pg_catalog.pg_sequence 
+WHERE pg_catalog.pg_attribute.attidentity != %(attidentity_2)s AND pg_catalog.pg_sequence.seqrelid = CAST(CAST(pg_catalog.pg_get_serial_sequence(CAST(CAST(pg_catalog.pg_attribute.attrelid AS REGCLASS) AS TEXT), pg_catalog.pg_attribute.attname) AS REGCLASS) AS OID)) AS identity_options, CASE WHEN (pg_catalog.pg_attribute.attcollation != %(attcollation_1)s AND (SELECT pg_catalog.pg_type.typcollation 
+FROM pg_catalog.pg_type 
+WHERE pg_catalog.pg_type.oid = pg_catalog.pg_attribute.atttypid) != pg_catalog.pg_attribute.attcollation) THEN (SELECT pg_catalog.pg_collation.collname 
+FROM pg_catalog.pg_collation 
+WHERE pg_catalog.pg_collation.oid = pg_catalog.pg_attribute.attcollation) ELSE NULL END AS collation 
+FROM pg_catalog.pg_class LEFT OUTER JOIN pg_catalog.pg_attribute ON pg_catalog.pg_class.oid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_attribute.attnum > %(attnum_1)s AND NOT pg_catalog.pg_attribute.attisdropped LEFT OUTER JOIN pg_catalog.pg_description ON pg_catalog.pg_description.objoid = pg_catalog.pg_attribute.attrelid AND pg_catalog.pg_description.objsubid = pg_catalog.pg_attribute.attnum JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s AND pg_catalog.pg_class.relname IN (%(filter_names_1)s) ORDER BY pg_catalog.pg_class.relname, pg_catalog.pg_attribute.attnum
+2026-04-13 15:12:14,553 INFO sqlalchemy.engine.Engine [cached since 147s ago] {'json_build_object_2': 'always', 'attidentity_1': 'a', 'json_build_object_3': 'start', 'json_build_object_4': 'increment', 'json_build_object_5': 'minvalue', 'json_build_object_6': 'maxvalue', 'json_build_object_7': 'cache', 'json_build_object_8': 'cycle', 'attidentity_2': '', 'attcollation_1': 0, 'attnum_1': 0, 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog', 'filter_names_1': 'vtaritem'}
+2026-04-13 15:12:14,556 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname AS name, pg_catalog.format_type(pg_catalog.pg_type.typbasetype, pg_catalog.pg_type.typtypmod) AS attype, NOT pg_catalog.pg_type.typnotnull AS nullable, pg_catalog.pg_type.typdefault AS "default", pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AS visible, pg_catalog.pg_namespace.nspname AS schema, domain_constraints.condefs, domain_constraints.connames, pg_catalog.pg_collation.collname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace LEFT OUTER JOIN pg_catalog.pg_collation ON pg_catalog.pg_type.typcollation = pg_catalog.pg_collation.oid LEFT OUTER JOIN (SELECT pg_catalog.pg_constraint.contypid AS contypid, array_agg(pg_catalog.pg_get_constraintdef(pg_catalog.pg_constraint.oid, %(pg_get_constraintdef_1)s)) AS condefs, array_agg(CAST(pg_catalog.pg_constraint.conname AS TEXT)) AS connames 
+FROM pg_catalog.pg_constraint 
+WHERE pg_catalog.pg_constraint.contypid != %(contypid_1)s GROUP BY pg_catalog.pg_constraint.contypid) AS domain_constraints ON pg_catalog.pg_type.oid = domain_constraints.contypid 
+WHERE pg_catalog.pg_type.typtype = %(typtype_1)s ORDER BY pg_catalog.pg_namespace.nspname, pg_catalog.pg_type.typname
+2026-04-13 15:12:14,556 INFO sqlalchemy.engine.Engine [cached since 147s ago] {'pg_get_constraintdef_1': True, 'contypid_1': 0, 'typtype_1': 'd'}
+2026-04-13 15:12:14,557 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname AS name, pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AS visible, pg_catalog.pg_namespace.nspname AS schema, lbl_agg.labels AS labels 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace LEFT OUTER JOIN (SELECT pg_catalog.pg_enum.enumtypid AS enumtypid, array_agg(CAST(pg_catalog.pg_enum.enumlabel AS TEXT) ORDER BY pg_catalog.pg_enum.enumsortorder) AS labels 
+FROM pg_catalog.pg_enum GROUP BY pg_catalog.pg_enum.enumtypid) AS lbl_agg ON pg_catalog.pg_type.oid = lbl_agg.enumtypid 
+WHERE pg_catalog.pg_type.typtype = %(typtype_1)s ORDER BY pg_catalog.pg_namespace.nspname, pg_catalog.pg_type.typname
+2026-04-13 15:12:14,557 INFO sqlalchemy.engine.Engine [cached since 147s ago] {'typtype_1': 'e'}
+2026-04-13 15:12:14,559 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:14,560 INFO sqlalchemy.engine.Engine SELECT count(*) FROM "vtaritem" WHERE company_id = %(company_id)s
+2026-04-13 15:12:14,560 INFO sqlalchemy.engine.Engine [cached since 146.6s ago] {'company_id': 6}
+2026-04-13 15:12:14,580 INFO sqlalchemy.engine.Engine SELECT * FROM "vtaritem" WHERE company_id = %(company_id)s LIMIT %(limit)s OFFSET %(skip)s
+2026-04-13 15:12:14,580 INFO sqlalchemy.engine.Engine [cached since 146.6s ago] {'company_id': 6, 'limit': 1000000, 'skip': 0}
+INFO:     172.18.0.1:54612 - "GET /api/v1/mapeo/origen-preview?company_id=6&limit=1000000&skip=0&subcategoria_id=42 HTTP/1.1" 200 OK
+2026-04-13 15:12:14,737 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:15,905 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:15,906 INFO sqlalchemy.engine.Engine SELECT 1
+2026-04-13 15:12:15,906 INFO sqlalchemy.engine.Engine [cached since 277.6s ago] {}
+2026-04-13 15:12:15,906 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     172.18.0.1:54612 - "GET /api/v1/db-status HTTP/1.1" 200 OK
+INFO:     172.18.0.1:33322 - "GET /companies HTTP/1.1" 200 OK
+2026-04-13 15:12:38,829 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:38,829 INFO sqlalchemy.engine.Engine SELECT 1
+2026-04-13 15:12:38,829 INFO sqlalchemy.engine.Engine [cached since 300.5s ago] {}
+2026-04-13 15:12:38,831 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:38,832 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.full_name AS users_full_name, users.role AS users_role, users.is_active AS users_is_active, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s 
+ LIMIT %(param_1)s
+2026-04-13 15:12:38,833 INFO sqlalchemy.engine.Engine [cached since 198.3s ago] {'id_1': 2, 'param_1': 1}
+2026-04-13 15:12:38,834 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:38,835 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:12:38,836 INFO sqlalchemy.engine.Engine SELECT companies.id AS companies_id, companies.name AS companies_name, companies.ruc AS companies_ruc, companies.description AS companies_description, companies.is_active AS companies_is_active, companies.created_at AS companies_created_at, companies.updated_at AS companies_updated_at 
+FROM companies 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+2026-04-13 15:12:38,836 INFO sqlalchemy.engine.Engine [cached since 182.6s ago] {'param_1': 100, 'param_2': 0}
+INFO:     172.18.0.1:33336 - "GET /api/v1/db-status HTTP/1.1" 200 OK
+INFO:     172.18.0.1:33322 - "GET /api/v1/auth/me HTTP/1.1" 200 OK
+INFO:     172.18.0.1:33344 - "GET /api/v1/companies/ HTTP/1.1" 200 OK
+2026-04-13 15:12:38,840 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:12:38,840 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-04-13 15:13:08,835 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:13:08,836 INFO sqlalchemy.engine.Engine SELECT 1
+2026-04-13 15:13:08,836 INFO sqlalchemy.engine.Engine [cached since 330.5s ago] {}
+2026-04-13 15:13:08,837 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     172.18.0.1:58886 - "GET /api/v1/db-status HTTP/1.1" 200 OK
+2026-04-13 15:13:39,075 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:13:39,075 INFO sqlalchemy.engine.Engine SELECT 1
+2026-04-13 15:13:39,075 INFO sqlalchemy.engine.Engine [cached since 360.8s ago] {}
+2026-04-13 15:13:39,076 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     172.18.0.1:54650 - "GET /api/v1/db-status HTTP/1.1" 200 OK
+2026-04-13 15:14:08,841 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:14:08,841 INFO sqlalchemy.engine.Engine SELECT 1
+2026-04-13 15:14:08,841 INFO sqlalchemy.engine.Engine [cached since 390.5s ago] {}
+2026-04-13 15:14:08,842 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     172.18.0.1:37604 - "GET /api/v1/db-status HTTP/1.1" 200 OK
+2026-04-13 15:14:38,837 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:14:38,838 INFO sqlalchemy.engine.Engine SELECT 1
+2026-04-13 15:14:38,838 INFO sqlalchemy.engine.Engine [cached since 420.5s ago] {}
+2026-04-13 15:14:38,838 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     172.18.0.1:51414 - "GET /api/v1/db-status HTTP/1.1" 200 OK
+2026-04-13 15:15:08,835 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:15:08,835 INFO sqlalchemy.engine.Engine SELECT 1
+2026-04-13 15:15:08,835 INFO sqlalchemy.engine.Engine [cached since 450.5s ago] {}
+2026-04-13 15:15:08,836 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     172.18.0.1:55710 - "GET /api/v1/db-status HTTP/1.1" 200 OK
+2026-04-13 15:15:38,832 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:15:38,833 INFO sqlalchemy.engine.Engine SELECT 1
+2026-04-13 15:15:38,833 INFO sqlalchemy.engine.Engine [cached since 480.5s ago] {}
+2026-04-13 15:15:38,833 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     172.18.0.1:41058 - "GET /api/v1/db-status HTTP/1.1" 200 OK
+2026-04-13 15:16:08,831 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:16:08,831 INFO sqlalchemy.engine.Engine SELECT 1
+2026-04-13 15:16:08,831 INFO sqlalchemy.engine.Engine [cached since 510.5s ago] {}
+2026-04-13 15:16:08,832 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     172.18.0.1:42372 - "GET /api/v1/db-status HTTP/1.1" 200 OK
+2026-04-13 15:16:38,842 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:16:38,842 INFO sqlalchemy.engine.Engine SELECT 1
+2026-04-13 15:16:38,842 INFO sqlalchemy.engine.Engine [cached since 540.5s ago] {}
+2026-04-13 15:16:38,843 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     172.18.0.1:48750 - "GET /api/v1/db-status HTTP/1.1" 200 OK
+2026-04-13 15:17:09,070 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:17:09,070 INFO sqlalchemy.engine.Engine SELECT 1
+2026-04-13 15:17:09,070 INFO sqlalchemy.engine.Engine [cached since 570.8s ago] {}
+2026-04-13 15:17:09,071 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     172.18.0.1:34810 - "GET /api/v1/db-status HTTP/1.1" 200 OK
+2026-04-13 15:17:39,077 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:17:39,077 INFO sqlalchemy.engine.Engine SELECT 1
+2026-04-13 15:17:39,077 INFO sqlalchemy.engine.Engine [cached since 600.8s ago] {}
+2026-04-13 15:17:39,078 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     172.18.0.1:40768 - "GET /api/v1/db-status HTTP/1.1" 200 OK
+2026-04-13 15:18:12,064 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:18:12,064 INFO sqlalchemy.engine.Engine SELECT 1
+2026-04-13 15:18:12,064 INFO sqlalchemy.engine.Engine [cached since 633.8s ago] {}
+2026-04-13 15:18:12,065 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     172.18.0.1:54812 - "GET /api/v1/db-status HTTP/1.1" 200 OK
+2026-04-13 15:19:12,072 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-04-13 15:19:12,073 INFO sqlalchemy.engine.Engine SELECT 1
+2026-04-13 15:19:12,073 INFO sqlalchemy.engine.Engine [cached since 693.8s ago] {}
+2026-04-13 15:19:12,073 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     172.18.0.1:55328 - "GET /api/v1/db-status HTTP/1.1" 200 OK

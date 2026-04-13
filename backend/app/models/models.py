@@ -792,3 +792,37 @@ class UserCatalogItem(DestBase):
 
     catalog = relationship("UserCatalog", back_populates="items")
 
+
+class ScheduledTask(DestBase):
+    __tablename__ = "scheduled_tasks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True)
+    task_type = Column(String(50), nullable=False) # 'TC_SUNAT', 'ETL_FULL'
+    schedule_type = Column(String(20), nullable=False) # 'DAILY', 'WEEKLY', 'MONTHLY'
+    time_str = Column(String(10), nullable=False) # '02:00'
+    day_of_week = Column(String(20), nullable=True) # 'mon,wed,fri'
+    day_of_month = Column(Integer, nullable=True) # 1, 15, 31
+    params = Column(JSON, nullable=True) # {"subcategorias": [1,2], "clear_previous": true}
+    is_active = Column(Boolean, default=True)
+    last_run = Column(DateTime(timezone=True), nullable=True)
+    next_run = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    company = relationship("Company", foreign_keys=[company_id])
+    logs = relationship("TaskLog", back_populates="task", cascade="all, delete-orphan")
+
+
+class TaskLog(DestBase):
+    __tablename__ = "task_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    task_id = Column(Integer, ForeignKey("scheduled_tasks.id"), nullable=False)
+    status = Column(String(20), nullable=False) # 'SUCCESS', 'ERROR', 'RUNNING'
+    message = Column(String, nullable=True)
+    details = Column(JSON, nullable=True)
+    started_at = Column(DateTime(timezone=True), server_default=func.now())
+    finished_at = Column(DateTime(timezone=True), nullable=True)
+
+    task = relationship("ScheduledTask", back_populates="logs")

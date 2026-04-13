@@ -519,8 +519,30 @@
                             <i class="bi bi-trash me-1"></i> Eliminar asientos pendientes
                         </button>
                     </div>
-                    <hr class="my-1" style="opacity:0.1; borderColor: #f59e0b;">
+                    <hr class="my-1" style="opacity:0.1; border-color: #f59e0b;">
                     <div id="subcatControlInfo" class="text-muted small"></div>
+                    <!-- Inline editable fields -->
+                    <div id="subcatEditableFields" style="display:none;" class="mt-2">
+                        <hr class="my-1" style="opacity:0.1; border-color: #f59e0b;">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-auto">
+                                <label class="form-label text-muted small mb-0" style="font-size:0.72rem;">Asiento Inicial</label>
+                                <input type="number" class="form-control-dark" id="editAsientoInicial" style="font-size:0.8rem; padding:4px 8px; width:90px;" min="1">
+                            </div>
+                            <div class="col">
+                                <label class="form-label text-muted small mb-0" style="font-size:0.72rem;"><i class="bi bi-funnel me-1"></i>Filtros de Datos (Periodo / Fecha)</label>
+                                <div id="editFilterRulesContainer" class="mb-1"></div>
+                                <button class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size:0.7rem;" onclick="addEditFilterRuleRow()">
+                                    <i class="bi bi-plus-lg me-1"></i> Filtro
+                                </button>
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-outline-warning btn-sm" onclick="saveSubcatQuickEdit()" style="font-size:0.75rem;">
+                                    <i class="bi bi-check-lg me-1"></i> Guardar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
 
@@ -551,6 +573,18 @@
                 </div>
                 <p class="text-muted small mb-3">Inserta los asientos generados directamente en las tablas
                     cf_diariol y cf_diario del sistema Contasis.</p>
+                <div class="d-flex gap-2 mb-2">
+                    <select class="form-select-dark flex-grow-1" id="migrateSubcatSelect">
+                        <option value="">-- Todas las subcategorías --</option>
+                    </select>
+                </div>
+                <div class="form-check form-switch mb-2 custom-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="overwriteSwitch">
+                    <label class="form-check-label text-muted small" for="overwriteSwitch" style="line-height:1.2;">
+                        <strong>Permitir Modificar / Sobreescribir</strong><br>
+                        <span style="font-size:0.75rem;">Actualiza el asiento en Contasis si ya existe (ej. para corregir).</span>
+                    </label>
+                </div>
                 <button class="btn-ghost w-100" style="border-color: #10b981; color: #10b981;" onclick="runEtlStep3()"
                     id="btnStep3">
                     <i class="bi bi-send me-2"></i> Migrar a Contasis
@@ -569,6 +603,14 @@
                 </div>
                 <p class="text-muted small mb-3">Ejecuta los tres pasos en secuencia: Extraer → Generar → Migrar.
                 </p>
+
+                <div class="mb-3">
+                    <label class="form-label text-secondary small">Seleccionar Subcategorías (Opcional)</label>
+                    <div id="fullSubcatCheckboxes" class="p-2 border border-secondary rounded" style="max-height: 150px; overflow-y: auto; background: var(--bg-tertiary);">
+                        <div class="text-muted small">Cargando subcategorías...</div>
+                    </div>
+                    <small class="text-muted" style="font-size:0.7rem;">Si no se selecciona ninguna, se procesan todas.</small>
+                </div>
 
                 <div class="mb-3">
                     <div class="form-check form-switch mb-2 custom-switch">
@@ -700,13 +742,18 @@
                     <label class="form-label text-secondary small">¿Qué procesar al generar asientos?</label>
                     <div class="d-flex gap-4 mt-1">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="newSubGenHeaders" checked>
+                            <input class="form-check-input" type="checkbox" id="newSubGenHeaders" checked onchange="updateNewSubModeHelp()">
                             <label class="form-check-label text-muted small" for="newSubGenHeaders">Cabeceras</label>
                         </div>
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="newSubGenDetails" checked>
                             <label class="form-check-label text-muted small" for="newSubGenDetails">Detalles</label>
                         </div>
+                    </div>
+                    <div id="newSubModeHelpPanel" class="mt-2 p-2 border rounded" style="font-size:0.75rem; background:#f0f9ff;">
+                        <i class="bi bi-info-circle text-primary me-1"></i>
+                        <strong id="newSubModeHelpTitle" class="text-primary">Modo A — Asiento por Asiento (Cabecera + Detalle)</strong>
+                        <div id="newSubModeHelpText" class="text-muted mt-1">Migra datos agrupados por asiento contable. Usa dos tablas: cabecera + detalles. Si un asiento falla, los demás se migran igual. <b>Ideal para libros contables.</b></div>
                     </div>
                 </div>
             </div>
@@ -826,9 +873,14 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <small class="text-muted">Defina las reglas de transformación.</small>
-                            <button class="btn-ghost btn-sm" onclick="addComputedRule()">
-                                <i class="bi bi-plus-lg"></i> Agregar Regla
-                            </button>
+                            <div class="d-flex gap-2">
+                                <button class="btn-ghost btn-sm" onclick="openCopyFormulasModal()">
+                                    <i class="bi bi-box-arrow-in-down"></i> Copiar Fórmulas
+                                </button>
+                                <button class="btn-ghost btn-sm" onclick="addComputedRule()">
+                                    <i class="bi bi-plus-lg"></i> Agregar Regla
+                                </button>
+                            </div>
                         </div>
                         <div class="table-responsive" style="max-height:300px; overflow-y:auto;">
                             <table class="table-dark-custom" id="computedTable">
@@ -891,6 +943,37 @@
         </div>
     </div>
 
+    <!-- Modal Copiar Fórmulas -->
+    <div class="modal fade" id="copyFormulasModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-black text-white border-secondary">
+                <div class="modal-header border-secondary border-bottom">
+                    <h5 class="modal-title mb-0" style="font-size: 1.1rem;">
+                        <i class="bi bi-box-arrow-in-down me-2 text-primary"></i> Copiar Fórmulas de Otra Empresa
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info-dark small mb-4">
+                        <i class="bi bi-info-circle me-1"></i> Selecciona la empresa de donde copiarás las Fórmulas Mágicas para la tabla actual (<code id="cfCurrentTable" class="text-warning"></code>).<br>
+                        <strong>Ojo:</strong> Se añadirán a las fórmulas actuales. Si deseas reemplazar, borra las actuales antes de guardar.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Empresa Origen</label>
+                        <select id="cfSourceCompany" class="form-select form-select-dark">
+                            <option value="">Seleccione empresa...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary border-top">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="executeCopyFormulas()">
+                        <i class="bi bi-copy me-1"></i> Traer Fórmulas
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {% endblock %}
 
@@ -940,8 +1023,8 @@
         }
 
         .form-select-dark option {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
+            background: #1e1e2e;
+            color: #e2e8f0;
         }
     </style>
     {% endblock %}
@@ -1503,24 +1586,47 @@
         // Cargar subcategorías del mapeo en el dropdown del Paso 2
         async function loadEtlSubcategories() {
             const subcatSel = document.getElementById('genSubcatSelect');
+            const migrateSel = document.getElementById('migrateSubcatSelect');
             if (!subcatSel) return;
             try {
                 const res = await fetch(`/api/v1/mapeo/categorias?company_id=${companyId}`);
                 if (!res.ok) return;
                 const cats = await res.json();
                 subcatSel.innerHTML = '<option value="">-- Todas las subcategorías --</option>';
+                if (migrateSel) migrateSel.innerHTML = '<option value="">-- Todas las subcategorías --</option>';
+                const fullCheckboxes = document.getElementById('fullSubcatCheckboxes');
+                if (fullCheckboxes) fullCheckboxes.innerHTML = '';
+                
                 step2SubcatDataMap = {}; // Guardar objeto completo
                 cats.forEach(cat => {
                     (cat.subcategorias || []).forEach(sub => {
                         if (!sub.is_active) return;
+                        const label = `[${cat.nombre}] ${sub.nombre}${sub.tabla_origen ? ' (' + sub.tabla_origen + ')' : ' (Sin Tabla Origen)'}`;
                         const opt = document.createElement('option');
                         opt.value = sub.id;
-                        opt.textContent = `[${cat.nombre}] ${sub.nombre}${sub.tabla_origen ? ' (' + sub.tabla_origen + ')' : ' (Sin Tabla Origen)'}`;
+                        opt.textContent = label;
                         subcatSel.appendChild(opt);
+                        // Also populate Step 3 dropdown
+                        if (migrateSel) {
+                            const opt3 = document.createElement('option');
+                            opt3.value = sub.id;
+                            opt3.textContent = label;
+                            migrateSel.appendChild(opt3);
+                        }
+                        // Checkboxes Proceso Completo
+                        if (fullCheckboxes) {
+                            const wrapper = document.createElement('div');
+                            wrapper.className = 'form-check mb-1';
+                            wrapper.innerHTML = `<input class="form-check-input" type="checkbox" value="${sub.id}" id="full_chk_${sub.id}">
+                                                 <label class="form-check-label text-muted small" for="full_chk_${sub.id}" style="font-size:0.8rem;">${label}</label>`;
+                            fullCheckboxes.appendChild(wrapper);
+                        }
                         step2SubcatDataMap[String(sub.id)] = sub;
-
                     });
                 });
+                if (fullCheckboxes && fullCheckboxes.children.length === 0) {
+                    fullCheckboxes.innerHTML = '<div class="text-muted small">No hay subcategorías activas.</div>';
+                }
             } catch (e) {
                 console.error('Error cargando subcategorías ETL:', e);
             }
@@ -1633,15 +1739,16 @@
             const actionPanel = document.getElementById('subcatActionPanel');
             const info = document.getElementById('subcatControlInfo');
             const regenSwitch = document.getElementById('regenSwitch');
+            const editableFields = document.getElementById('subcatEditableFields');
 
             if (!subcatId) {
                 if(actionPanel) actionPanel.style.display = 'none';
-                if(regenSwitch) regenSwitch.parentElement.style.display = 'block'; // Mostrar regenerar todo
+                if(editableFields) editableFields.style.display = 'none';
+                if(regenSwitch) regenSwitch.parentElement.style.display = 'block';
                 return;
             }
 
             if(actionPanel) actionPanel.style.display = 'block';
-            // Ocultar switch de "Re-generar Todo" para una sola subcat para evitar confusiones
             if(regenSwitch) regenSwitch.parentElement.style.display = 'none'; 
             if(info) info.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Cargando información...';
 
@@ -1678,10 +1785,8 @@
                 ctrlCol = '<span class="text-muted">No configurado (Saltar Fetch)</span>';
             }
 
-
             const ctrlVal = sub.last_generated_control_value || '<span class="text-muted">Ninguno</span>';
             const startAsiento = sub.asiento_inicial || '<span class="text-muted">Por defecto</span>';
-
 
             if(info) {
                 info.innerHTML = `
@@ -1693,8 +1798,135 @@
                     </div>
                 `;
             }
+
+            // Populate editable fields
+            if (editableFields) {
+                editableFields.style.display = 'block';
+                const aiInput = document.getElementById('editAsientoInicial');
+                if (aiInput) aiInput.value = sub.asiento_inicial || 1;
+
+                // Load origin table columns for filter dropdowns 
+                let editCols = [];
+                if (sub.tabla_origen) {
+                    try {
+                        const hRes = await fetch(`/api/v1/mapeo/subcategorias/${subcatId}/helper-data`);
+                        if (hRes.ok) {
+                            const hData = await hRes.json();
+                            editCols = hData.columns || [];
+                        }
+                    } catch(e) {}
+                }
+                window._editFilterColumns = editCols;
+
+                // Render existing filter_rules
+                const container = document.getElementById('editFilterRulesContainer');
+                container.innerHTML = '';
+                const rules = sub.filter_rules || [];
+                rules.forEach(r => addEditFilterRuleRow(r));
+            }
         }
 
+        // ─── Inline Editable Filter Rules for Step 2 ──────────────────────
+        function addEditFilterRuleRow(data = {}) {
+            const container = document.getElementById('editFilterRulesContainer');
+            if (!container) return;
+            const row = document.createElement('div');
+            row.className = 'd-flex gap-1 mb-1 align-items-center edit-filter-rule-row';
+
+            const cols = window._editFilterColumns || [];
+            let colOptions = '<option value="">-- Columna --</option>';
+            cols.forEach(c => {
+                colOptions += `<option value="${c}" ${data.column === c ? 'selected' : ''}>${c}</option>`;
+            });
+            // Also add the current saved column even if not in list
+            if (data.column && !cols.includes(data.column)) {
+                colOptions += `<option value="${data.column}" selected>${data.column}</option>`;
+            }
+
+            const op = data.operator || '=';
+            const showVal2 = (op === 'BETWEEN' || op === 'RANGO_FECHAS') ? 'block' : 'none';
+            const inputType = op === 'RANGO_FECHAS' ? 'date' : 'text';
+
+            row.innerHTML = `
+            <select class="form-select-dark efr-col" style="font-size:0.75rem; padding:3px 5px; flex:2;">
+                ${colOptions}
+            </select>
+            <select class="form-select-dark efr-op" style="font-size:0.75rem; padding:3px 5px; flex:1;" onchange="toggleEditFilterVal2(this)">
+                <option value="=" ${op === '=' ? 'selected' : ''}>=</option>
+                <option value=">" ${op === '>' ? 'selected' : ''}>&gt;</option>
+                <option value="<" ${op === '<' ? 'selected' : ''}>&lt;</option>
+                <option value=">=" ${op === '>=' ? 'selected' : ''}>&gt;=</option>
+                <option value="<=" ${op === '<=' ? 'selected' : ''}>&lt;=</option>
+                <option value="BETWEEN" ${op === 'BETWEEN' ? 'selected' : ''}>BETWEEN</option>
+                <option value="RANGO_FECHAS" ${op === 'RANGO_FECHAS' ? 'selected' : ''}>Rango Fechas</option>
+                <option value="LIKE" ${op === 'LIKE' ? 'selected' : ''}>LIKE</option>
+                <option value="IN" ${op === 'IN' ? 'selected' : ''}>IN</option>
+            </select>
+            <input type="${inputType}" class="form-control-dark efr-val" style="font-size:0.75rem; padding:3px 5px; flex:2;" placeholder="Valor" value="${data.value || ''}">
+            <input type="${inputType}" class="form-control-dark efr-val2" style="font-size:0.75rem; padding:3px 5px; flex:1; display:${showVal2};" placeholder="Hasta" value="${data.value2 || ''}">
+            <button class="btn-ghost btn-sm text-danger" onclick="this.parentElement.remove()" style="padding:2px 5px; font-size:0.72rem;">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            `;
+            container.appendChild(row);
+        }
+
+        function toggleEditFilterVal2(opSelect) {
+            const row = opSelect.closest('.edit-filter-rule-row');
+            const val = row.querySelector('.efr-val');
+            const val2 = row.querySelector('.efr-val2');
+            val2.style.display = (opSelect.value === 'BETWEEN' || opSelect.value === 'RANGO_FECHAS') ? 'block' : 'none';
+            if (opSelect.value === 'RANGO_FECHAS') {
+                val.type = 'date'; val2.type = 'date';
+            } else {
+                val.type = 'text'; val2.type = 'text';
+            }
+        }
+
+        async function saveSubcatQuickEdit() {
+            const subcatId = document.getElementById('genSubcatSelect')?.value;
+            if (!subcatId) { showToast('error', 'Seleccione una subcategoría primero.'); return; }
+
+            const asientoInicial = parseInt(document.getElementById('editAsientoInicial')?.value) || 1;
+
+            // Collect filter rules
+            const rows = document.querySelectorAll('.edit-filter-rule-row');
+            const filterRules = [];
+            rows.forEach(row => {
+                const col = row.querySelector('.efr-col')?.value || '';
+                const op = row.querySelector('.efr-op')?.value || '=';
+                const val = row.querySelector('.efr-val')?.value || '';
+                const val2 = row.querySelector('.efr-val2')?.value || '';
+                if (col && (val || op === 'IS NULL' || op === 'IS NOT NULL')) {
+                    filterRules.push({ column: col, operator: op, value: val, value2: val2 });
+                }
+            });
+
+            try {
+                const res = await fetch(`/api/v1/mapeo/subcategorias/${subcatId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        asiento_inicial: asientoInicial,
+                        filter_rules: filterRules
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('success', `Guardado: Asiento Inicial = ${asientoInicial}, ${filterRules.length} filtros`);
+                    // Update in-memory data so the display refreshes
+                    if (step2SubcatDataMap[subcatId]) {
+                        step2SubcatDataMap[subcatId].asiento_inicial = asientoInicial;
+                        step2SubcatDataMap[subcatId].filter_rules = filterRules;
+                    }
+                    onSubcatChange(); // Refresh the info panel
+                } else {
+                    showToast('error', data.detail || 'Error al guardar');
+                }
+            } catch (e) {
+                showToast('error', 'Error de red: ' + e.message);
+            }
+        }
 
         function addStep2FilterRow(data = {}) {
             const container = document.getElementById('step2FiltersContainer');
@@ -1774,9 +2006,18 @@
             const sub = step2SubcatDataMap[subcatId];
             const name = sub ? sub.nombre : `ID ${subcatId}`;
 
-            if (!confirm(`¿Está seguro de eliminar los asientos pendientes (no migrados) para la subcategoría "${name}"? Esta acción evitará duplicados cuando vuelva a generar.`)) {
-                return;
-            }
+            const { isConfirmed } = await Swal.fire({
+                title: '¿Eliminar asientos pendientes?',
+                html: `Se eliminarán los asientos <b>no migrados</b> de la subcategoría <b>"${name}"</b>.<br><small class="text-muted">Esto evitará duplicados al volver a generar.</small>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '<i class="bi bi-trash me-1"></i> Sí, Eliminar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc3545',
+                background: '#1e293b',
+                color: '#e2e8f0'
+            });
+            if (!isConfirmed) return;
 
             try {
                 const res = await fetch(`/api/v1/mapeo/delete-subcategoria-asientos/${companyId}/${subcatId}`, {
@@ -1797,9 +2038,23 @@
         }
 
         async function clearLocalStaging() {
-            if (!confirm("¿Está seguro que desea VACIAR todos los asientos generados localmente para esta empresa? Esto reiniciará las pruebas en el sistema local sin tocar Contasis.")) return;
-            
             const subcatId = document.getElementById('genSubcatSelect')?.value || '';
+            const subcatLabel = subcatId 
+                ? `los asientos de la subcategoría seleccionada (ID: ${subcatId})`
+                : '<b>TODOS</b> los asientos generados localmente para esta empresa';
+            const { isConfirmed } = await Swal.fire({
+                title: '<i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> Vaciar Staging',
+                html: `¿Desea vaciar ${subcatLabel}?<br><small class="text-muted">Se reiniciarán las pruebas en el sistema local sin tocar Contasis.</small>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '<i class="bi bi-trash me-1"></i> Sí, Vaciar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc3545',
+                background: '#1e293b',
+                color: '#e2e8f0'
+            });
+            if (!isConfirmed) return;
+            
             let url = `/api/v1/mapeo/clear-local-staging/${companyId}`;
             if (subcatId) {
                 url += `?subcategoria_id=${subcatId}`;
@@ -1828,8 +2083,7 @@
             const origHtml = '<i class="bi bi-gear me-2"></i> Generar Asientos';
             setStepLoading('btnStep2', 'step2Result', 'Generando asientos en staging...');
             try {
-                const body = { company_id: parseInt(companyId) };
-                if (regen) body.clear_previous = true;
+                const body = { company_id: parseInt(companyId), clear_previous: true };
                 if (subcatId) body.subcategoria_id = parseInt(subcatId);
 
                 // Collect filters from the UI
@@ -2084,17 +2338,33 @@
 
         async function runEtlStep3() {
             const origHtml = '<i class="bi bi-send me-2"></i> Migrar a Contasis';
-            setStepLoading('btnStep3', 'step3Result', 'Migrando al destino final...');
             
-            const onlyDelete = document.getElementById('clearMigratedSwitch')?.checked || false;
-            let url = `/api/v1/mapeo/migrate-to-final/${companyId}`;
-            if (onlyDelete) {
-                if (!confirm("¿Está seguro que desea ELIMINAR de Contasis TODOS los asientos ya migrados? Esta acción borrará la data para reiniciar tus pruebas.")) {
-                    setStepResult('btnStep3', origHtml, 'step3Result', false, 'Operación cancelada.');
-                    return;
-                }
-                url += `?only_delete=true`;
+            const allowOverwrite = document.getElementById('overwriteSwitch')?.checked || false;
+            const migrateSubcatId = document.getElementById('migrateSubcatSelect')?.value || '';
+            
+            let params = [];
+            if (allowOverwrite) {
+                const { isConfirmed } = await Swal.fire({
+                    title: '<i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> Sobreescribir Asiento',
+                    html: `Si el asiento ya existe en Contasis, será <b>actualizado</b> con los nuevos datos.<br><small class="text-muted">No se borrarán otros asientos.</small>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="bi bi-pencil-square me-1"></i> Sí, Permitir Sobreescribir',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#d29922',
+                    background: '#1e293b',
+                    color: '#e2e8f0'
+                });
+                if (!isConfirmed) return;
+                params.push('allow_overwrite=true');
             }
+            if (migrateSubcatId) {
+                params.push(`subcategoria_id=${migrateSubcatId}`);
+            }
+            
+            setStepLoading('btnStep3', 'step3Result', 'Migrando al destino final...');
+            let url = `/api/v1/mapeo/migrate-to-final/${companyId}`;
+            if (params.length > 0) url += '?' + params.join('&');
 
             try {
                 const res = await fetch(url, { method: 'POST' });
@@ -2120,6 +2390,9 @@
         async function runFullEtl() {
             const fullRefresh = document.getElementById('fullRefreshFullEtlSwitch')?.checked;
             const regenAll = document.getElementById('regenFullEtlSwitch')?.checked;
+            const subcatCheckboxes = document.querySelectorAll('#fullSubcatCheckboxes input[type="checkbox"]:checked');
+            const subcategorias = Array.from(subcatCheckboxes).map(cb => parseInt(cb.value));
+            
             const origHtml = '<i class="bi bi-lightning-charge me-2"></i> Proceso Completo';
             setStepLoading('btnFull', 'fullResult', 'Ejecutando proceso completo...');
             try {
@@ -2127,7 +2400,8 @@
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         full_refresh: fullRefresh || false,
-                        clear_previous: regenAll || false
+                        clear_previous: regenAll || false,
+                        subcategorias: subcategorias.length > 0 ? subcategorias : []
                     })
                 });
                 const data = await res.json();
@@ -2176,46 +2450,52 @@
                 parent.appendChild(container);
             }
             container.style.display = 'block';
-            
-            let html = `
-                <div class="card bg-black p-3 mb-3 border border-danger" style="border-radius:8px;">
-                    <h6 class="mb-2" style="color:#f87171;">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Filas conflictivas detectadas en migración
-                        <span class="badge bg-danger ms-2">${failedRows.length} fila(s)</span>
-                    </h6>
-                    <div class="table-responsive">
-                        <table id="dt_mig_failed" class="table-dark-custom table-striped w-100" style="white-space:nowrap;">
-                            <thead>
-                                <tr>
-                                    <th>C_PER</th>
-                                    <th>C_MES</th>
-                                    <th>C_CODORI</th>
-                                    <th>N_ASIENTO</th>
-                                    <th>N_IDLIN</th>
-                                    <th>C_CODCUE</th>
-                                    <th>DEBE</th>
-                                    <th>HABER</th>
-                                    <th>C_GLOSA</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>`;
-            container.innerHTML = html;
-            
-            $('#dt_mig_failed').DataTable({
-                data: failedRows,
-                columns: [
+
+            // Auto-detect mode: Mode A has 'cper', Mode B has 'seat'+'error'
+            const isModeBFormat = failedRows.length > 0 && failedRows[0].hasOwnProperty('seat') && failedRows[0].hasOwnProperty('error');
+
+            let theadHtml, dtColumns;
+            if (isModeBFormat) {
+                // Mode B: simple table with identifier + error
+                theadHtml = `<tr><th>#</th><th>Identificador</th><th>Error</th></tr>`;
+                dtColumns = [
+                    { data: null, render: function(d, t, r, meta) { return meta.row + 1; }, className: 'text-center', width: '40px' },
+                    { data: 'seat', defaultContent: '-', render: function(v) { return `<code style="color:#fbbf24;">${v || '-'}</code>`; } },
+                    { data: 'error', defaultContent: '-', render: function(v) { return `<span style="color:#fca5a5; font-size:0.8rem;">${v || '-'}</span>`; } }
+                ];
+            } else {
+                // Mode A: accounting columns
+                theadHtml = `<tr><th>C_PER</th><th>C_MES</th><th>C_CODORI</th><th>N_ASIENTO</th><th>N_IDLIN</th><th>C_CODCUE</th><th>DEBE</th><th>HABER</th><th>C_GLOSA</th></tr>`;
+                dtColumns = [
                     { data: 'cper', defaultContent: '-' },
                     { data: 'cmes', defaultContent: '-' },
                     { data: 'ccodori', defaultContent: '-' },
                     { data: 'nasiento', className: 'text-center', defaultContent: '-' },
                     { data: 'nidlin', className: 'text-center', defaultContent: '-' },
-                    { data: 'ccodcue', render: function(v) { return `<code style="color:#fbbf24;">${v === null ? 'NULL' : (v.trim() === '' ? '(vacío/espacios)' : v)}</code>`; }, defaultContent: '-' },
+                    { data: 'ccodcue', render: function(v) { return `<code style="color:#fbbf24;">${v === null ? 'NULL' : (v.trim() === '' ? '(vac\u00edo/espacios)' : v)}</code>`; }, defaultContent: '-' },
                     { data: 'ndebe', render: $.fn.dataTable.render.number(',', '.', 2, ''), defaultContent: '0.00' },
                     { data: 'nhaber', render: $.fn.dataTable.render.number(',', '.', 2, ''), defaultContent: '0.00' },
                     { data: 'cglosa', defaultContent: '-' }
-                ],
+                ];
+            }
+
+            container.innerHTML = `
+                <div class="card bg-black p-3 mb-3 border border-danger" style="border-radius:8px;">
+                    <h6 class="mb-2" style="color:#f87171;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Filas conflictivas detectadas en migraci\u00f3n
+                        <span class="badge bg-danger ms-2">${failedRows.length} fila(s)</span>
+                        ${isModeBFormat ? '<span class="badge bg-warning text-dark ms-1">Modo B</span>' : '<span class="badge bg-primary ms-1">Modo A</span>'}
+                    </h6>
+                    <div class="table-responsive">
+                        <table id="dt_mig_failed" class="table-dark-custom table-striped w-100" style="white-space:nowrap;">
+                            <thead>${theadHtml}</thead>
+                        </table>
+                    </div>
+                </div>`;
+
+            $('#dt_mig_failed').DataTable({
+                data: failedRows,
+                columns: dtColumns,
                 deferRender: true,
                 language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
                 dom: '<"d-flex justify-content-between align-items-center mb-3"Bf>rt<"d-flex justify-content-between align-items-center mt-3"ip>',
@@ -2223,7 +2503,7 @@
                     { extend: 'copy', className: 'btn btn-sm btn-outline-secondary' },
                     { extend: 'excel', className: 'btn btn-sm btn-outline-success', title: 'Lineas_Error_Migracion' }
                 ],
-                pageLength: 5,
+                pageLength: 10,
                 destroy: true
             });
         }
@@ -2474,12 +2754,16 @@
 
                 // Populate subcategory dropdown in ETL tab and build table map
                 const subcatSel = document.getElementById('genSubcatSelect');
+                const migrateSel2 = document.getElementById('migrateSubcatSelect');
                 if (subcatSel) {
                     subcatSel.innerHTML = '<option value="">-- Todas las subcategorías --</option>';
+                    if (migrateSel2) migrateSel2.innerHTML = '<option value="">-- Todas las subcategorías --</option>';
                     step2SubcatTableMap = {};
                     cats.forEach(cat => {
                         (cat.subcategorias || []).forEach(sub => {
-                            subcatSel.innerHTML += `<option value="${sub.id}">[${cat.nombre}] ${sub.nombre}${sub.tabla_origen ? ' (' + sub.tabla_origen + ')' : ''}</option>`;
+                            const label = `[${cat.nombre}] ${sub.nombre}${sub.tabla_origen ? ' (' + sub.tabla_origen + ')' : ''}`;
+                            subcatSel.innerHTML += `<option value="${sub.id}">${label}</option>`;
+                            if (migrateSel2) migrateSel2.innerHTML += `<option value="${sub.id}">${label}</option>`;
                             if (sub.tabla_origen) {
                                 step2SubcatTableMap[String(sub.id)] = sub.tabla_origen;
                             }
@@ -2635,6 +2919,24 @@
             }
 
             modalMapeoSubcategoria.show();
+        }
+
+        function updateNewSubModeHelp() {
+            const isHeaders = document.getElementById('newSubGenHeaders').checked;
+            const title = document.getElementById('newSubModeHelpTitle');
+            const text = document.getElementById('newSubModeHelpText');
+            const panel = document.getElementById('newSubModeHelpPanel');
+            if (isHeaders) {
+                panel.style.background = '#f0f9ff';
+                title.className = 'text-primary';
+                title.textContent = 'Modo A \u2014 Asiento por Asiento (Cabecera + Detalle)';
+                text.innerHTML = 'Migra datos agrupados por asiento contable. Usa dos tablas: cabecera + detalles. Si un asiento falla, los dem\u00e1s se migran igual. <b>Ideal para libros contables.</b>';
+            } else {
+                panel.style.background = '#fefce8';
+                title.className = 'text-warning';
+                title.textContent = 'Modo B \u2014 Fila por Fila (Tabla Directa)';
+                text.innerHTML = 'Migra datos directamente fila por fila a una \u00fanica tabla de Contasis (ej: <code>cg_entitrib</code>, <code>cbdmauxi</code>). No requiere cabecera. Si una fila falla, las dem\u00e1s se migran igual. <b>Ideal para tablas maestras o auxiliares.</b>';
+            }
         }
 
         async function saveSubcategoria() {
@@ -3111,6 +3413,89 @@
                     showToast('error', '❌ Error: ' + (data.detail || 'Error desconocido'));
                 }
             } catch (e) { showToast('error', 'Error de red: ' + e.message); }
+        }
+
+        // ─── COPIAR FORMULAS DE OTRA EMPRESA ───
+        
+        let copyFormulasModalInstance = null;
+        
+        async function openCopyFormulasModal() {
+            if (!copyFormulasModalInstance) {
+                copyFormulasModalInstance = new bootstrap.Modal(document.getElementById('copyFormulasModal'));
+            }
+            const tableName = document.getElementById('configTableName').textContent.trim();
+            if (!tableName) {
+                showToast('warning', 'Asegúrese de guardar la selección de tabla primero.');
+                return;
+            }
+            
+            document.getElementById('cfCurrentTable').textContent = tableName;
+            const selectEl = document.getElementById('cfSourceCompany');
+            selectEl.innerHTML = '<option value="">Cargando empresas...</option>';
+            selectEl.disabled = true;
+            
+            copyFormulasModalInstance.show();
+            
+            try {
+                const res = await fetch('/api/v1/companies/');
+                if (res.ok) {
+                    const companies = await res.json();
+                    const currentCompanyId = parseInt(document.getElementById('companyId').value);
+                    selectEl.innerHTML = '<option value="">Seleccione empresa...</option>';
+                    
+                    companies.forEach(c => {
+                        if (c.id !== currentCompanyId) {
+                            selectEl.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+                        }
+                    });
+                    selectEl.disabled = false;
+                } else {
+                    selectEl.innerHTML = '<option value="">Error al cargar empresas</option>';
+                }
+            } catch (e) {
+                selectEl.innerHTML = '<option value="">Error de conexión</option>';
+            }
+        }
+        
+        async function executeCopyFormulas() {
+            const srcCompanyId = document.getElementById('cfSourceCompany').value;
+            const tableName = document.getElementById('cfCurrentTable').textContent.trim();
+            
+            if (!srcCompanyId) {
+                showToast('warning', 'Seleccione una empresa de origen');
+                return;
+            }
+            
+            try {
+                const btn = document.querySelector('#copyFormulasModal .btn-primary');
+                const oHtml = btn.innerHTML;
+                btn.innerHTML = '<div class="spinner-sm"></div> Copiando...';
+                btn.disabled = true;
+                
+                const res = await fetch(`/api/v1/mapeo/table-selections/by-company-and-table/computed-columns?company_id=${srcCompanyId}&table_name=${tableName}`);
+                
+                btn.innerHTML = oHtml;
+                btn.disabled = false;
+                
+                if (res.ok) {
+                    const rules = await res.json();
+                    if (rules.length === 0) {
+                        showToast('info', 'La empresa seleccionada no tiene fórmulas configuradas para esta tabla.');
+                        return;
+                    }
+                    
+                    // Añadir reglas a la tabla UI
+                    rules.forEach(r => addComputedRule(r));
+                    copyFormulasModalInstance.hide();
+                    showToast('success', `Se agregaron ${rules.length} fórmulas. ¡No olvides guardarlas!`);
+                } else {
+                    showToast('error', 'Error al obtener las fórmulas');
+                }
+            } catch (e) {
+                showToast('error', 'Error de red: ' + e.message);
+                document.querySelector('#copyFormulasModal .btn-primary').disabled = false;
+                document.querySelector('#copyFormulasModal .btn-primary').innerHTML = '<i class="bi bi-copy me-1"></i> Traer Fórmulas';
+            }
         }
 
 

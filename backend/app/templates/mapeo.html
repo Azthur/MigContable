@@ -245,7 +245,7 @@
                             <label class="form-label small fw-semibold">¿Qué procesar al generar asientos?</label>
                             <div class="d-flex gap-4 mt-1">
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="subGenHeaders" checked>
+                                    <input class="form-check-input" type="checkbox" id="subGenHeaders" checked onchange="updateModeHelp()">
                                     <label class="form-check-label text-muted small"
                                         for="subGenHeaders">Cabeceras</label>
                                 </div>
@@ -254,6 +254,11 @@
                                     <label class="form-check-label text-muted small"
                                         for="subGenDetails">Detalles</label>
                                 </div>
+                            </div>
+                            <div id="modeHelpPanel" class="mt-2 p-2 border rounded" style="font-size:0.75rem; background:#f0f9ff;">
+                                <i class="bi bi-info-circle text-primary me-1"></i>
+                                <strong id="modeHelpTitle" class="text-primary"></strong>
+                                <div id="modeHelpText" class="text-muted mt-1"></div>
                             </div>
                         </div>
                     </div>
@@ -488,6 +493,7 @@
                 if (data.tabla_origen) document.getElementById('subTablaOrigen').value = data.tabla_origen;
             });
             subModal.show();
+            setTimeout(updateModeHelp, 50);
         }
 
         async function saveSubcategoria() {
@@ -655,7 +661,26 @@
             } catch (e) { Swal.fire('Error de red', e.message, 'error'); }
         }
 
+        function updateModeHelp() {
+            const isHeaders = document.getElementById('subGenHeaders').checked;
+            const title = document.getElementById('modeHelpTitle');
+            const text = document.getElementById('modeHelpText');
+            const panel = document.getElementById('modeHelpPanel');
+            if (isHeaders) {
+                panel.style.background = '#f0f9ff';
+                title.className = 'text-primary';
+                title.textContent = 'Modo A — Asiento por Asiento (Cabecera + Detalle)';
+                text.innerHTML = 'Migra datos agrupados por asiento contable. Usa dos tablas: una para cabecera (<code>cf_diario</code>) y otra para detalles (<code>cf_diariol</code>). Si un asiento falla, los demás se migran igual. <b>Ideal para libros contables.</b>';
+            } else {
+                panel.style.background = '#fefce8';
+                title.className = 'text-warning';
+                title.textContent = 'Modo B — Fila por Fila (Tabla Directa)';
+                text.innerHTML = 'Migra datos directamente fila por fila a una única tabla de Contasis (ej: <code>cg_entitrib</code>, <code>cbdmauxi</code>). No requiere cabecera. Si una fila falla, las demás se migran igual. <b>Ideal para tablas maestras o auxiliares.</b>';
+            }
+        }
+
         loadCompanies();
+        setTimeout(updateModeHelp, 100);
     </script>
 </body>
 

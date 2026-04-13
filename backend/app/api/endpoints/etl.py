@@ -74,32 +74,77 @@ def build_where_clause(filters: List[ColumnFilter], control: MigrationControl = 
     # Incremental
     if not start_date and control and control.control_column and control.last_migrated_value:
         cols = [c.strip() for c in control.control_column.split(',')]
-        if len(cols) > 1:
-            vals = [v.strip() for v in control.last_migrated_value.split(',')]
-            def build_recursive_tuple(idx):
-                if idx >= len(cols): return "1=0"
-                col_name = f"[{cols[idx]}]"
-                val = vals[idx] if idx < len(vals) else ''
-                
-                p1 = add_param(val)
-                base_cond = f"{col_name} > {p1}"
-                if idx == len(cols) - 1:
-                    return base_cond
-                
-                p2 = add_param(val)
-                next_cond = build_recursive_tuple(idx + 1)
-                return f"({base_cond}) OR ({col_name} = {p2} AND ({next_cond}))"
-
-            if len(vals) == len(cols):
-                composite_clause = build_recursive_tuple(0)
-                conditions.append(f"({composite_clause})")
-        else:
+        if len(cols) == 1:
             col = f"[{control.control_column}]"
             p = add_param(control.last_migrated_value)
             conditions.append(f"{col} > {p}")
+        # If len(cols) > 1, we intentionally skip SQL-based incremental tracking 
+        # to prevent lexicographical jump bugs with non-monotonic categorical keys like coddoc.
+        # Instead, we rely entirely on the Pandas idcontrol-based set difference below.
 
     where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
     return where, params
+
+
+def __get_col_simple(col_name, dataframe):
+    """Busca una columna en el DataFrame ignorando mayúsculas/minúsculas y espacios."""
+    if not col_name: return None
+    col_clean = col_name.strip().upper()
+    for c in dataframe.columns:
+        if c.strip().upper() == col_clean: return c
+    return None
+
+def __apply_computed_rules(df, computed_rules, db, company_id, table_name):
+    df_cols_lower = {str(c).lower(): str(c) for c in df.columns}
+    from collections import defaultdict
+    grouped = defaultdict(list)
+    for rule in computed_rules:
+        r_lower = rule.new_column_name.lower()
+        actual_col = df_cols_lower.get(r_lower, rule.new_column_name)
+        grouped[actual_col].append(rule)
+    
+    for new_col, col_rules in grouped.items():
+        default = ""
+        for cr in col_rules:
+            if cr.default_value:
+                default = cr.default_value
+                break
+        df[new_col] = default
+        
+        for rule in reversed(col_rules):
+            try:
+                val_upper = rule.condition_value.strip().upper()
+                if val_upper in ("BUSCARX_TC_VENTA", "BUSCARX_TC_COMPRA"):
+                    if rule.source_column in df.columns:
+                        tc_col = "venta" if "VENTA" in val_upper else "compra"
+                        from backend.app.models.models import TipoCambio
+                        tc_rows = db.query(TipoCambio).all()
+                        tc_map = {str(r.fecha): float(getattr(r, tc_col)) for r in tc_rows}
+                        df[new_col] = df[rule.source_column].astype(str).str[:10].map(tc_map)
+                        if default:
+                            df[new_col] = df[new_col].fillna(float(default) if default.replace('.','',1).isdigit() else default)
+                        else:
+                            df[new_col] = df[new_col].fillna(0)
+                        
+                elif any(val_upper.startswith(p) for p in [
+                    "CONCAT(", "LEFT(", "RIGHT(", "SI.CONJUNTO(", 
+                    "BUSCARX(", "BUSCARX_EXT(", "BUSCARX_LOCAL(", "SUMA(", "RESTA(", "MULTIPLICA(", "DIVIDE(", "REDONDEAR(", "ABS(",
+                    "LARGO(", "ESPACIOS(", "MAYUSC(", "REPETIR(", "TEXTO(", "AÑO(", "MES(", "Y(", "O("
+                ]):
+                    from backend.app.core.formula_parser import evaluate_formula_on_df
+                    df[new_col] = evaluate_formula_on_df(
+                        df=df, formula_str=rule.condition_value,
+                        db=db, company_id=company_id, default=default if default else ""
+                    )
+                else:
+                    actual_src = __get_col_simple(rule.source_column, df)
+                    if actual_src:
+                        mask = df[actual_src].astype(str).str.strip().str.upper() == val_upper
+                        df.loc[mask, new_col] = rule.result_value
+            except Exception as rule_err:
+                rule_detail = f"Tabla: {table_name} | Columna Calculada: '{new_col}' | Regla ID: {rule.id} | Col Origen: '{rule.source_column}' | Fórmula/Valor: '{rule.condition_value}' | Error: {rule_err}"
+                print(f"ERROR en columna calculada: {rule_detail}")
+                raise Exception(rule_detail)
 
 
 def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, start_date: str = None, end_date: str = None, full_refresh: bool = False):
@@ -164,6 +209,10 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
     db.commit()
 
     try:
+        computed_rules = db.query(ComputedColumnRule).filter(
+            ComputedColumnRule.table_selection_id == table_selection_id,
+            ComputedColumnRule.is_active == True
+        ).order_by(ComputedColumnRule.priority).all()
         # Conectar a origen (SQL Server)
         src_data = {
             "host": source_conn.host, "port": source_conn.port,
@@ -215,6 +264,23 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                 if actual_cols:
                     df['idcontrol'] = df[actual_cols].astype(str).agg('-'.join, axis=1)
                     diag_msg = f" | [IDCONTROL OK] Cols: {actual_cols}"
+                    
+                    if not full_refresh:
+                        try:
+                            from sqlalchemy import text, inspect
+                            insp = inspect(dst_engine)
+                            table_dest_empty = sel.table_name.lower().replace(" ", "_")
+                            if insp.has_table(table_dest_empty):
+                                cols_in_dest = [c['name'] for c in insp.get_columns(table_dest_empty)]
+                                if 'idcontrol' in cols_in_dest:
+                                    with dst_engine.connect() as d_conn:
+                                        existing_ids_df = pd.read_sql(text(f'SELECT idcontrol FROM "{table_dest_empty}" WHERE company_id = {company_id}'), d_conn)
+                                        existing_ids = set(existing_ids_df['idcontrol'].dropna())
+                                        if existing_ids:
+                                            df = df[~df['idcontrol'].isin(existing_ids)]
+                                            diag_msg += f" | Filtro Delta: Extraídos nuevos descartando registros existentes."
+                        except Exception as delta_e:
+                            diag_msg += f" | [ERROR DELTA PANDAS] {delta_e}"
                 else:
                     df['idcontrol'] = None # Siempre crear la columna
                     diag_msg = f" | [IDCONTROL NOT FOUND] Buscaba: {ctrl_cols} en: {df_cols_lower[:8]}"
@@ -229,91 +295,166 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                     log.message += f" | [IDCONTROL ERROR] {e}"
             
             # ── Aplicar Columnas Calculadas (condicionales tipo Excel) ──
-            def _get_col_simple(col_name, dataframe):
-                """Busca una columna en el DataFrame ignorando mayúsculas/minúsculas y espacios."""
-                if not col_name:
-                    return None
-                col_clean = col_name.strip().upper()
-                for c in dataframe.columns:
-                    if c.strip().upper() == col_clean:
-                        return c
-                return None
-
-            computed_rules = db.query(ComputedColumnRule).filter(
-                ComputedColumnRule.table_selection_id == table_selection_id,
-                ComputedColumnRule.is_active == True
-            ).order_by(ComputedColumnRule.priority).all()
-            
             if computed_rules:
-                from collections import defaultdict
-                grouped = defaultdict(list)
-                for rule in computed_rules:
-                    grouped[rule.new_column_name].append(rule)
+                __apply_computed_rules(df, computed_rules, db, company_id, sel.table_name)
+
+        # ── Reaplicar reglas a registros pendientes (Incremental sin Full Refresh) ──
+        if not full_refresh and computed_rules:
+            table_dest_name = sel.table_name.lower().replace(" ", "_")
+            print(f"DEBUG ETL: Incremental computing rules for {table_dest_name}")
+            try:
+                from sqlalchemy import text, inspect
+                import pandas as pd
+                import numpy as np
                 
-                for new_col, col_rules in grouped.items():
-                    # Valor por defecto (tomar del primer rule que lo tenga)
-                    default = ""
-                    for cr in col_rules:
-                        if cr.default_value:
-                            default = cr.default_value
-                            break
-                    df[new_col] = default
-                    
-                    # Aplicar reglas en orden inverso de prioridad (última gana)
-                    for rule in reversed(col_rules):
+                insp = inspect(dst_engine)
+                col_info_list = insp.get_columns(table_dest_name)
+                existing_columns = [c['name'] for c in col_info_list]
+                # Mapa de tipos de destino: nombre_col -> tipo PostgreSQL (str)
+                dest_type_map = {c['name']: str(c['type']).upper() for c in col_info_list}
+                
+                # Garantizar que _migration_id exista y esté poblado ANTES de extraer df_pending
+                with dst_engine.begin() as conn:
+                    if "_migration_id" not in existing_columns:
                         try:
-                            val_upper = rule.condition_value.strip().upper()
+                            conn.execute(text(f'ALTER TABLE "{table_dest_name}" ADD COLUMN "_migration_id" TEXT'))
+                            existing_columns.append("_migration_id")
+                        except Exception as em:
+                            print(f"Warn: No se pudo agregar _migration_id a {table_dest_name}: {em}")
+                    
+                    try:
+                        conn.execute(text(f'UPDATE "{table_dest_name}" SET "_migration_id" = MD5(random()::text || clock_timestamp()::text) WHERE "_migration_id" IS NULL'))
+                    except Exception as em2:
+                        print(f"Warn: No se pudo poblar _migration_id: {em2}")
+                
+                where_clause = "company_id = :cid"
+                if "estado" in existing_columns:
+                    where_clause += " AND (estado IS NULL OR estado != 'MIGRADO')"
+                    
+                query_pend = text(f'SELECT * FROM "{table_dest_name}" WHERE {where_clause}')
+                with dst_engine.connect() as conn:
+                    df_pending = pd.read_sql(query_pend, conn, params={"cid": company_id})
+                
+                print(f"DEBUG ETL: df_pending length is {len(df_pending)}")
+                
+                if not df_pending.empty:
+                    print("DEBUG ETL: Running __apply_computed_rules")
+                    __apply_computed_rules(df_pending, computed_rules, db, company_id, sel.table_name)
+                    
+                    # Identificar columnas calculadas a actualizar
+                    update_cols = []
+                    df_cols_lower_pending = {str(c).lower(): str(c) for c in df_pending.columns}
+                    for r in computed_rules:
+                        r_lower = r.new_column_name.lower()
+                        if r_lower in df_cols_lower_pending:
+                            actual_col_name = df_cols_lower_pending[r_lower]
+                            if actual_col_name not in update_cols:
+                                update_cols.append(actual_col_name)
+                    
+                    # ── Coercer tipos de datos de columnas calculadas ──
+                    # Las fórmulas producen TEXT pero la tabla destino puede tener BIGINT, DOUBLE, etc.
+                    for col in update_cols:
+                        col_type = dest_type_map.get(col, 'TEXT')
+                        if 'INT' in col_type:
+                            df_pending[col] = pd.to_numeric(df_pending[col], errors='coerce')
+                            # Usar Int64 nullable para no perder NaN -> NULL
+                            try:
+                                df_pending[col] = df_pending[col].astype('Int64')
+                            except Exception:
+                                pass
+                        elif any(t in col_type for t in ['DOUBLE', 'FLOAT', 'NUMERIC', 'REAL', 'DECIMAL']):
+                            df_pending[col] = pd.to_numeric(df_pending[col], errors='coerce')
+                        elif 'TIMESTAMP' in col_type or 'DATE' in col_type:
+                            df_pending[col] = pd.to_datetime(df_pending[col], errors='coerce')
+                        else:
+                            # TEXT: limpiar valores nulos/vacíos
+                            if df_pending[col].dtype == 'object':
+                                df_pending[col] = df_pending[col].apply(
+                                    lambda x: None if pd.isna(x) or str(x).strip() in ['', 'nan', 'None', '<NA>'] else x
+                                )
+                    
+                    # Limpiar TODAS las columnas object restantes (no solo las calculadas)
+                    for col in df_pending.select_dtypes(include=['object']).columns:
+                        df_pending[col] = df_pending[col].apply(
+                            lambda x: None if pd.isna(x) or str(x).strip() in ['', 'nan', 'None'] else x
+                        )
+                    
+                    temp_table = f"temp_update_{table_dest_name}_{company_id}"
+                    # Crear tabla temporal SIN dtype_map para evitar conflictos de tipos
+                    df_pending.to_sql(temp_table, dst_engine, if_exists="replace", index=False)
+                    print(f"DEBUG ETL: temp table {temp_table} creado con {len(df_pending)} filas")
+                    
+                    if update_cols:
+                        # Elegir columna de match
+                        if "_migration_id" in existing_columns:
+                            match_col = "_migration_id"
+                        elif "idcontrol" in existing_columns:
+                            match_col = "idcontrol"
+                        elif "id" in existing_columns:
+                            match_col = "id"
+                        else:
+                            match_col = None
                             
-                            # ── BUSCARX: Tipo de Cambio ──
-                            if val_upper in ("BUSCARX_TC_VENTA", "BUSCARX_TC_COMPRA"):
-                                if rule.source_column in df.columns:
-                                    tc_col = "venta" if "VENTA" in val_upper else "compra"
-                                    from backend.app.models.models import TipoCambio
-                                    tc_rows = db.query(TipoCambio).all()
-                                    tc_map = {str(r.fecha): float(getattr(r, tc_col)) for r in tc_rows}
-                                    df[new_col] = df[rule.source_column].astype(str).str[:10].map(tc_map)
-                                    if default:
-                                        df[new_col] = df[new_col].fillna(float(default) if default.replace('.','',1).isdigit() else default)
-                                    else:
-                                        df[new_col] = df[new_col].fillna(0)
+                        if match_col:
+                            # 1. Asegurar que las columnas calculadas existan en la tabla destino
+                            with dst_engine.begin() as conn:
+                                for new_col in update_cols:
+                                    if new_col not in existing_columns:
+                                        try:
+                                            safe_col = new_col.replace('"', '""')
+                                            conn.execute(text(f'ALTER TABLE "{table_dest_name}" ADD COLUMN "{safe_col}" TEXT'))
+                                            existing_columns.append(new_col)
+                                        except Exception as e:
+                                            print(f"Error agregando calculada pendiente {new_col}: {e}")
 
-                            # ── Fórmulas Dinámicas: BUSCARX, LEFT, RIGHT, CONCAT, SI.CONJUNTO, Math ──
-                            elif any(val_upper.startswith(p) for p in [
-                                "CONCAT(", "LEFT(", "RIGHT(", "SI.CONJUNTO(", 
-                                "BUSCARX(", "BUSCARX_EXT(", "BUSCARX_LOCAL(", "SUMA(", "RESTA(", "MULTIPLICA(", "DIVIDE(", "REDONDEAR(", "ABS(",
-                                "LARGO(", "ESPACIOS(", "MAYUSC(", "REPETIR(", "TEXTO(", "AÑO(", "MES(", "Y(", "O("
-                            ]):
-                                        from backend.app.core.formula_parser import evaluate_formula_on_df
-                                        
-                                        df[new_col] = evaluate_formula_on_df(
-                                            df=df,
-                                            formula_str=rule.condition_value,
-                                            db=db,
-                                            company_id=company_id,
-                                            default=default if default else ""
-                                        )
+                            # 2. Construir SET con CAST explícito por seguridad de tipos
+                            set_parts = []
+                            for c in update_cols:
+                                ct = dest_type_map.get(c, 'TEXT')
+                                if 'INT' in ct:
+                                    set_parts.append(f'"{c}" = CASE WHEN temp."{c}" IS NULL THEN NULL ELSE CAST(temp."{c}" AS {ct}) END')
+                                elif any(t in ct for t in ['DOUBLE', 'FLOAT', 'NUMERIC', 'REAL', 'DECIMAL']):
+                                    set_parts.append(f'"{c}" = CASE WHEN temp."{c}" IS NULL THEN NULL ELSE CAST(temp."{c}" AS {ct}) END')
+                                else:
+                                    set_parts.append(f'"{c}" = temp."{c}"')
+                            
+                            set_clause = ", ".join(set_parts)
+                            update_sql = f"""
+                                UPDATE "{table_dest_name}" t
+                                SET {set_clause}
+                                FROM "{temp_table}" temp
+                                WHERE t."{match_col}" = temp."{match_col}"
+                            """
+                            with dst_engine.begin() as conn:
+                                conn.execute(text(update_sql))
+                                conn.execute(text(f'DROP TABLE "{temp_table}"'))
+                            log.message = log.message or ""
+                            log.message += f" | Fórmulas actualizadas en {len(df_pending)} registros pendientes"
+                            print(f"DEBUG ETL: Fórmulas OK para {table_dest_name}: {len(df_pending)} registros, {len(update_cols)} columnas")
+                        else:
+                            print(f"No key column found to update pending formulas in {table_dest_name}")
+                            with dst_engine.begin() as conn:
+                                conn.execute(text(f'DROP TABLE "{temp_table}"'))
+                    else:
+                        # No hay columnas para actualizar, limpiar temp table
+                        with dst_engine.begin() as conn:
+                            conn.execute(text(f'DROP TABLE "{temp_table}"'))
+            except Exception as ev_e:
+                import traceback
+                traceback.print_exc()
+                print(f"Error reevaluando formulas en pendientes de {table_dest_name}: {ev_e}")
+                log.message = (log.message or "") + f" | [ERROR FORMULAS] {ev_e}"
 
-                            else:
-                                # ── Condicional simple tipo IF ──
-                                actual_src = _get_col_simple(rule.source_column, df)
-                                if actual_src:
-                                    mask = df[actual_src].astype(str).str.strip().str.upper() == val_upper
-                                    df.loc[mask, new_col] = rule.result_value
-                        except Exception as rule_err:
-                            rule_detail = f"Tabla: {sel.table_name} | Columna Calculada: '{new_col}' | Regla ID: {rule.id} | Col Origen: '{rule.source_column}' | Fórmula/Valor: '{rule.condition_value}' | Error: {rule_err}"
-                            print(f"ERROR en columna calculada: {rule_detail}")
-                            raise Exception(rule_detail)
-        
         rows_count = len(df)
 
         if rows_count == 0:
             table_dest_empty = sel.table_name.lower().replace(" ", "_")
             if full_refresh:
-                # Si piden full refresh y origen está vacío, truncamos también
+                # Si piden full refresh y origen está vacío, solo borramos los registros de la empresa
                 try:
                     from sqlalchemy import text
                     with dst_engine.begin() as conn:
-                        conn.execute(text(f'TRUNCATE TABLE "{table_dest_empty}" RESTART IDENTITY CASCADE'))
+                        conn.execute(text(f'DELETE FROM "{table_dest_empty}" WHERE company_id = {company_id}'))
                 except:
                     pass
             else:
@@ -326,7 +467,13 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                     except Exception as e:
                         print(f"Error creating empty table {table_dest_empty}: {e}")
             log.status = "SUCCESS"
-            log.message = f"Sin registros {'nuevos ' if not full_refresh else ''}en {sel.table_name}"
+            
+            base_msg = f"Sin registros {'nuevos ' if not full_refresh else ''}en {sel.table_name}"
+            if log.message and "Fórmulas actualizadas" in log.message:
+                log.message = f"{base_msg} {log.message}"
+            else:
+                log.message = base_msg
+                
             log.records_processed = 0
             db.commit()
             return {"status": "OK", "message": log.message, "records": 0}
@@ -334,21 +481,30 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
         # Insertar en BD intermedia (append o replace)
         table_dest = sel.table_name.lower().replace(" ", "_")
         
-        # Sincronizar esquema de tabla si hay columnas nuevas (ej. columnas calculadas) solo si no reemplazamos
-        if not full_refresh:
-            from sqlalchemy import inspect
-            from sqlalchemy import text
-            inspector = inspect(dst_engine)
-            if inspector.has_table(table_dest):
-                existing_cols = [c['name'] for c in inspector.get_columns(table_dest)]
-                with dst_engine.begin() as conn:
-                    for col_name in df.columns:
-                        if col_name not in existing_cols:
-                            try:
-                                safe_col = col_name.replace('"', '""')
-                                conn.execute(text(f'ALTER TABLE "{table_dest}" ADD COLUMN "{safe_col}" TEXT'))
-                            except Exception as e:
-                                print(f"Error adding column {col_name}: {e}")
+        # ── Sincronizar esquema o limpiar tabla compartida ──
+        from sqlalchemy import inspect
+        from sqlalchemy import text
+        inspector = inspect(dst_engine)
+        
+        if inspector.has_table(table_dest):
+            if full_refresh:
+                # Si es full refresh, borramos selectivamente los datos de la empresa (sin destruir la tabla)
+                try:
+                    with dst_engine.begin() as conn:
+                        conn.execute(text(f'DELETE FROM "{table_dest}" WHERE company_id = {company_id}'))
+                except Exception as e:
+                    print(f"Error borrando datos previos de {company_id} en {table_dest}: {e}")
+
+            # Sincronizar esquema SIEMPRE (agregar columnas nuevas como las calculadas)
+            existing_cols = [c['name'] for c in inspector.get_columns(table_dest)]
+            with dst_engine.begin() as conn:
+                for col_name in df.columns:
+                    if col_name not in existing_cols:
+                        try:
+                            safe_col = col_name.replace('"', '""')
+                            conn.execute(text(f'ALTER TABLE "{table_dest}" ADD COLUMN "{safe_col}" TEXT'))
+                        except Exception as e:
+                            print(f"Error adding column {col_name}: {e}")
 
         # ── Limpiar Datos para PostgreSQL ──
         # Convertir strings vacíos a None para evitar errores de cast en columnas numéricas
@@ -356,9 +512,8 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
         for col in df.select_dtypes(include=['object']).columns:
             df[col] = df[col].apply(lambda x: None if x == "" else x)
 
-        # Escribir en destino
-        write_mode = 'replace' if full_refresh else 'append'
-        df.to_sql(table_dest, dst_engine, if_exists=write_mode, index=False, chunksize=1000)
+        # Escribir en destino (siempre append ya que borramos previamente)
+        df.to_sql(table_dest, dst_engine, if_exists='append', index=False, chunksize=1000)
 
         # Actualizar control incremental
         if sel.control_column and rows_count > 0:
@@ -805,9 +960,24 @@ def run_full_etl(company_id: int, body: dict = {}, db: Session = Depends(get_des
         end_date = body.get("end_date")
         full_refresh = body.get("full_refresh", False)
         clear_prev = body.get("clear_previous", False)
+        subcats_filter = body.get("subcategorias", [])
+
+        # Identificar qué tablas origen necesitan extraerse basándonos en las subcategorías seleccionadas
+        tablas_origen_permitidas = []
+        if subcats_filter:
+            subcats = db.query(MapeoSubcategoria).filter(
+                MapeoSubcategoria.id.in_(subcats_filter)
+            ).all()
+            tablas_origen_permitidas = [s.tabla_origen for s in subcats if s.tabla_origen]
 
         total_etl = 0
         for sel in selections:
+            if subcats_filter:
+                sel_table_dest = sel.table_name.lower().replace(" ", "_")
+                # Solo extraemos si la tabla coincide con alguna de las requeridas por los filtros
+                if sel.table_name not in tablas_origen_permitidas and sel_table_dest not in tablas_origen_permitidas:
+                    continue
+
             result = run_incremental_etl(company_id, sel.id, db, start_date, end_date, full_refresh=full_refresh)
             total_etl += result.get("records", 0)
 
@@ -832,6 +1002,8 @@ def run_full_etl(company_id: int, body: dict = {}, db: Session = Depends(get_des
         for cat in categorias:
             for sub in cat.subcategorias:
                 if not sub.is_active or not sub.tabla_origen:
+                    continue
+                if subcats_filter and sub.id not in subcats_filter:
                     continue
                 try:
                     gen_result = generate_to_cf_diariol(
@@ -870,12 +1042,25 @@ def run_full_etl(company_id: int, body: dict = {}, db: Session = Depends(get_des
                 "migrated": 0
             }
         else:
-            mig_result = migrate_to_final(company_id, None, db)
-            results["paso3_migrar"] = {
-                "status": "OK",
-                "message": mig_result.get("message", ""),
-                "migrated": mig_result.get("migrated_lineas", 0)
-            }
+            if subcats_filter:
+                migrated_total = 0
+                msg_total = ""
+                for sid in subcats_filter:
+                    mig_result = migrate_to_final(company_id=company_id, lote_id=None, allow_overwrite=False, subcategoria_id=sid, db=db)
+                    migrated_total += mig_result.get("migrated_lineas", 0)
+                    if mig_result.get("message"): msg_total += mig_result["message"] + ". "
+                results["paso3_migrar"] = {
+                    "status": "OK",
+                    "message": msg_total.strip() or f"Migrados {migrated_total} registros de subcategorías filtradas",
+                    "migrated": migrated_total
+                }
+            else:
+                mig_result = migrate_to_final(company_id=company_id, lote_id=None, allow_overwrite=False, subcategoria_id=None, db=db)
+                results["paso3_migrar"] = {
+                    "status": "OK",
+                    "message": mig_result.get("message", ""),
+                    "migrated": mig_result.get("migrated_lineas", 0)
+                }
     except Exception as e:
         failed_rows = []
         err_msg = str(e)

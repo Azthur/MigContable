@@ -104,20 +104,20 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 res = pd.Series([""] * len(df), index=df.index)
                 for arg in node.args:
                     val = eval_ast(arg)
-                    res = res + val.astype(str).str.strip().fillna('')
+                    res = res + val.fillna('').astype(str).str.strip()
                 return res
                 
             elif func_id == "LEFT" and len(node.args) >= 2:
                 src = eval_ast(node.args[0])
                 try: n = int(eval_ast(node.args[1]).iloc[0])
                 except: n = 0
-                return src.astype(str).str.strip().str[:n]
+                return src.fillna('').astype(str).str.strip().str[:n]
                 
             elif func_id == "RIGHT" and len(node.args) >= 2:
                 src = eval_ast(node.args[0])
                 try: n = int(eval_ast(node.args[1]).iloc[0])
                 except: n = 0
-                return src.astype(str).str.strip().str[-n:]
+                return src.fillna('').astype(str).str.strip().str[-n:]
                 
             elif func_id == "Y" and len(node.args) >= 1:
                 res = pd.Series([True] * len(df), index=df.index)
@@ -169,15 +169,15 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 
             elif func_id == "LARGO" and len(node.args) >= 1:
                 src = eval_ast(node.args[0])
-                return src.astype(str).str.len()
+                return src.fillna('').astype(str).str.len()
                 
             elif func_id == "ESPACIOS" and len(node.args) >= 1:
                 src = eval_ast(node.args[0])
-                return src.astype(str).str.strip()
+                return src.fillna('').astype(str).str.strip()
                 
             elif func_id == "MAYUSC" and len(node.args) >= 1:
                 src = eval_ast(node.args[0])
-                return src.astype(str).str.upper()
+                return src.fillna('').astype(str).str.upper()
 
             elif func_id == "ENCONTRAR" and len(node.args) >= 2:
                 # ENCONTRAR(TextoBuscado, TextoDestino) → 1-based position, 0 if not found
