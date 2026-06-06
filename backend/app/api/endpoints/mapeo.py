@@ -603,7 +603,14 @@ def save_computed_columns(selection_id: int, body: dict, db: Session = Depends(g
             # Preprocesamiento idéntico al que hace etl.py para AST
             formula_str = re.sub(r'["\']([^"\']+)["\'][\'"]+', r"'\1'", cond)
             formula_str = re.sub(r'[\'"]+([^"\']+)["\']', r"'\1'", formula_str)
-            formula_ast_str = re.sub(r'(?<![=<>!])=(?![=])', '==', formula_str)
+            # Safe replacement of single '=' with '==' only outside string literals
+            pattern = r"'(?:[^'\\]|\\.)*'|\"(?:[^\"\\]|\\.)*\"|(?<![=<>!])=(?![=])"
+            def repl(match):
+                val = match.group(0)
+                if val == '=':
+                    return '=='
+                return val
+            formula_ast_str = re.sub(pattern, repl, formula_str)
             formula_ast_str = formula_ast_str.replace('<>', '!=')
             formula_ast_str = formula_ast_str.replace("SI.CONJUNTO", "SI_CONJUNTO")
             try:
@@ -934,7 +941,7 @@ def _generate_subcategoria_cf_diariol(
     ).order_by(MapeoLineaAsiento.orden).all()
 
     if not lineas:
-        return 0, 0 # No configurado
+        return 0, 0, [] # No configurado
     # Load DetTable early for duplicate lookups
     from sqlalchemy import Table, MetaData, select
     metadata = MetaData()
@@ -945,6 +952,16 @@ def _generate_subcategoria_cf_diariol(
     except Exception as e:
         print(f"Error loading DetTable {tabla_det_name}: {e}")
         DetTable = None
+
+    # Fetch actual columns of the source table to match case-insensitively
+    from sqlalchemy import inspect
+    try:
+        insp = inspect(dest_engine)
+        actual_cols = [c['name'] for c in insp.get_columns(sub.tabla_origen.lower().replace(" ", "_"))]
+    except Exception as e:
+        print(f"Error inspecting columns for table {sub.tabla_origen}: {e}")
+        actual_cols = []
+    cols_map = {c.lower(): c for c in actual_cols}
 
     query_str = f'SELECT * FROM "{sub.tabla_origen.lower()}"'
     where_parts = [f"company_id = {company_id}"]
@@ -959,7 +976,8 @@ def _generate_subcategoria_cf_diariol(
         val2 = rule.get("value2", "")
         if not col:
             continue
-        col_quoted = f'"{col}"'
+        col_actual = cols_map.get(col.lower(), col)
+        col_quoted = f'"{col_actual}"'
         pkey = f"fr{idx}"
 
         if op == "IS NULL":
@@ -991,7 +1009,8 @@ def _generate_subcategoria_cf_diariol(
             val = f.get("value", "")
             val2 = f.get("value2", "")
             if not col: continue
-            col_quoted = f'"{col}"'
+            col_actual = cols_map.get(col.lower(), col)
+            col_quoted = f'"{col_actual}"'
             
             if op == "IS NULL": where_parts.append(f"{col_quoted} IS NULL")
             elif op == "IS NOT NULL": where_parts.append(f"{col_quoted} IS NOT NULL")
@@ -1021,10 +1040,10 @@ def _generate_subcategoria_cf_diariol(
             columns = list(result.keys())
     except Exception as e:
         print(f"DB READ ERROR for {sub.tabla_origen}: {e}")
-        return 0, 0
+        return 0, 0, []
 
     if not rows:
-        return 0, 0
+        return 0, 0, []
 
     df = pd.DataFrame(rows, columns=columns)
 
@@ -1060,6 +1079,8 @@ def _generate_subcategoria_cf_diariol(
                 pass
             else:
                 stmt_existing = select(DetTable.c.idcontrol).where(
+                     DetTable.c.company_id == company_id,
+                     DetTable.c.subcategoria_id == sub.id,
                      DetTable.c.estado.in_(["0", "1", "PENDIENTE", "MIGRADO"]),
                      DetTable.c.idcontrol.in_(idcontrols_in_df)
                 )
@@ -1078,7 +1099,7 @@ def _generate_subcategoria_cf_diariol(
                 df = df[~df['idcontrol'].astype(str).isin(existing_ids)]
                 diff = before_count - len(df)
                 if diff > 0:
-                    print(f"IDCONTROL: Filtradas {diff} filas ya regristradas por cualquier compañía para subcat {sub.id}.")
+                    print(f"IDCONTROL: Filtradas {diff} filas ya registradas para la compañía {company_id} y subcat {sub.id}.")
                 if df.empty:
                     return 0, 0, []
             else:

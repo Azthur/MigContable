@@ -653,8 +653,11 @@
                             <p class="small text-muted mb-2">Inserta una función básica:</p>
                             <div class="list-group list-group-flush">
                                 <button class="list-group-item list-group-item-action py-1 small"
-                                    onclick="insertText('CONCAT(col1, col2)')"><b>CONCAT</b>(col1, col2) - Unir
-                                    textos</button>
+                                    onclick="insertText('CONCAT(col1, col2)')"><b>CONCAT</b>(col1, col2) - Unir textos (Limpia espacios)</button>
+                                <button class="list-group-item list-group-item-action py-1 small"
+                                    onclick="insertText('CONCAT_EXACTO(col1, col2)')"><b>CONCAT_EXACTO</b>(col1, col2) - Unir textos (Mantiene espacios/saltos)</button>
+                                <button class="list-group-item list-group-item-action py-1 small"
+                                    onclick="insertText('CHR(10)')"><b>CHR</b>(10) - Caracter ASCII (Ej: salto de línea)</button>
                                 <button class="list-group-item list-group-item-action py-1 small"
                                     onclick="insertText('LEFT(col, 5)')"><b>LEFT</b>(col, n) - Extraer
                                     izquierda</button>
@@ -671,7 +674,10 @@
                                     onclick="insertText('SI.CONJUNTO(condicion1, valor1, condicion2, valor2)')"><b>SI.CONJUNTO</b>(...)
                                     - Condiciones</button>
                                 <button class="list-group-item list-group-item-action py-1 small"
-                                    onclick="insertText('SUM(col1, col2)')"><b>SUM</b>(...) - Sumar</button>
+                                    onclick="insertText('SUMAR.SI.CONJUNTO(colSuma, colCriterio1, criterio1)')"><b>SUMAR.SI.CONJUNTO</b>(...)
+                                    - Sumar con condiciones</button>
+                                <button class="list-group-item list-group-item-action py-1 small"
+                                    onclick="insertText('SUMA(col1, col2)')"><b>SUMA</b>(...) - Sumar</button>
                             </div>
                         </div>
                     </div>

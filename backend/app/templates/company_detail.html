@@ -916,6 +916,7 @@
                             </option>
                             <option value="SI.CONJUNTO(Col1='Val1', 'Ret1', Col1='Val2', 'Ret2')">Si Conjunto (Múltiples
                                 cond)</option>
+                            <option value="SUMAR.SI.CONJUNTO(ColSuma, ColCriterio1, Criterio1)">Sumar Si Conjunto (Suma condicional)</option>
                             <option value="Y(cond1, cond2)"> Y Lógico (AND)</option>
                             <option value="O(cond1, cond2)"> O Lógico (OR)</option>
                             <option value="SUMA(Col1, Col2, Col3)">Suma (+)</option>
@@ -926,7 +927,9 @@
                             <option value="ABS(Columna)">Valor Absoluto (ABS)</option>
                             <option value="LEFT(Columna, 3)">Izquierda (3 caracteres)</option>
                             <option value="RIGHT(Columna, 4)">Derecha (4 caracteres)</option>
-                            <option value="CONCAT(Col1, Col2)">Concatenar</option>
+                            <option value="CONCAT(Col1, Col2)">Concatenar (Limpia espacios)</option>
+                            <option value="CONCAT_EXACTO(Col1, Col2)">Concatenar Exacto (Mantiene espacios y saltos)</option>
+                            <option value="CHR(10)">Caracter ASCII (Ej: 10 para salto de línea)</option>
                             <option value="LARGO(Columna)">Longitud (N° caracteres)</option>
                             <option value="ESPACIOS(Columna)">Limpiar Espacios</option>
                             <option value="MAYUSC(Columna)">Convertir a Mayúsculas</option>
@@ -3319,7 +3322,7 @@
             }
 
             // Validar funciones que exigen comas (múltiples parámetros)
-            const multiParamFuncs = ["SI.CONJUNTO", "CONCAT", "RESTA", "MULTIPLICA", "DIVIDE", "BUSCARX", "BUSCARX_EXT", "EXTRAER", "ENCONTRAR"];
+            const multiParamFuncs = ["SI.CONJUNTO", "SUMAR.SI.CONJUNTO", "CONCAT", "CONCAT_EXACTO", "RESTA", "MULTIPLICA", "DIVIDE", "BUSCARX", "BUSCARX_EXT", "EXTRAER", "ENCONTRAR"];
             for (let f of multiParamFuncs) {
                 if (val.toUpperCase().includes(f + "(")) {
                     // Extracting content inside parenthesis roughly without full AST parsing

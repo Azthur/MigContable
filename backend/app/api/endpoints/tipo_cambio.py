@@ -15,7 +15,7 @@ from backend.app.models.models import TipoCambio
 router = APIRouter()
 
 # Token para api.org.pe
-TC_API_TOKEN = "ebf3feafb06f11f09f1d005056563c20"
+TC_API_TOKEN = "7964086d139cec9233e0581c3ceb49cQ"
 TC_API_BASE = "https://api.org.pe/v1"
 
 

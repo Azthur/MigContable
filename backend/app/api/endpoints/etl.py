@@ -96,55 +96,75 @@ def __get_col_simple(col_name, dataframe):
 
 def __apply_computed_rules(df, computed_rules, db, company_id, table_name):
     df_cols_lower = {str(c).lower(): str(c) for c in df.columns}
-    from collections import defaultdict
-    grouped = defaultdict(list)
+    # 1. Pre-escanear e inicializar columnas con su valor por defecto (o vacío)
+    col_defaults = {}
     for rule in computed_rules:
         r_lower = rule.new_column_name.lower()
         actual_col = df_cols_lower.get(r_lower, rule.new_column_name)
-        grouped[actual_col].append(rule)
-    
-    for new_col, col_rules in grouped.items():
-        default = ""
-        for cr in col_rules:
-            if cr.default_value:
-                default = cr.default_value
-                break
-        df[new_col] = default
+        if actual_col not in col_defaults:
+            col_defaults[actual_col] = rule.default_value if rule.default_value else ""
+            
+    for col, default in col_defaults.items():
+        df[col] = default
+
+    # 2. Ejecutar reglas de manera estrictamente secuencial de arriba hacia abajo
+    for rule in computed_rules:
+        r_lower = rule.new_column_name.lower()
+        new_col = df_cols_lower.get(r_lower, rule.new_column_name)
+        default = col_defaults.get(new_col, "")
         
-        for rule in reversed(col_rules):
-            try:
-                val_upper = rule.condition_value.strip().upper()
-                if val_upper in ("BUSCARX_TC_VENTA", "BUSCARX_TC_COMPRA"):
-                    if rule.source_column in df.columns:
-                        tc_col = "venta" if "VENTA" in val_upper else "compra"
-                        from backend.app.models.models import TipoCambio
-                        tc_rows = db.query(TipoCambio).all()
-                        tc_map = {str(r.fecha): float(getattr(r, tc_col)) for r in tc_rows}
-                        df[new_col] = df[rule.source_column].astype(str).str[:10].map(tc_map)
-                        if default:
-                            df[new_col] = df[new_col].fillna(float(default) if default.replace('.','',1).isdigit() else default)
-                        else:
-                            df[new_col] = df[new_col].fillna(0)
+        try:
+            import re
+            val_upper = rule.condition_value.strip().upper()
+            func_match = re.match(r'^([\w\.]+)\s*\(', val_upper)
+            
+            if val_upper in ("BUSCARX_TC_VENTA", "BUSCARX_TC_COMPRA"):
+                if rule.source_column in df.columns:
+                    tc_col = "venta" if "VENTA" in val_upper else "compra"
+                    from backend.app.models.models import TipoCambio
+                    tc_rows = db.query(TipoCambio).all()
+                    tc_map = {str(r.fecha): float(getattr(r, tc_col)) for r in tc_rows}
+                    df[new_col] = df[rule.source_column].astype(str).str[:10].map(tc_map)
+                    if default:
+                        df[new_col] = df[new_col].fillna(float(default) if default.replace('.','',1).isdigit() else default)
+                    else:
+                        df[new_col] = df[new_col].fillna(0)
                         
-                elif any(val_upper.startswith(p) for p in [
-                    "CONCAT(", "LEFT(", "RIGHT(", "SI.CONJUNTO(", 
-                    "BUSCARX(", "BUSCARX_EXT(", "BUSCARX_LOCAL(", "SUMA(", "RESTA(", "MULTIPLICA(", "DIVIDE(", "REDONDEAR(", "ABS(",
-                    "LARGO(", "ESPACIOS(", "MAYUSC(", "REPETIR(", "TEXTO(", "AÑO(", "MES(", "Y(", "O("
-                ]):
-                    from backend.app.core.formula_parser import evaluate_formula_on_df
-                    df[new_col] = evaluate_formula_on_df(
-                        df=df, formula_str=rule.condition_value,
-                        db=db, company_id=company_id, default=default if default else ""
-                    )
-                else:
-                    actual_src = __get_col_simple(rule.source_column, df)
-                    if actual_src:
-                        mask = df[actual_src].astype(str).str.strip().str.upper() == val_upper
+            elif func_match and func_match.group(1) in [
+                "CONCAT", "CONCAT_EXACTO", "LEFT", "RIGHT", "SI.CONJUNTO", 
+                "BUSCARX", "BUSCARX_EXT", "BUSCARX_LOCAL", "SUMA", "RESTA", "MULTIPLICA", "DIVIDE", "REDONDEAR", "ABS",
+                "LARGO", "ESPACIOS", "MAYUSC", "REPETIR", "TEXTO", "AÑO", "MES", "Y", "O", "CHR", "CARACTER", "SUMAR.SI.CONJUNTO",
+                "ENCONTRAR", "EXTRAER"
+            ]:
+                from backend.app.core.formula_parser import evaluate_formula_on_df
+                df[new_col] = evaluate_formula_on_df(
+                    df=df, formula_str=rule.condition_value,
+                    db=db, company_id=company_id, default=default if default else ""
+                )
+            else:
+                actual_src = __get_col_simple(rule.source_column, df)
+                if actual_src:
+                    mask = df[actual_src].astype(str).str.strip().str.upper() == val_upper
+                    
+                    res_val = rule.result_value
+                    res_upper = res_val.strip().upper() if res_val else ""
+                    func_match_res = re.match(r'^([\w\.]+)\s*\(', res_upper)
+                    
+                    if func_match_res and func_match_res.group(1) in [
+                        "CONCAT", "CONCAT_EXACTO", "LEFT", "RIGHT", "SI.CONJUNTO", 
+                        "BUSCARX", "BUSCARX_EXT", "BUSCARX_LOCAL", "SUMA", "RESTA", "MULTIPLICA", "DIVIDE", "REDONDEAR", "ABS",
+                        "LARGO", "ESPACIOS", "MAYUSC", "REPETIR", "TEXTO", "AÑO", "MES", "Y", "O", "CHR", "CARACTER", "SUMAR.SI.CONJUNTO",
+                        "ENCONTRAR", "EXTRAER"
+                    ]:
+                        from backend.app.core.formula_parser import evaluate_formula_on_df
+                        eval_res = evaluate_formula_on_df(df=df, formula_str=res_val, db=db, company_id=company_id, default="")
+                        df.loc[mask, new_col] = eval_res[mask]
+                    else:
                         df.loc[mask, new_col] = rule.result_value
-            except Exception as rule_err:
-                rule_detail = f"Tabla: {table_name} | Columna Calculada: '{new_col}' | Regla ID: {rule.id} | Col Origen: '{rule.source_column}' | Fórmula/Valor: '{rule.condition_value}' | Error: {rule_err}"
-                print(f"ERROR en columna calculada: {rule_detail}")
-                raise Exception(rule_detail)
+        except Exception as rule_err:
+            rule_detail = f"Tabla: {table_name} | Columna Calculada: '{new_col}' | Regla ID: {rule.id} | Col Origen: '{rule.source_column}' | Fórmula/Valor: '{rule.condition_value}' | Error: {rule_err}"
+            print(f"ERROR en columna calculada: {rule_detail}")
+            raise Exception(rule_detail)
 
 
 def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, start_date: str = None, end_date: str = None, full_refresh: bool = False):
@@ -722,6 +742,16 @@ def generate_asientos_contables(
         raise HTTPException(status_code=400, detail="La subcategoría no tiene tabla origen configurada")
 
     # Construir filtros opcionales para la query
+    from backend.app.core.database import dest_engine
+    from sqlalchemy import inspect
+    try:
+        insp = inspect(dest_engine)
+        actual_cols = [c['name'] for c in insp.get_columns(sub.tabla_origen.lower().replace(" ", "_"))]
+    except Exception as e:
+        print(f"Error inspecting columns for table {sub.tabla_origen}: {e}")
+        actual_cols = []
+    cols_map = {c.lower(): c for c in actual_cols}
+
     filters = body.get("filters", [])
     query_str = f'SELECT * FROM "{sub.tabla_origen.lower()}"'
     query_params = {}
@@ -737,7 +767,8 @@ def generate_asientos_contables(
             if not col:
                 continue
             
-            col_quoted = f'"{col}"'
+            col_actual = cols_map.get(col.lower(), col)
+            col_quoted = f'"{col_actual}"'
             
             if op == "IS NULL":
                 where_parts.append(f"{col_quoted} IS NULL")

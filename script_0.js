@@ -1427,7 +1427,7 @@
             }
 
             // Validar funciones que exigen comas (múltiples parámetros)
-            const multiParamFuncs = ["SI.CONJUNTO", "CONCAT", "RESTA", "MULTIPLICA", "DIVIDE", "BUSCARX", "BUSCARX_EXT"];
+            const multiParamFuncs = ["SI.CONJUNTO", "SUMAR.SI.CONJUNTO", "CONCAT", "CONCAT_EXACTO", "RESTA", "MULTIPLICA", "DIVIDE", "BUSCARX", "BUSCARX_EXT"];
             for (let f of multiParamFuncs) {
                 if (val.toUpperCase().includes(f + "(")) {
                     // Extracting content inside parenthesis roughly without full AST parsing

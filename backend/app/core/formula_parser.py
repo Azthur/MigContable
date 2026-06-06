@@ -7,6 +7,16 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from backend.app.core.database import dest_engine
 
+def get_real_column_names(table_name: str, db_engine) -> list:
+    query = text("SELECT column_name FROM information_schema.columns WHERE table_name = :tname")
+    try:
+        with db_engine.connect() as conn:
+            result = conn.execute(query, {"tname": table_name.lower()})
+            return [row[0] for row in result.fetchall()]
+    except Exception as e:
+        print(f"Error fetching columns for {table_name}: {e}")
+        return []
+
 def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, company_id: int, default: str = "") -> pd.Series:
     """
     Evaluates an Excel-like formula string using Python AST on a pandas DataFrame.
@@ -35,8 +45,16 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
     formula_str = formula_str.strip()
     formula_str = re.sub(r'["\']([^"\']+)["\'][\'"]+', r"'\1'", formula_str)
     formula_str = re.sub(r'[\'"]+([^"\']+)["\']', r"'\1'", formula_str)
-    formula_ast_str = re.sub(r'(?<![=<>!])=(?![=])', '==', formula_str)
+    # Safe replacement of single '=' with '==' only outside string literals
+    pattern = r"'(?:[^'\\]|\\.)*'|\"(?:[^\"\\]|\\.)*\"|(?<![=<>!])=(?![=])"
+    def repl(match):
+        val = match.group(0)
+        if val == '=':
+            return '=='
+        return val
+    formula_ast_str = re.sub(pattern, repl, formula_str)
     formula_ast_str = formula_ast_str.replace('<>', '!=')
+    formula_ast_str = formula_ast_str.replace("SUMAR.SI.CONJUNTO", "SUMAR_SI_CONJUNTO")
     formula_ast_str = formula_ast_str.replace("SI.CONJUNTO", "SI_CONJUNTO")
 
     col_map = {str(c).upper().strip(): c for c in df.columns}
@@ -84,7 +102,11 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
             elif op == ast.Div: return np.where(rn != 0, ln / rn, 0)
             return pd.Series([0] * len(df), index=df.index)
         elif isinstance(node, ast.Call):
-            func_id = node.func.id.upper() if isinstance(node.func, ast.Name) else (node.func.value.id.upper() + "." + node.func.attr.upper() if isinstance(node.func, ast.Attribute) else "")
+            def _get_name(n):
+                if isinstance(n, ast.Name): return n.id.upper()
+                elif isinstance(n, ast.Attribute): return _get_name(n.value) + "." + n.attr.upper()
+                return ""
+            func_id = _get_name(node.func)
             
             if func_id in ("SI_CONJUNTO", "SI.CONJUNTO"):
                 masks = []
@@ -104,20 +126,42 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 res = pd.Series([""] * len(df), index=df.index)
                 for arg in node.args:
                     val = eval_ast(arg)
-                    res = res + val.fillna('').astype(str).str.strip()
+                    if isinstance(arg, ast.Name):
+                        res = res + val.fillna('').astype(str).str.strip()
+                    else:
+                        res = res + val.fillna('').astype(str)
                 return res
+
+            elif func_id == "CONCAT_EXACTO":
+                res = pd.Series([""] * len(df), index=df.index)
+                for arg in node.args:
+                    val = eval_ast(arg)
+                    res = res + val.fillna('').astype(str)
+                return res
+
+            elif func_id in ("CHR", "CARACTER") and len(node.args) >= 1:
+                try: 
+                    n = int(eval_ast(node.args[0]).iloc[0])
+                except: 
+                    n = 0
+                char_val = chr(n) if n > 0 else ""
+                return pd.Series([char_val] * len(df), index=df.index)
                 
             elif func_id == "LEFT" and len(node.args) >= 2:
-                src = eval_ast(node.args[0])
-                try: n = int(eval_ast(node.args[1]).iloc[0])
-                except: n = 0
-                return src.fillna('').astype(str).str.strip().str[:n]
+                src = eval_ast(node.args[0]).fillna('').astype(str).str.strip()
+                n_series = pd.to_numeric(eval_ast(node.args[1]), errors='coerce').fillna(0).astype(int)
+                return pd.Series(
+                    [s[:max(0, n)] for s, n in zip(src, n_series)],
+                    index=df.index
+                )
                 
             elif func_id == "RIGHT" and len(node.args) >= 2:
-                src = eval_ast(node.args[0])
-                try: n = int(eval_ast(node.args[1]).iloc[0])
-                except: n = 0
-                return src.fillna('').astype(str).str.strip().str[-n:]
+                src = eval_ast(node.args[0]).fillna('').astype(str).str.strip()
+                n_series = pd.to_numeric(eval_ast(node.args[1]), errors='coerce').fillna(0).astype(int)
+                return pd.Series(
+                    [s[-n:] if n > 0 else "" for s, n in zip(src, n_series)],
+                    index=df.index
+                )
                 
             elif func_id == "Y" and len(node.args) >= 1:
                 res = pd.Series([True] * len(df), index=df.index)
@@ -134,6 +178,34 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                     mask = pd.to_numeric(val, errors='coerce').fillna(0).astype(bool) | (val.astype(str).str.strip().str.upper() == 'TRUE')
                     res = res | mask
                 return res
+
+            elif func_id in ("SUMAR.SI.CONJUNTO", "SUMAR_SI_CONJUNTO") and len(node.args) >= 3 and len(node.args) % 2 == 1:
+                sum_range = pd.to_numeric(eval_ast(node.args[0]), errors='coerce').fillna(0)
+                tmp_df = pd.DataFrame({'_sum': sum_range.values})
+                lookup_keys = []
+                merge_keys = []
+                for i in range(1, len(node.args), 2):
+                    c_range = eval_ast(node.args[i]).astype(str).str.strip().str.upper()
+                    c_val = eval_ast(node.args[i+1]).astype(str).str.strip().str.upper()
+                    range_col = f'_range_{i}'
+                    val_col = f'_val_{i}'
+                    tmp_df[range_col] = c_range.values
+                    tmp_df[val_col] = c_val.values
+                    lookup_keys.append(range_col)
+                    merge_keys.append(val_col)
+                
+                grouped = tmp_df.groupby(lookup_keys)['_sum'].sum().reset_index()
+                tmp_df['_row_idx'] = np.arange(len(tmp_df))
+                merged = pd.merge(
+                    tmp_df,
+                    grouped,
+                    left_on=merge_keys,
+                    right_on=lookup_keys,
+                    how='left',
+                    suffixes=('', '_grouped')
+                )
+                merged = merged.sort_values('_row_idx')
+                return pd.Series(merged['_sum_grouped'].fillna(0).values, index=df.index)
 
             elif func_id == "SUMA":
                 res = pd.Series([0.0] * len(df), index=df.index)
@@ -202,9 +274,11 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 
             elif func_id == "REPETIR" and len(node.args) >= 2:
                 src = eval_ast(node.args[0])
-                try: n = int(eval_ast(node.args[1]).iloc[0])
-                except: n = 0
-                return src.astype(str).str.repeat(n)
+                times = pd.to_numeric(eval_ast(node.args[1]), errors='coerce').fillna(0).astype(int)
+                return pd.Series(
+                    [s * max(0, t) for s, t in zip(src.astype(str), times)],
+                    index=df.index
+                )
                 
             elif func_id == "TEXTO" and len(node.args) >= 1:
                 src = eval_ast(node.args[0])
@@ -235,10 +309,20 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                     items = db.query(UserCatalogItem).filter(UserCatalogItem.catalog_id == cat.id).all()
                     lookup = {}
                     for item in items:
-                        k = str(item.data.get(match_col, "")).strip().upper()
-                        v = item.data.get(ret_col, "")
-                        lookup[k] = v
-                    return src.astype(str).str.strip().str.upper().map(lookup).fillna(default if default else "")
+                        # Case-insensitive lookup in item.data dictionary
+                        data_keys_lower = {str(k).lower(): k for k in item.data.keys()}
+                        match_key = data_keys_lower.get(match_col.lower())
+                        ret_key = data_keys_lower.get(ret_col.lower())
+                        
+                        k_val = item.data.get(match_key, "") if match_key else ""
+                        v_val = item.data.get(ret_key, "") if ret_key else ""
+                        
+                        k = str(k_val).strip().upper()
+                        k = re.sub(r'\.0$', '', k)
+                        lookup[k] = v_val
+                        
+                    src_str = src.astype(str).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
+                    return src_str.map(lookup).fillna(default if default else "")
                 return pd.Series([default if default else ""] * len(df), index=df.index)
 
             elif func_id == "BUSCARX_EXT" and len(node.args) >= 4:
@@ -247,12 +331,24 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 match_col = get_string_arg(node.args[2]).replace("'", "").replace('"', "")
                 ret_col = get_string_arg(node.args[3]).replace("'", "").replace('"', "")
                 
-                query = f'SELECT "{match_col}", "{ret_col}" FROM "{ext_table}"'
+                # Fetch actual columns from PG to resolve casing case-insensitively
+                real_cols = get_real_column_names(ext_table, dest_engine)
+                if real_cols:
+                    match_col_lower = match_col.lower()
+                    ret_col_lower = ret_col.lower()
+                    real_match_col = next((c for c in real_cols if c.lower() == match_col_lower), match_col)
+                    real_ret_col = next((c for c in real_cols if c.lower() == ret_col_lower), ret_col)
+                else:
+                    real_match_col = match_col
+                    real_ret_col = ret_col
+                
+                query = f'SELECT "{real_match_col}", "{real_ret_col}" FROM "{ext_table}" WHERE "company_id" = {company_id}'
                 try:
                     ext_df = pd.read_sql(query, dest_engine)
-                    ext_df[match_col] = ext_df[match_col].astype(str).str.strip().str.upper()
-                    lookup = ext_df.set_index(match_col)[ret_col].to_dict()
-                    return src.astype(str).str.strip().str.upper().map(lookup).fillna(default if default else "")
+                    ext_df[real_match_col] = ext_df[real_match_col].astype(str).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
+                    lookup = ext_df.set_index(real_match_col)[real_ret_col].to_dict()
+                    src_str = src.astype(str).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
+                    return src_str.map(lookup).fillna(default if default else "")
                 except Exception as e:
                     print(f"Error in BUSCARX_EXT querying {ext_table}: {e}")
                     return pd.Series([default if default else ""] * len(df), index=df.index)
@@ -262,16 +358,26 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 match_col = get_string_arg(node.args[1]).replace("'", "").replace('"', "")
                 ret_col = get_string_arg(node.args[2]).replace("'", "").replace('"', "")
                 
-                if match_col in df.columns and ret_col in df.columns:
+                # Case-insensitive check and retrieval of actual column names in DataFrame
+                df_cols_lower = {str(c).lower(): c for c in df.columns}
+                if match_col.lower() in df_cols_lower and ret_col.lower() in df_cols_lower:
+                    actual_match_col = df_cols_lower[match_col.lower()]
+                    actual_ret_col = df_cols_lower[ret_col.lower()]
+                    
                     # Create a lookup dictionary from the current dataframe
                     # Drop duplicates so that the mapping is 1-to-1 based on the first occurrence
-                    lookup_df = df[[match_col, ret_col]].dropna(subset=[match_col]).drop_duplicates(subset=[match_col])
-                    lookup = lookup_df.set_index(match_col)[ret_col].to_dict()
+                    lookup_df = df[[actual_match_col, actual_ret_col]].dropna(subset=[actual_match_col]).drop_duplicates(subset=[actual_match_col])
+                    lookup = lookup_df.set_index(actual_match_col)[actual_ret_col].to_dict()
                     
-                    # Convert map keys (match_col values) to string upper for loose matching
-                    str_lookup = {str(k).strip().upper(): v for k, v in lookup.items()}
+                    # Convert map keys (match_col values) to string upper and strip .0 for loose matching
+                    str_lookup = {}
+                    for k, v in lookup.items():
+                        k_str = str(k).strip().upper()
+                        k_str = re.sub(r'\.0$', '', k_str)
+                        str_lookup[k_str] = v
                     
-                    return src.astype(str).str.strip().str.upper().map(str_lookup).fillna(default if default else "")
+                    src_str = src.astype(str).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
+                    return src_str.map(str_lookup).fillna(default if default else "")
                 else:
                     print(f"Error in BUSCARX_LOCAL: Columns {match_col} or {ret_col} not in DataFrame")
                     return pd.Series([default if default else ""] * len(df), index=df.index)
