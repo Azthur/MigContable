@@ -95,6 +95,35 @@ def execute_scheduled_task(task_id: int):
                 log.status = "ERROR"
                 log.message = f"Error general en ETL: {str(e)}"
             
+        elif task.task_type == "ETL_REALTIME":
+            from backend.app.api.endpoints.etl import run_realtime_etl
+            try:
+                subcategories_filter = task.params.get("subcategorias", []) if task.params else []
+                results = run_realtime_etl(company_id=task.company_id, db=db, subcategorias=subcategories_filter)
+                errors = []
+                warnings = []
+                success_count = 0
+                for r in results:
+                    if r["status"] == "ERROR":
+                        errors.append(f"{r['company_name']}: {r['message']}")
+                    elif r["status"] == "WARNING":
+                        warnings.append(f"{r['company_name']}: {r['message']}")
+                    else:
+                        success_count += 1
+                
+                if errors:
+                    log.status = "ERROR"
+                    log.message = "Fallo ETL Realtime: " + " | ".join(errors)
+                elif warnings:
+                    log.status = "WARNING"
+                    log.message = "Advertencias en ETL Realtime: " + " | ".join(warnings)
+                else:
+                    log.status = "SUCCESS"
+                    log.message = f"Completado para {len(results)} empresa(s). Exitosas: {success_count}."
+            except Exception as e:
+                log.status = "ERROR"
+                log.message = f"Error general en ETL Realtime: {str(e)}"
+            
         elif task.task_type == "MES_ROTATION":
             try:
                 from backend.app.models.models import MapeoSubcategoria, MapeoCategoria
@@ -159,6 +188,16 @@ def start_scheduler():
                     execute_scheduled_task, 'cron', 
                     day=(t.day_of_month or 1), 
                     hour=hour, minute=minute, 
+                    id=job_id, args=[t.id]
+                )
+            elif t.schedule_type == "MINUTES":
+                try:
+                    minutes = int(t.time_str)
+                except ValueError:
+                    minutes = 5
+                scheduler.add_job(
+                    execute_scheduled_task, 'interval',
+                    minutes=minutes,
                     id=job_id, args=[t.id]
                 )
     except Exception as e:

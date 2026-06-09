@@ -1,5 +1,8 @@
 from backend.app.core.database import dest_engine, DestBase
-from backend.app.models.models import AccountMapping, DocumentTypeMapping, TransformationRule, IntegLog
+from backend.app.models.models import (
+    AccountMapping, DocumentTypeMapping, TransformationRule, IntegLog,
+    AsientoCorrelativo, EtlRealtimeLog
+)
 
 def init_db():
     print("Creando tablas en la base de datos de destino...")

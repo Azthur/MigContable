@@ -85,6 +85,11 @@ async def read_company_detail(request: Request, company_id: int):
 async def read_automatizaciones(request: Request):
     return templates.TemplateResponse("automatizaciones.html", {"request": request})
 
+@app.get("/etl-realtime", response_class=HTMLResponse)
+async def read_etl_realtime(request: Request):
+    return templates.TemplateResponse("realtime_etl.html", {"request": request})
+
+
 @app.get("/catalogos", response_class=HTMLResponse)
 async def read_catalogos(request: Request):
     return templates.TemplateResponse("catalogos.html", {"request": request})

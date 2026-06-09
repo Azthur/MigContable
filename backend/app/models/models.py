@@ -354,6 +354,9 @@ class MapeoSubcategoria(DestBase):
     control_column_origen = Column(String(200), nullable=True)
     # Último valor de control migrado exitosamente al destino final
     last_generated_control_value = Column(String(500), nullable=True)
+    # Columnas origen personalizadas para periodo y mes
+    col_origen_periodo = Column(String(100), nullable=True)
+    col_origen_mes = Column(String(100), nullable=True)
     # Filtros de periodo/fecha por subcategoría (JSON array)
     # Formato: [{"column": "anos", "operator": "=", "value": "2026"},
     #           {"column": "C_mes", "operator": ">=", "value": "02"}]
@@ -549,11 +552,12 @@ class CfDiariol(DestBase):
     subcategoria_id = Column(Integer, ForeignKey("mapeo_subcategorias.id"), nullable=True, index=True)
     lote_id = Column(String(50), nullable=True, index=True)
     estado = Column(String(20), default="PENDIENTE", index=True)  # PENDIENTE, MIGRADO, ERROR
+    idcontrol = Column(String(200), nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # ── Campos de Contasis cf_diariol (en orden del CSV) ──
-    cper = Column(String(10), nullable=True)
-    cmes = Column(String(5), nullable=True)
+    cper = Column(String(10), nullable=True, index=True)
+    cmes = Column(String(5), nullable=True, index=True)
     ccodori = Column(String(10), nullable=True)
     nasiento = Column(Integer, nullable=True)
     nidlin = Column(Integer, nullable=True)
@@ -742,8 +746,8 @@ class CfDiario(DestBase):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # ── Campos de Contasis cf_diario ──
-    cper = Column(String(10), nullable=True)
-    cmes = Column(String(5), nullable=True)
+    cper = Column(String(10), nullable=True, index=True)
+    cmes = Column(String(5), nullable=True, index=True)
     ccodori = Column(String(10), nullable=True)
     nasiento = Column(Integer, nullable=True)
     ntc = Column(Numeric(10, 6), nullable=True, default=0)
@@ -826,3 +830,40 @@ class TaskLog(DestBase):
     finished_at = Column(DateTime(timezone=True), nullable=True)
 
     task = relationship("ScheduledTask", back_populates="logs")
+
+
+# ─── Correlativos de Asiento por Periodo ──────────────────────────────────────
+
+class AsientoCorrelativo(DestBase):
+    __tablename__ = "asiento_correlativos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False, index=True)
+    subcategoria_id = Column(Integer, ForeignKey("mapeo_subcategorias.id"), nullable=False, index=True)
+    periodo = Column(String(10), nullable=False, index=True)
+    mes = Column(String(5), nullable=False, index=True)
+    asiento_inicial = Column(Integer, nullable=False, default=1)
+    asiento_actual = Column(Integer, nullable=False, default=0)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
+
+    company = relationship("Company")
+
+
+
+# ─── Logs de ETL en Tiempo Real ───────────────────────────────────────────────
+
+class EtlRealtimeLog(DestBase):
+    __tablename__ = "etl_realtime_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False, index=True)
+    run_date = Column(DateTime(timezone=True), server_default=func.now())
+    status = Column(String(20), nullable=False)  # 'SUCCESS', 'WARNING', 'ERROR'
+    message = Column(Text, nullable=True)
+    records_extracted = Column(Integer, default=0)
+    records_generated = Column(Integer, default=0)
+    records_migrated = Column(Integer, default=0)
+    errors = Column(JSON, nullable=True)
+
+    company = relationship("Company")
+

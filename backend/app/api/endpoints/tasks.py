@@ -31,6 +31,7 @@ class TaskUpdate(BaseModel):
 def list_tasks(db: Session = Depends(get_dest_db)):
     tasks = db.query(ScheduledTask).order_by(ScheduledTask.id.desc()).all()
     from backend.app.core.scheduler import scheduler
+    from backend.app.models.models import Company, MapeoSubcategoria
     
     result = []
     for t in tasks:
@@ -38,9 +39,27 @@ def list_tasks(db: Session = Depends(get_dest_db)):
         job = scheduler.get_job(f"task_{t.id}")
         real_next_run = str(job.next_run_time) if job and job.next_run_time else (str(t.next_run) if t.next_run else None)
         
+        # Get Company name
+        company_name = "Todas"
+        if t.company_id:
+            comp = db.query(Company).filter(Company.id == t.company_id).first()
+            if comp:
+                company_name = comp.name
+                
+        # Get Subcategory names
+        subcategoria_nombres = "Todas las Subcategorías"
+        if t.params and "subcategorias" in t.params:
+            subids = t.params["subcategorias"]
+            if subids:
+                subs = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id.in_(subids)).all()
+                if subs:
+                    subcategoria_nombres = ", ".join([s.nombre for s in subs])
+        
         result.append({
             "id": t.id,
             "company_id": t.company_id,
+            "company_name": company_name,
+            "subcategoria_nombres": subcategoria_nombres,
             "task_type": t.task_type,
             "schedule_type": t.schedule_type,
             "time_str": t.time_str,

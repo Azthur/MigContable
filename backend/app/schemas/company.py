@@ -342,6 +342,8 @@ class MapeoSubcategoriaBase(BaseModel):
     asiento_inicial: Optional[int] = None
     control_column_origen: Optional[str] = None
     last_generated_control_value: Optional[str] = None
+    col_origen_periodo: Optional[str] = None
+    col_origen_mes: Optional[str] = None
     is_active: bool = True
 
 class MapeoSubcategoriaCreate(MapeoSubcategoriaBase):
@@ -368,6 +370,8 @@ class MapeoSubcategoriaUpdate(BaseModel):
     asiento_inicial: Optional[int] = None
     control_column_origen: Optional[str] = None
     last_generated_control_value: Optional[str] = None
+    col_origen_periodo: Optional[str] = None
+    col_origen_mes: Optional[str] = None
     is_active: Optional[bool] = None
     categoria_id: Optional[int] = None
 

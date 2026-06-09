@@ -1,0 +1,1976 @@
+{% extends "base.html" %}
+
+{% block title %}ETL en Tiempo Real - SistemaMigConta{% endblock %}
+{% block page_title %}ETL y Asientos en Tiempo Real{% endblock %}
+{% block breadcrumb %}Inicio › ETL Realtime{% endblock %}
+
+{% block extra_head %}
+<style>
+    .glass-panel {
+        background: rgba(22, 27, 34, 0.4);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-panel:hover {
+        border-color: rgba(88, 166, 255, 0.4);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+    .stat-card {
+        border-left: 4px solid var(--accent);
+        border-radius: 8px;
+        background: rgba(22, 27, 34, 0.6);
+        padding: 16px 20px;
+    }
+    .stat-card.success {
+        border-left-color: var(--accent-green);
+    }
+    .stat-card.warning {
+        border-left-color: var(--accent-yellow);
+    }
+    .stat-card.danger {
+        border-left-color: var(--accent-red);
+    }
+    .log-details-pre {
+        background: #0d1117;
+        color: #8b949e;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 12px;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.8rem;
+        max-height: 250px;
+        overflow-y: auto;
+    }
+    .animate-pulse-slow {
+        animation: pulse-slow 2s infinite ease-in-out;
+    }
+    @keyframes pulse-slow {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+    .table-container {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .progress {
+        border-radius: 3px;
+    }
+    .progress-bar {
+        border-radius: 3px;
+        transition: width 0.6s ease-in-out;
+    }
+    .table-dark-custom tbody tr:hover {
+        background: rgba(88, 166, 255, 0.06);
+    }
+    .summary-grid .badge {
+        min-width: 40px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="row g-4 mb-4">
+    <!-- Recurrence Scheduler panel -->
+    <div class="col-md-12">
+        <div class="glass-panel p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="m-0 text-primary"><i class="bi bi-alarm-fill me-2"></i>Frecuencia Automática</h5>
+                <button class="btn btn-ghost btn-sm px-2 py-1" onclick="openScheduleModal()">
+                    <i class="bi bi-plus-lg me-1"></i> Programar Tarea
+                </button>
+            </div>
+            <p class="text-secondary small">Configure intervalos o ejecuciones programadas diarias/semanales del ETL en tiempo real por empresa y subcategoría.</p>
+            
+            <div class="table-responsive mt-3" style="max-height: 320px; overflow-y: auto;">
+                <table class="table-dark-custom">
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Subcategoría</th>
+                            <th>Frecuencia</th>
+                            <th>Info</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schedulesTableBody">
+                        <tr><td colspan="6" class="text-center text-secondary py-3">Cargando programaciones...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section: Staging Summary per Subcategory -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="glass-panel p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="m-0 text-primary"><i class="bi bi-pie-chart-fill me-2"></i>Resumen por Subcategoría (Staging)</h5>
+                    <p class="text-secondary small mb-0 mt-1">Estado de migración agrupado por cada subcategoría configurada. Seleccione empresa para ver los conteos.</p>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <select class="form-select-dark form-select-sm" id="summaryCompany" onchange="loadStagingSummary()" style="min-width: 200px;">
+                        <option value="">-- Seleccionar Empresa --</option>
+                    </select>
+                    <button class="btn-ghost btn-sm" onclick="loadStagingSummary()">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table-dark-custom mb-0">
+                    <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;">
+                        <tr>
+                            <th>Subcategoría</th>
+                            <th class="text-center">Total Registros</th>
+                            <th class="text-center"><i class="bi bi-clock text-warning me-1"></i>Pendientes</th>
+                            <th class="text-center"><i class="bi bi-check-circle text-success me-1"></i>Migrados</th>
+                            <th class="text-center"><i class="bi bi-exclamation-triangle text-danger me-1"></i>Errores</th>
+                            <th class="text-center">Progreso</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summaryTableBody">
+                        <tr><td colspan="7" class="text-center text-secondary py-4">Seleccione una empresa para ver el resumen de staging.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section: Control de Correlativos y Configuración de Periodo/Mes -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="glass-panel p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="m-0 text-primary"><i class="bi bi-hash me-2"></i>Control de Correlativos y Columnas de Periodo/Mes</h5>
+                    <p class="text-secondary small mb-0 mt-1">Configure el número de asiento inicial, el correlativo actual y las columnas origen de periodo/mes de cada subcategoría por año y mes.</p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap justify-content-end">
+                    <select class="form-select-dark form-select-sm" id="correlativoFilterCompany" onchange="onCorrelativoFilterCompanyChange()" style="min-width: 180px;">
+                        <option value="">-- Seleccionar Empresa --</option>
+                    </select>
+                    <select class="form-select-dark form-select-sm" id="correlativoFilterSubcategory" onchange="loadCorrelativos()" style="min-width: 180px;" disabled>
+                        <option value="">-- Todas las Subcategorías --</option>
+                    </select>
+                    <input type="text" class="form-control-dark form-control-sm" id="correlativoSearch" placeholder="Buscar subcategoría..." onkeyup="filterCorrelativosUI()" style="max-width: 180px;">
+                    <select class="form-select-dark form-select-sm" id="correlativoSort" onchange="loadCorrelativos()" style="min-width: 160px;">
+                        <option value="subcat_asc">Subcategoría A-Z</option>
+                        <option value="subcat_desc">Subcategoría Z-A</option>
+                        <option value="period_desc">Año: Reciente primero</option>
+                        <option value="period_asc">Año: Antiguo primero</option>
+                    </select>
+                    <button class="btn btn-accent btn-sm" onclick="openCorrelativoModal()">
+                        <i class="bi bi-plus-lg me-1"></i> Registrar Correlativo
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table-dark-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th>Subcategoría / Mes</th>
+                            <th class="text-center">Periodo</th>
+                            <th class="text-center">Mes</th>
+                            <th class="text-center">Asiento Inicial</th>
+                            <th class="text-center">Último Asiento</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="correlativosTableBody">
+                        <tr><td colspan="6" class="text-center text-secondary py-4">Seleccione una empresa para cargar los correlativos.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section: Real-time Audit Logs & Error Control -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="glass-panel p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="m-0 text-primary"><i class="bi bi-bug-fill me-2"></i>Auditoría y Errores en Tiempo Real</h5>
+                    <p class="text-secondary small mb-0 mt-1">Verifique en tiempo real qué registros pasaron correctamente y cuáles fueron bloqueados.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <select class="form-select-dark form-select-sm" id="logFilterCompany" onchange="loadRealtimeLogs()" style="min-width: 180px;">
+                        <option value="">-- Todas las Empresas --</option>
+                    </select>
+                    <select class="form-select-dark form-select-sm" id="logFilterStatus" onchange="loadRealtimeLogs()">
+                        <option value="">-- Todos los Estados --</option>
+                        <option value="SUCCESS">✅ Éxitos</option>
+                        <option value="WARNING">⚠️ Advertencias/Errores de Validación</option>
+                        <option value="ERROR">❌ Errores Críticos de Sistema</option>
+                    </select>
+                    <button class="btn-ghost btn-sm" onclick="loadRealtimeLogs()">
+                        <i class="bi bi-arrow-clockwise"></i> Actualizar
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive table-container">
+                <table class="table-dark-custom" id="realtimeLogsTable">
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Fecha Ejecución</th>
+                            <th>Estado</th>
+                            <th>Extraídos</th>
+                            <th>Generados</th>
+                            <th>Migrados</th>
+                            <th>Mensaje / Resumen</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="realtimeLogsBody">
+                        <tr><td colspan="8" class="text-center text-secondary py-4"><span class="spinner-sm"></span> Cargando auditoría de ejecución...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section: Staging Visor Grid -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="glass-panel p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="m-0 text-primary"><i class="bi bi-table me-2"></i>Visor de Asientos en Staging</h5>
+                    <p class="text-secondary small mb-0 mt-1">Busque, filtre y vuelva a procesar asientos individuales que están pendientes de migrar o que fallaron.</p>
+                </div>
+                <div>
+                    <button class="btn-ghost btn-sm" onclick="loadStagingRows(0)">
+                        <i class="bi bi-arrow-clockwise"></i> Actualizar Visor
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filters Bar -->
+            <div class="row g-2 mb-3">
+                <div class="col-md-3">
+                    <label class="form-label-dark small text-secondary">Empresa</label>
+                    <select class="form-select-dark form-select-sm" id="visorCompany" onchange="onVisorCompanyChange()" required>
+                        <option value="">-- Seleccionar Empresa --</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label-dark small text-secondary">Subcategoría</label>
+                    <select class="form-select-dark form-select-sm" id="visorSubcategory" onchange="loadStagingRows(0)" disabled>
+                        <option value="">-- Todas --</option>
+                    </select>
+                </div>
+                <div class="col-md-1.5">
+                    <label class="form-label-dark small text-secondary">Año</label>
+                    <input type="number" class="form-control-dark form-control-sm" id="visorPeriodo" placeholder="Año" onchange="loadStagingRows(0)">
+                </div>
+                <div class="col-md-1.5">
+                    <label class="form-label-dark small text-secondary">Mes</label>
+                    <select class="form-select-dark form-select-sm" id="visorMes" onchange="loadStagingRows(0)">
+                        <option value="">-- Todos --</option>
+                        <option value="01">01 - Ene</option>
+                        <option value="02">02 - Feb</option>
+                        <option value="03">03 - Mar</option>
+                        <option value="04">04 - Abr</option>
+                        <option value="05">05 - May</option>
+                        <option value="06">06 - Jun</option>
+                        <option value="07">07 - Jul</option>
+                        <option value="08">08 - Ago</option>
+                        <option value="09">09 - Set</option>
+                        <option value="10">10 - Oct</option>
+                        <option value="11">11 - Nov</option>
+                        <option value="12">12 - Dic</option>
+                    </select>
+                </div>
+                <div class="col-md-1.5">
+                    <label class="form-label-dark small text-secondary">Estado</label>
+                    <select class="form-select-dark form-select-sm" id="visorEstado" onchange="loadStagingRows(0)">
+                        <option value="">-- Todos --</option>
+                        <option value="PENDIENTE">PENDIENTE</option>
+                        <option value="MIGRADO">MIGRADO</option>
+                        <option value="ERROR">ERROR</option>
+                    </select>
+                </div>
+                <div class="col-md-2.5">
+                    <label class="form-label-dark small text-secondary">Buscar (Glosa/Cuenta/Doc/RUC)</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control-dark form-control-sm" id="visorSearch" placeholder="Glosa, cuenta, ruc..." onkeyup="if(event.key === 'Enter') loadStagingRows(0)">
+                        <button class="btn btn-accent btn-sm px-2 py-0" onclick="loadStagingRows(0)"><i class="bi bi-search"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table class="table-dark-custom mb-0">
+                    <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;">
+                        <tr>
+                            <th>Per/Mes</th>
+                            <th>Subcategoría</th>
+                            <th>Asiento</th>
+                            <th>Lín</th>
+                            <th>ID Control</th>
+                            <th>Cuenta</th>
+                            <th>Debe</th>
+                            <th>Haber</th>
+                            <th>Glosa</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="visorTableBody">
+                        <tr><td colspan="11" class="text-center text-secondary py-4">Seleccione una empresa para cargar los datos de staging.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center mt-3 text-secondary small">
+                <div>
+                    Mostrando del <span id="visorRangeStart">0</span> al <span id="visorRangeEnd">0</span> de <span id="visorTotalCount">0</span> registros
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-ghost btn-sm" id="btnVisorPrev" onclick="changeVisorPage(-1)" disabled>
+                        <i class="bi bi-chevron-left"></i> Anterior
+                    </button>
+                    <button class="btn btn-ghost btn-sm" id="btnVisorNext" onclick="changeVisorPage(1)" disabled>
+                        <i class="bi bi-chevron-right"></i> Siguiente
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Programar Frecuencia Automática -->
+<div class="modal fade modal-dark" id="scheduleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title"><i class="bi bi-alarm-fill text-primary me-2"></i>Programar Ejecución Automática</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="scheduleForm">
+                    <div class="mb-3">
+                        <label class="form-label-dark">Empresa</label>
+                        <select class="form-select-dark" id="schedCompany" onchange="onSchedCompanyChange()" required>
+                            <option value="">-- Seleccionar Empresa --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-dark">Subcategoría (Opcional)</label>
+                        <select class="form-select-dark" id="schedSubcategory" disabled>
+                            <option value="">-- Todas las Subcategorías (Recomendado) --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-dark">Frecuencia</label>
+                        <select class="form-select-dark" id="schedFrequency" onchange="toggleSchedInputs()" required>
+                            <option value="MINUTES">Cada X minutos</option>
+                            <option value="DAILY">Diaria (Todos los días)</option>
+                            <option value="WEEKLY">Semanal</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="divMinutes">
+                        <label class="form-label-dark">Intervalo (Minutos)</label>
+                        <select class="form-select-dark" id="schedMinutesVal">
+                            <option value="1">Cada 1 minuto (Pruebas)</option>
+                            <option value="5">Cada 5 minutos</option>
+                            <option value="10">Cada 10 minutos</option>
+                            <option value="15">Cada 15 minutos</option>
+                            <option value="30">Cada 30 minutos</option>
+                            <option value="60">Cada 1 hora</option>
+                        </select>
+                    </div>
+
+                    <div class="row" id="divTime" style="display: none;">
+                        <div class="col-6 mb-3">
+                            <label class="form-label-dark">Hora Ejecución (24h)</label>
+                            <input type="time" class="form-control-dark" id="schedTimeVal" value="08:00">
+                        </div>
+                        <div class="col-6 mb-3" id="divDayOfWeek" style="display: none;">
+                            <label class="form-label-dark">Día de la semana</label>
+                            <select class="form-select-dark" id="schedDayOfWeek">
+                                <option value="mon">Lunes</option>
+                                <option value="tue">Martes</option>
+                                <option value="wed">Miércoles</option>
+                                <option value="thu">Jueves</option>
+                                <option value="fri">Viernes</option>
+                                <option value="sat">Sábado</option>
+                                <option value="sun">Domingo</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn-accent" onclick="saveSchedule()">Guardar Programación</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Ver Detalles del Log (Historial Completo de Filas y Tablas) -->
+<div class="modal fade modal-dark" id="logDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title"><i class="bi bi-journal-text text-primary me-2"></i>Historial de Ejecución y Auditoría Completa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3 row text-secondary small">
+                    <div class="col-md-4"><strong>Empresa:</strong> <span id="detailCompany" class="text-light"></span></div>
+                    <div class="col-md-4"><strong>Fecha:</strong> <span id="detailDate" class="text-light"></span></div>
+                    <div class="col-md-4"><strong>Estado:</strong> <span id="detailStatus"></span></div>
+                    <div class="col-12 mt-2"><strong>Resumen general:</strong> <div id="detailMessage" class="text-light mt-1"></div></div>
+                </div>
+
+                <div class="mt-4 border-top border-secondary pt-3">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+                        <h6 class="text-light fw-semibold d-flex align-items-center mb-0">
+                            <i class="bi bi-list-check me-2 text-primary"></i> Filas y Tablas Procesadas (<span id="detailLogCount">0</span>)
+                        </h6>
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control-dark form-control-sm w-auto" id="modalSearchInput" placeholder="Buscar..." oninput="filterModalTable()">
+                            <select class="form-select-dark form-select-sm w-auto" id="modalStatusFilter" onchange="filterModalTable()">
+                                <option value="">-- Todos los Estados --</option>
+                                <option value="SUCCESS">✅ Éxitos</option>
+                                <option value="ERROR">❌ Fallas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table-dark-custom mb-0" id="detailErrorsTable">
+                            <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;">
+                                <tr>
+                                    <th>Paso</th>
+                                    <th>Referencia / Asiento</th>
+                                    <th>Tabla / Campo</th>
+                                    <th>Estado</th>
+                                    <th>Detalles / Error</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailErrorsBody">
+                                <tr><td colspan="6" class="text-center text-muted">Ningún registro procesado.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Ver Fila Completa de Staging -->
+<div class="modal fade modal-dark" id="stagingRowModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title"><i class="bi bi-eye-fill text-info me-2"></i>Detalle Completo de Fila en Staging</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive" style="max-height: 550px;">
+                    <table class="table-dark-custom">
+                        <thead>
+                            <tr>
+                                <th style="width: 35%;">Campo / Columna</th>
+                                <th>Valor Mapeado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stagingRowModalBody">
+                            <!-- Populated dynamically in JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Registrar/Editar Correlativo y Columnas de Periodo/Mes -->
+<div class="modal fade modal-dark" id="correlativoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title" id="correlativoModalTitle"><i class="bi bi-hash text-primary me-2"></i>Registrar Correlativo por Periodo/Mes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="correlativoForm">
+                    <input type="hidden" id="editCorrelativoId">
+                    <div class="mb-3" id="divCorrCompany">
+                        <label class="form-label-dark">Empresa</label>
+                        <select class="form-select-dark" id="corrCompany" onchange="onCorrCompanyChange()" required>
+                            <option value="">-- Seleccionar Empresa --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="divCorrSubcategory">
+                        <label class="form-label-dark">Subcategoría</label>
+                        <select class="form-select-dark" id="corrSubcategory" onchange="onCorrSubcatChange()" required disabled>
+                            <option value="">-- Seleccionar Subcategoría --</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3" id="divCorrPeriodo">
+                            <label class="form-label-dark">Periodo (Año)</label>
+                            <input type="number" class="form-control-dark" id="corrPeriodo" placeholder="Ej: 2026" required>
+                        </div>
+                        <div class="col-6 mb-3" id="divCorrMes">
+                            <label class="form-label-dark">Mes</label>
+                            <select class="form-select-dark" id="corrMes" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="01">01 - Ene</option>
+                                <option value="02">02 - Feb</option>
+                                <option value="03">03 - Mar</option>
+                                <option value="04">04 - Abr</option>
+                                <option value="05">05 - May</option>
+                                <option value="06">06 - Jun</option>
+                                <option value="07">07 - Jul</option>
+                                <option value="08">08 - Ago</option>
+                                <option value="09">09 - Set</option>
+                                <option value="10">10 - Oct</option>
+                                <option value="11">11 - Nov</option>
+                                <option value="12">12 - Dic</option>
+                        </div>
+                    </div>
+                    <div class="mb-3 form-check" id="divCorrBulk" style="padding-left: 1.8em;">
+                        <input type="checkbox" class="form-check-input" id="corrBulkYear" onchange="toggleCorrBulk(this)">
+                        <label class="form-check-label text-muted small" for="corrBulkYear">
+                            <strong>Registrar Año Completo (12 meses)</strong><br>
+                            <span style="font-size:0.75rem;">Creará/sincronizará la configuración para todos los meses (01 a 12) del año.</span>
+                        </label>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label-dark">Columna Periodo (Origen)</label>
+                            <input type="text" class="form-control-dark" id="corrColPeriodo" placeholder="Ej: anos" list="corrPeriodColsList">
+                            <datalist id="corrPeriodColsList"></datalist>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label-dark">Columna Mes (Origen)</label>
+                            <input type="text" class="form-control-dark" id="corrColMes" placeholder="Ej: c_mes" list="corrMesColsList">
+                            <datalist id="corrMesColsList"></datalist>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label-dark">Asiento Inicial</label>
+                            <input type="number" class="form-control-dark" id="corrAsientoInicial" value="1" min="1" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label-dark">Último Asiento (Asiento Actual)</label>
+                            <input type="number" class="form-control-dark" id="corrAsientoActual" value="0" min="0" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn-accent" onclick="saveCorrelativo()">Guardar Correlativo</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const authHeaders = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('migconta_token')}`
+    };
+
+    let allCompanies = [];
+    let scheduleModalObj = null;
+    let logDetailsModalObj = null;
+    let stagingRowModalObj = null;
+    let correlativoModalObj = null;
+    let currentVisorItems = [];
+
+    // Startup
+    $(document).ready(function() {
+        scheduleModalObj = new bootstrap.Modal(document.getElementById('scheduleModal'));
+        logDetailsModalObj = new bootstrap.Modal(document.getElementById('logDetailsModal'));
+        stagingRowModalObj = new bootstrap.Modal(document.getElementById('stagingRowModal'));
+        correlativoModalObj = new bootstrap.Modal(document.getElementById('correlativoModal'));
+
+        // Load page components
+        loadCompanies();
+        loadSchedules();
+        loadRealtimeLogs();
+        
+        // Auto refresh logs and summary every 30s
+        setInterval(loadRealtimeLogs, 30000);
+        
+        // Populate current period/month defaults
+        const currentYear = new Date().getFullYear();
+        const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
+        
+        document.getElementById('visorPeriodo').value = currentYear;
+        document.getElementById('visorMes').value = currentMonth;
+    });
+
+    // Load Companies
+    async function loadCompanies() {
+        try {
+            const res = await fetch('/api/v1/companies', { headers: authHeaders });
+            if (!res.ok) throw new Error();
+            allCompanies = await res.json();
+            
+            // Populate all company selectors on the page
+            const selectors = [
+                'schedCompany', 'visorCompany', 'summaryCompany', 'logFilterCompany', 'corrCompany', 'correlativoFilterCompany'
+            ];
+            
+            allCompanies.forEach(c => {
+                if (c.is_active) {
+                    selectors.forEach(selId => {
+                        const sel = document.getElementById(selId);
+                        if (sel) sel.add(new Option(c.name, c.id));
+                    });
+                }
+            });
+        } catch (err) {
+            console.error("Error cargando empresas:", err);
+        }
+    }
+
+    // ─── Staging Summary per Subcategory ───
+    async function loadStagingSummary() {
+        const compId = document.getElementById('summaryCompany').value;
+        const tbody = document.getElementById('summaryTableBody');
+        
+        if (!compId) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-secondary py-4">Seleccione una empresa para ver el resumen de staging.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-secondary py-4"><span class="spinner-sm"></span> Cargando resumen...</td></tr>';
+
+        const currentYear = new Date().getFullYear();
+        const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
+
+        try {
+            const res = await fetch(`/api/v1/etl/staging-summary?company_id=${compId}&periodo=${currentYear}&mes=${currentMonth}`, { headers: authHeaders });
+            const data = res.ok ? await res.json() : [];
+            
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-secondary py-4">No hay datos de staging para esta empresa en el periodo actual.</td></tr>';
+                return;
+            }
+
+            data.forEach(s => {
+                const pct = s.total > 0 ? Math.round((s.migrado / s.total) * 100) : 0;
+                let progressColor = 'bg-warning';
+                if (pct >= 100) progressColor = 'bg-success';
+                else if (pct >= 50) progressColor = 'bg-info';
+                else if (s.error > 0) progressColor = 'bg-danger';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-semibold">${s.subcategoria_nombre}</td>
+                        <td class="text-center font-monospace">${s.total}</td>
+                        <td class="text-center">
+                            <span class="badge bg-warning-subtle text-warning">${s.pendiente}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-success-subtle text-success">${s.migrado}</span>
+                        </td>
+                        <td class="text-center">
+                            ${s.error > 0 
+                                ? `<span class="badge bg-danger-subtle text-danger">${s.error}</span>` 
+                                : '<span class="text-secondary">0</span>'}
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height: 6px; background: rgba(255,255,255,0.1);">
+                                    <div class="progress-bar ${progressColor}" style="width: ${pct}%"></div>
+                                </div>
+                                <span class="text-secondary small font-monospace" style="min-width: 36px;">${pct}%</span>
+                            </div>
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-primary btn-sm px-2 py-0" style="font-size:0.75rem;" 
+                                onclick="reprocessSubcategory(${compId}, ${s.subcategoria_id}, '${s.subcategoria_nombre}', this)">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Reprocesar
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (err) {
+            console.error("Error loading staging summary:", err);
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Error al cargar resumen.</td></tr>';
+        }
+    }
+
+    async function reprocessSubcategory(companyId, subcatId, subcatName, btn) {
+        const confirmResult = await Swal.fire({
+            title: `¿Reprocesar ${subcatName}?`,
+            text: 'Se regenerarán y migrarán todos los asientos de esta subcategoría.',
+            icon: 'question',
+            showCancelButton: true,
+            background: '#161b22',
+            color: '#fff',
+            confirmButtonColor: '#bc8cff',
+            cancelButtonColor: '#30363d',
+            confirmButtonText: 'Sí, reprocesar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (!confirmResult.isConfirmed) return;
+
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+        try {
+            const res = await fetch('/api/v1/etl/reprocess-row', {
+                method: 'POST',
+                headers: authHeaders,
+                body: JSON.stringify({
+                    company_id: companyId,
+                    step: 'MIGRATION',
+                    table: 'cf_diariol',
+                    reference: '',
+                    subcategoria_id: subcatId
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.status === 'SUCCESS') {
+                showToast('success', data.message || `${subcatName} reprocesada correctamente`);
+                loadStagingSummary();
+                loadRealtimeLogs();
+            } else {
+                showToast('error', data.detail || 'Fallo al reprocesar subcategoría');
+            }
+        } catch (err) {
+            showToast('error', 'Error de red');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    }
+
+    // Load Scheduled Tasks of type ETL_REALTIME
+    async function loadSchedules() {
+        try {
+            const res = await fetch('/api/v1/tasks', { headers: authHeaders });
+            const tasks = await res.json();
+            const scheds = tasks.filter(t => t.task_type === 'ETL_REALTIME');
+            
+            const tbody = document.getElementById('schedulesTableBody');
+            tbody.innerHTML = '';
+            
+            if (scheds.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-secondary py-3">No hay programaciones automáticas registradas.</td></tr>';
+                return;
+            }
+
+            scheds.forEach(s => {
+                const comp = allCompanies.find(c => c.id === s.company_id);
+                const compName = comp ? comp.name : `Empresa ${s.company_id}`;
+                
+                let freqBadge = '';
+                let infoStr = '';
+                if (s.schedule_type === 'MINUTES') {
+                    freqBadge = `<span class="badge bg-info">Cada ${s.time_str} Minutos</span>`;
+                    infoStr = '-';
+                } else if (s.schedule_type === 'DAILY') {
+                    freqBadge = `<span class="badge bg-primary">Diario</span>`;
+                    infoStr = `<i class="bi bi-clock me-1"></i>${s.time_str}`;
+                } else if (s.schedule_type === 'WEEKLY') {
+                    freqBadge = `<span class="badge bg-secondary">Semanal</span>`;
+                    const daysMap = { mon: 'Lunes', tue: 'Martes', wed: 'Miércoles', thu: 'Jueves', fri: 'Viernes', sat: 'Sábado', sun: 'Domingo' };
+                    infoStr = `${daysMap[s.day_of_week] || s.day_of_week} a las ${s.time_str}`;
+                }
+
+                const statusBadge = s.is_active 
+                    ? `<span class="badge bg-success-subtle text-success">Activo</span>`
+                    : `<span class="badge bg-danger-subtle text-danger">Inactivo</span>`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-semibold">${compName}</td>
+                        <td class="text-secondary small font-monospace">${s.subcategoria_nombres || 'Todas las Subcategorías'}</td>
+                        <td>${freqBadge}</td>
+                        <td>${infoStr}</td>
+                        <td>${statusBadge}</td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-danger btn-sm px-2 py-0" onclick="deleteSchedule(${s.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (err) {
+            console.error("Error loading tasks schedules:", err);
+        }
+    }
+
+    // Toggle Schedule Type inputs in modal
+    function toggleSchedInputs() {
+        const freq = document.getElementById('schedFrequency').value;
+        const divMin = document.getElementById('divMinutes');
+        const divTime = document.getElementById('divTime');
+        const divDay = document.getElementById('divDayOfWeek');
+        
+        if (freq === 'MINUTES') {
+            divMin.style.display = 'block';
+            divTime.style.display = 'none';
+        } else {
+            divMin.style.display = 'none';
+            divTime.style.display = 'flex';
+            
+            if (freq === 'WEEKLY') {
+                divDay.style.display = 'block';
+            } else {
+                divDay.style.display = 'none';
+            }
+        }
+    }
+
+    async function onSchedCompanyChange() {
+        const compId = document.getElementById('schedCompany').value;
+        const subcatSel = document.getElementById('schedSubcategory');
+        subcatSel.innerHTML = '<option value="">-- Todas las Subcategorías (Recomendado) --</option>';
+        if (!compId) {
+            subcatSel.disabled = true;
+            return;
+        }
+        subcatSel.disabled = false;
+        
+        try {
+            const res = await fetch(`/api/v1/mapeo/categorias?company_id=${compId}`, { headers: authHeaders });
+            if (res.ok) {
+                const cats = await res.json();
+                cats.forEach(cat => {
+                    if (cat.subcategorias && cat.subcategorias.length) {
+                        cat.subcategorias.forEach(sub => {
+                            const opt = document.createElement('option');
+                            opt.value = sub.id;
+                            opt.textContent = `${cat.nombre} → ${sub.nombre}`;
+                            subcatSel.appendChild(opt);
+                        });
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("Error loading subcategories for scheduler:", e);
+        }
+    }
+
+    function openScheduleModal() {
+        document.getElementById('scheduleForm').reset();
+        document.getElementById('schedSubcategory').innerHTML = '<option value="">-- Todas las Subcategorías (Recomendado) --</option>';
+        document.getElementById('schedSubcategory').disabled = true;
+        toggleSchedInputs();
+        scheduleModalObj.show();
+    }
+
+    async function saveSchedule() {
+        const companyId = document.getElementById('schedCompany').value;
+        const subcatId = document.getElementById('schedSubcategory').value;
+        const freq = document.getElementById('schedFrequency').value;
+        
+        if (!companyId) {
+            showToast('warning', 'Debe seleccionar una empresa');
+            return;
+        }
+
+        let timeStr = '';
+        let dayOfWeek = null;
+        
+        if (freq === 'MINUTES') {
+            timeStr = document.getElementById('schedMinutesVal').value;
+        } else {
+            timeStr = document.getElementById('schedTimeVal').value;
+            if (!timeStr) {
+                showToast('warning', 'Debe especificar la hora de ejecución');
+                return;
+            }
+            if (freq === 'WEEKLY') {
+                dayOfWeek = document.getElementById('schedDayOfWeek').value;
+            }
+        }
+
+        const payload = {
+            company_id: parseInt(companyId),
+            task_type: 'ETL_REALTIME',
+            schedule_type: freq,
+            time_str: timeStr,
+            day_of_week: dayOfWeek,
+            params: subcatId ? { subcategorias: [parseInt(subcatId)] } : { subcategorias: [] }
+        };
+
+        try {
+            const res = await fetch('/api/v1/tasks', {
+                method: 'POST',
+                headers: authHeaders,
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                showToast('success', 'Programación automatizada guardada');
+                scheduleModalObj.hide();
+                loadSchedules();
+            } else {
+                const data = await res.json();
+                showToast('error', data.detail || 'Fallo al programar tarea');
+            }
+        } catch (e) {
+            showToast('error', 'Error de red');
+        }
+    }
+
+    async function deleteSchedule(taskId) {
+        Swal.fire({
+            title: '¿Eliminar programación?',
+            text: 'La tarea dejará de ejecutarse en segundo plano.',
+            icon: 'warning',
+            showCancelButton: true,
+            background: '#161b22',
+            color: '#fff',
+            confirmButtonColor: '#bc8cff',
+            cancelButtonColor: '#30363d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch(`/api/v1/tasks/${taskId}`, {
+                        method: 'DELETE',
+                        headers: authHeaders
+                    });
+                    if (res.ok) {
+                        showToast('success', 'Programación eliminada');
+                        loadSchedules();
+                    } else {
+                        showToast('error', 'Fallo al eliminar');
+                    }
+                } catch {
+                    showToast('error', 'Error de red');
+                }
+            }
+        });
+    }
+
+
+
+    // ─── Audit Real-time Logs List & Details ───
+    let currentLogsList = [];
+
+    async function loadRealtimeLogs() {
+        const statusFilter = document.getElementById('logFilterStatus').value;
+        const companyFilter = document.getElementById('logFilterCompany') ? document.getElementById('logFilterCompany').value : '';
+        let url = '/api/v1/etl/realtime-logs?limit=50';
+        if (statusFilter) {
+            url += `&status=${statusFilter}`;
+        }
+        if (companyFilter) {
+            url += `&company_id=${companyFilter}`;
+        }
+        
+        try {
+            const res = await fetch(url, { headers: authHeaders });
+            currentLogsList = await res.json();
+            
+            const tbody = document.getElementById('realtimeLogsBody');
+            tbody.innerHTML = '';
+            
+            if (currentLogsList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-secondary py-3">No hay registros de auditoría que coincidan.</td></tr>';
+                return;
+            }
+
+            // Calculate daily sums for stats panel
+            let totalExt = 0;
+            let totalGen = 0;
+            let totalMig = 0;
+            
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            currentLogsList.forEach((l, idx) => {
+                // Parse date
+                const runDateObj = new Date(l.run_date);
+                const localDateStr = runDateObj.toLocaleDateString('es-CO') + ' ' + runDateObj.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                // Add to stats if ran today
+                if (l.run_date && l.run_date.startsWith(todayStr)) {
+                    totalExt += l.records_extracted || 0;
+                    totalGen += l.records_generated || 0;
+                    totalMig += l.records_migrated || 0;
+                }
+
+                let statusBadge = '';
+                if (l.status === 'SUCCESS') {
+                    statusBadge = '<span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle me-1"></i>SUCCESS</span>';
+                } else if (l.status === 'WARNING') {
+                    statusBadge = '<span class="badge bg-warning-subtle text-warning"><i class="bi bi-exclamation-triangle me-1"></i>WARNING</span>';
+                } else {
+                    statusBadge = '<span class="badge bg-danger-subtle text-danger"><i class="bi bi-x-circle me-1"></i>ERROR</span>';
+                }
+
+                const errorsCount = l.errors ? l.errors.length : 0;
+                const hasAction = (errorsCount > 0 || l.status !== 'SUCCESS');
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-semibold">${l.company_name}</td>
+                        <td class="font-monospace text-secondary" style="font-size: 0.75rem;">${localDateStr}</td>
+                        <td>${statusBadge}</td>
+                        <td class="text-success font-monospace">+${l.records_extracted}</td>
+                        <td class="text-primary font-monospace">+${l.records_generated}</td>
+                        <td class="text-warning font-monospace">+${l.records_migrated}</td>
+                        <td class="text-truncate text-secondary" style="max-width: 320px;" title="${l.message || ''}">${l.message || ''}</td>
+                        <td class="text-end">
+                            <button class="btn btn-ghost btn-sm px-2 py-1" onclick="viewLogDetail(${idx})" ${hasAction ? '' : 'disabled'}>
+                                <i class="bi bi-eye-fill"></i> Detalle
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+
+
+        } catch (err) {
+            console.error("Error cargando logs de auditoría:", err);
+        }
+    }
+
+    let modalErrorsData = [];
+    let currentLogCompanyId = null;
+
+    function viewLogDetail(index) {
+        const log = currentLogsList[index];
+        if (!log) return;
+
+        document.getElementById('detailCompany').textContent = log.company_name;
+        currentLogCompanyId = log.company_id;
+        
+        const runDateObj = new Date(log.run_date);
+        document.getElementById('detailDate').textContent = runDateObj.toLocaleDateString('es-CO') + ' ' + runDateObj.toLocaleTimeString('es-CO');
+        
+        const stSpan = document.getElementById('detailStatus');
+        if (log.status === 'SUCCESS') {
+            stSpan.innerHTML = '<span class="badge bg-success">ÉXITO</span>';
+        } else if (log.status === 'WARNING') {
+            stSpan.innerHTML = '<span class="badge bg-warning text-dark">ADVERTENCIA / VALIDACIONES</span>';
+        } else {
+            stSpan.innerHTML = '<span class="badge bg-danger">ERROR CRÍTICO</span>';
+        }
+
+        document.getElementById('detailMessage').textContent = log.message || '-';
+
+        // Save data globally in template
+        modalErrorsData = log.errors || [];
+        
+        // Reset modal filters
+        document.getElementById('modalSearchInput').value = '';
+        document.getElementById('modalStatusFilter').value = '';
+        
+        renderModalTable();
+        logDetailsModalObj.show();
+    }
+
+    function renderModalTable() {
+        const tbody = document.getElementById('detailErrorsBody');
+        tbody.innerHTML = '';
+        
+        const searchQuery = document.getElementById('modalSearchInput').value.toLowerCase().trim();
+        const statusFilter = document.getElementById('modalStatusFilter').value;
+
+        // Filter data on client side
+        const filtered = modalErrorsData.filter(e => {
+            if (statusFilter && e.status !== statusFilter) return false;
+            
+            if (searchQuery) {
+                const step = String(e.step || '').toLowerCase();
+                const table = String(e.table || '').toLowerCase();
+                const col = String(e.column || '').toLowerCase();
+                const ref = String(e.reference || '').toLowerCase();
+                const err = String(e.error || '').toLowerCase();
+                
+                if (!step.includes(searchQuery) &&
+                    !table.includes(searchQuery) &&
+                    !col.includes(searchQuery) &&
+                    !ref.includes(searchQuery) &&
+                    !err.includes(searchQuery)) {
+                    return false;
+                }
+            }
+            return true;
+        });
+
+        document.getElementById('detailLogCount').textContent = filtered.length;
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-secondary py-3">Ningún registro coincide con los filtros.</td></tr>';
+            return;
+        }
+
+        filtered.forEach(e => {
+            let stepLabel = '';
+            let stepClass = 'bg-secondary';
+            if (e.step === 'ETL') {
+                stepLabel = 'Extracción';
+                stepClass = 'bg-info-subtle text-info';
+            } else if (e.step === 'GENERATION') {
+                stepLabel = 'Generación';
+                stepClass = 'bg-primary-subtle text-primary';
+            } else if (e.step === 'VALIDATION') {
+                stepLabel = 'Validación';
+                stepClass = 'bg-warning-subtle text-warning';
+            } else if (e.step === 'MIGRATION') {
+                stepLabel = 'Migración';
+                stepClass = 'bg-danger-subtle text-danger';
+            } else {
+                stepLabel = e.step || 'Sistema';
+            }
+
+            const stepBadge = `<span class="badge ${stepClass}">${stepLabel}</span>`;
+            
+            const statusBadge = e.status === 'SUCCESS' 
+                ? '<span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle me-1"></i>Éxito</span>'
+                : '<span class="badge bg-danger-subtle text-danger"><i class="bi bi-x-circle me-1"></i>Fallo</span>';
+
+            const refStr = e.reference || '-';
+            
+            let tableStr = e.table || '-';
+            if (e.column) tableStr += ` · Campo: <code>${e.column}</code>`;
+
+            const errorClass = e.status === 'SUCCESS' ? 'text-secondary' : 'text-danger fw-semibold';
+            const errorStr = e.error || '-';
+
+            const reprocessBtn = `
+                <button class="btn btn-outline-primary btn-sm px-2 py-0" style="font-size:0.75rem;" onclick="reprocessRow(${currentLogCompanyId}, '${e.step || ''}', '${e.table || ''}', '${e.reference || ''}', ${e.subcategoria_id || 'null'}, this)">
+                    <i class="bi bi-arrow-clockwise"></i> Reprocesar
+                </button>
+            `;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${stepBadge}</td>
+                    <td class="font-monospace small">${refStr}</td>
+                    <td class="small">${tableStr}</td>
+                    <td>${statusBadge}</td>
+                    <td class="${errorClass} small">${errorStr}</td>
+                    <td class="text-end">${reprocessBtn}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function filterModalTable() {
+        renderModalTable();
+    }
+
+    async function reprocessRow(companyId, step, table, reference, subcatId, btn) {
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+        const payload = {
+            company_id: companyId,
+            step: step,
+            table: table,
+            reference: reference,
+            subcategoria_id: subcatId
+        };
+
+        try {
+            const res = await fetch('/api/v1/etl/reprocess-row', {
+                method: 'POST',
+                headers: authHeaders,
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            
+            if (res.ok && data.status === 'SUCCESS') {
+                showToast('success', data.message || 'Reprocesado correctamente');
+                
+                // Update local model array so changes are visible instantly
+                modalErrorsData.forEach(e => {
+                    if (e.reference === reference && e.step === step) {
+                        e.status = 'SUCCESS';
+                        e.error = data.message || 'Reprocesado exitosamente.';
+                    }
+                });
+                
+                renderModalTable();
+                loadRealtimeLogs(); // Refresh background counts
+            } else {
+                showToast('error', data.detail || 'Fallo al reprocesar fila');
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        } catch (err) {
+            showToast('error', 'Error de red');
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    }
+
+    // ─── Visor de Asientos en Staging JS ───
+    async function onVisorCompanyChange() {
+        const compId = document.getElementById('visorCompany').value;
+        const subcatSel = document.getElementById('visorSubcategory');
+        subcatSel.innerHTML = '<option value="">-- Todas --</option>';
+        subcatSel.disabled = true;
+        
+        if (!compId) {
+            document.getElementById('visorTableBody').innerHTML = '<tr><td colspan="10" class="text-center text-secondary py-4">Seleccione una empresa para cargar los datos de staging.</td></tr>';
+            document.getElementById('visorRangeStart').textContent = '0';
+            document.getElementById('visorRangeEnd').textContent = '0';
+            document.getElementById('visorTotalCount').textContent = '0';
+            document.getElementById('btnVisorPrev').disabled = true;
+            document.getElementById('btnVisorNext').disabled = true;
+            return;
+        }
+        
+        try {
+            const res = await fetch(`/api/v1/mapeo/categorias?company_id=${compId}`, { headers: authHeaders });
+            const categories = await res.json();
+            
+            let count = 0;
+            categories.forEach(cat => {
+                cat.subcategorias.forEach(sub => {
+                    if (sub.is_active) {
+                        const opt = new Option(sub.nombre, sub.id);
+                        subcatSel.add(opt);
+                        count++;
+                    }
+                });
+            });
+            
+            if (count > 0) {
+                subcatSel.disabled = false;
+            }
+        } catch (e) {
+            console.error("Error loading subcategories for visor:", e);
+        }
+        
+        loadStagingRows(0);
+    }
+
+    let visorSkip = 0;
+    const visorLimit = 50;
+
+    async function loadStagingRows(skip = 0) {
+        visorSkip = skip;
+        const compId = document.getElementById('visorCompany').value;
+        if (!compId) return;
+
+        const tbody = document.getElementById('visorTableBody');
+        tbody.innerHTML = '<tr><td colspan="11" class="text-center text-secondary py-4"><span class="spinner-sm"></span> Cargando asientos de staging...</td></tr>';
+
+        const subcatId = document.getElementById('visorSubcategory').value;
+        const periodo = document.getElementById('visorPeriodo').value;
+        const mes = document.getElementById('visorMes').value;
+        const estado = document.getElementById('visorEstado').value;
+        const search = document.getElementById('visorSearch').value;
+
+        let url = `/api/v1/mapeo/cf-diariol?company_id=${compId}&skip=${visorSkip}&limit=${visorLimit}`;
+        if (subcatId) url += `&subcategoria_id=${subcatId}`;
+        if (periodo) url += `&periodo=${periodo}`;
+        if (mes) url += `&mes=${mes}`;
+        if (estado) url += `&estado=${estado}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+
+        try {
+            const res = await fetch(url, { headers: authHeaders });
+            const data = res.ok ? await res.json() : { total: 0, items: [] };
+            
+            tbody.innerHTML = '';
+            currentVisorItems = data.items || [];
+            
+            if (data.items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" class="text-center text-secondary py-4">No se encontraron asientos en staging con los filtros seleccionados.</td></tr>';
+                document.getElementById('visorRangeStart').textContent = '0';
+                document.getElementById('visorRangeEnd').textContent = '0';
+                document.getElementById('visorTotalCount').textContent = '0';
+                document.getElementById('btnVisorPrev').disabled = true;
+                document.getElementById('btnVisorNext').disabled = true;
+                return;
+            }
+
+            data.items.forEach(r => {
+                let stateBadge = '';
+                if (r.estado === 'MIGRADO') {
+                    stateBadge = '<span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle me-1"></i>MIGRADO</span>';
+                } else if (r.estado === 'PENDIENTE') {
+                    stateBadge = '<span class="badge bg-warning-subtle text-warning"><i class="bi bi-clock me-1"></i>PENDIENTE</span>';
+                } else {
+                    stateBadge = `<span class="badge bg-danger-subtle text-danger"><i class="bi bi-exclamation-triangle me-1"></i>${r.estado || 'PENDIENTE'}</span>`;
+                }
+
+                const actionsHtml = `
+                    <div class="d-flex gap-1 justify-content-end">
+                        <button class="btn btn-outline-info btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="viewStagingRowDetail(${r.id})">
+                            <i class="bi bi-eye"></i> Ver Fila
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="reprocessVisorRow(${compId}, ${r.subcategoria_id}, '${r.nasiento}', this)">
+                            <i class="bi bi-arrow-clockwise"></i> Reprocesar
+                        </button>
+                    </div>
+                `;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="font-monospace text-secondary" style="font-size:0.75rem;">${r.cper}-${r.cmes}</td>
+                        <td class="small" title="${r.subcategoria_nombre}">${r.subcategoria_nombre}</td>
+                        <td class="fw-semibold text-light font-monospace">${r.nasiento}</td>
+                        <td class="text-secondary font-monospace" style="font-size:0.75rem;">${r.nidlin}</td>
+                        <td class="font-monospace text-secondary" style="font-size:0.75rem;">${r.idcontrol || '-'}</td>
+                        <td class="font-monospace text-info" style="font-size:0.75rem;">${r.ccodcue}</td>
+                        <td class="text-end font-monospace text-success">${r.ndebe > 0 ? r.ndebe.toFixed(2) : '-'}</td>
+                        <td class="text-end font-monospace text-danger">${r.nhaber > 0 ? r.nhaber.toFixed(2) : '-'}</td>
+                        <td class="text-truncate text-secondary small" style="max-width: 250px;" title="${r.cglosa || ''}">${r.cglosa || ''}</td>
+                        <td>${stateBadge}</td>
+                        <td class="text-end">${actionsHtml}</td>
+                    </tr>
+                `;
+            });
+
+            const start = visorSkip + 1;
+            const end = visorSkip + data.items.length;
+            document.getElementById('visorRangeStart').textContent = start;
+            document.getElementById('visorRangeEnd').textContent = end;
+            document.getElementById('visorTotalCount').textContent = data.total;
+
+            document.getElementById('btnVisorPrev').disabled = (visorSkip === 0);
+            document.getElementById('btnVisorNext').disabled = (end >= data.total);
+
+        } catch (err) {
+            console.error("Error loading visor staging rows:", err);
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center text-danger py-4">Error al cargar datos del servidor.</td></tr>';
+        }
+    }
+
+    function changeVisorPage(direction) {
+        const newSkip = visorSkip + (direction * visorLimit);
+        if (newSkip >= 0) {
+            loadStagingRows(newSkip);
+        }
+    }
+
+    async function reprocessVisorRow(companyId, subcatId, nasiento, btn) {
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+        const payload = {
+            company_id: companyId,
+            step: 'MIGRATION',
+            table: 'cf_diariol',
+            reference: `Asiento ${nasiento}`,
+            subcategoria_id: subcatId
+        };
+
+        try {
+            const res = await fetch('/api/v1/etl/reprocess-row', {
+                method: 'POST',
+                headers: authHeaders,
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            
+            if (res.ok && data.status === 'SUCCESS') {
+                showToast('success', data.message || `Asiento ${nasiento} remigrado correctamente`);
+                loadStagingRows(visorSkip); // Reload current page
+                loadRealtimeLogs(); // Refresh background counts
+            } else {
+                showToast('error', data.detail || 'Fallo al reprocesar asiento');
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        } catch (err) {
+            showToast('error', 'Error de red');
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    }
+
+    function viewStagingRowDetail(rowId) {
+        const r = currentVisorItems.find(item => item.id === rowId);
+        if (!r) return;
+        
+        const tbody = document.getElementById('stagingRowModalBody');
+        tbody.innerHTML = '';
+        
+        const keys = Object.keys(r).sort();
+        keys.forEach(k => {
+            if (k === 'subcategoria_nombre') return;
+            const val = r[k];
+            const valDisplay = (val === null || val === undefined) ? '<span class="text-secondary">NULL</span>' : val;
+            tbody.innerHTML += `
+                <tr>
+                    <td class="font-monospace text-info small" style="width: 35%;">${k}</td>
+                    <td class="font-monospace small text-light">${valDisplay}</td>
+                </tr>
+            `;
+        });
+        
+        stagingRowModalObj.show();
+    }
+
+    // ─── Control de Correlativos JS ───
+    let currentCorrelativosList = [];
+
+    async function onCorrelativoFilterCompanyChange() {
+        const compId = document.getElementById('correlativoFilterCompany').value;
+        const subcatSel = document.getElementById('correlativoFilterSubcategory');
+        subcatSel.innerHTML = '<option value="">-- Todas las Subcategorías --</option>';
+        subcatSel.disabled = true;
+
+        if (!compId) {
+            loadCorrelativos();
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/v1/mapeo/categorias?company_id=${compId}`, { headers: authHeaders });
+            if (res.ok) {
+                const cats = await res.json();
+                let count = 0;
+                cats.forEach(cat => {
+                    if (cat.subcategorias) {
+                        cat.subcategorias.forEach(sub => {
+                            const opt = document.createElement('option');
+                            opt.value = sub.id;
+                            opt.textContent = `${cat.nombre} → ${sub.nombre}${sub.is_active ? '' : ' (Inactivo)'}`;
+                            subcatSel.appendChild(opt);
+                            count++;
+                        });
+                    }
+                });
+                if (count > 0) subcatSel.disabled = false;
+            }
+        } catch (e) {
+            console.error("Error cargando subcategorías para filtro:", e);
+        }
+        
+        loadCorrelativos();
+    }
+
+    async function loadCorrelativos() {
+        const compId = document.getElementById('correlativoFilterCompany').value;
+        const tbody = document.getElementById('correlativosTableBody');
+        
+        if (!compId) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-secondary py-4">Seleccione una empresa para cargar los correlativos.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-secondary py-4"><span class="spinner-sm"></span> Cargando correlativos...</td></tr>';
+        
+        try {
+            let url = `/api/v1/etl/correlativos?company_id=${compId}`;
+            const res = await fetch(url, { headers: authHeaders });
+            currentCorrelativosList = res.ok ? await res.json() : [];
+            
+            renderCorrelativos();
+        } catch (err) {
+            console.error("Error cargando correlativos:", err);
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Error al cargar correlativos.</td></tr>';
+        }
+    }
+
+    function renderCorrelativos() {
+        const tbody = document.getElementById('correlativosTableBody');
+        if (!tbody) return;
+
+        const subcatFilterId = document.getElementById('correlativoFilterSubcategory').value;
+        const searchVal = document.getElementById('correlativoSearch').value.toLowerCase().trim();
+        const sortVal = document.getElementById('correlativoSort').value;
+
+        // 1. Filter elements
+        let filtered = currentCorrelativosList.filter(c => {
+            // Dropdown subcategory filter
+            if (subcatFilterId && String(c.subcategoria_id) !== String(subcatFilterId)) {
+                return false;
+            }
+            // Search text filter (by subcategory name)
+            if (searchVal && !c.subcategoria_name.toLowerCase().includes(searchVal)) {
+                return false;
+            }
+            return true;
+        });
+
+        tbody.innerHTML = '';
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-secondary py-4">No hay correlativos registrados que coincidan con los filtros.</td></tr>';
+            return;
+        }
+
+        // 2. Group by subcategoria_id
+        const subcatGroups = {};
+        filtered.forEach(c => {
+            const subId = c.subcategoria_id;
+            if (!subcatGroups[subId]) {
+                subcatGroups[subId] = {
+                    subcategoria_id: subId,
+                    subcategoria_name: c.subcategoria_name,
+                    col_origen_periodo: c.col_origen_periodo,
+                    col_origen_mes: c.col_origen_mes,
+                    periods: {}
+                };
+            }
+            
+            const per = c.periodo;
+            if (!subcatGroups[subId].periods[per]) {
+                subcatGroups[subId].periods[per] = [];
+            }
+            subcatGroups[subId].periods[per].push(c);
+        });
+
+        // 3. Sort subcategories
+        const subcatList = Object.values(subcatGroups);
+        if (sortVal === 'subcat_asc') {
+            subcatList.sort((a, b) => a.subcategoria_name.localeCompare(b.subcategoria_name));
+        } else if (sortVal === 'subcat_desc') {
+            subcatList.sort((a, b) => b.subcategoria_name.localeCompare(a.subcategoria_name));
+        } else {
+            // Sort by subcategory name by default
+            subcatList.sort((a, b) => a.subcategoria_name.localeCompare(b.subcategoria_name));
+        }
+
+        // 4. Render
+        subcatList.forEach(sub => {
+            const totalMonths = Object.values(sub.periods).reduce((sum, list) => sum + list.length, 0);
+            
+            // Subcategory main header row
+            tbody.innerHTML += `
+                <tr style="background: rgba(188, 140, 255, 0.08); font-weight: 600; border-left: 4px solid var(--accent);">
+                    <td colspan="6" class="py-2 align-middle">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>
+                                <strong class="text-accent" style="font-size: 0.88rem;">
+                                    <i class="bi bi-folder-fill me-2 text-warning"></i>${sub.subcategoria_name}
+                                </strong>
+                                <span class="text-secondary ms-3 small" style="font-size: 0.75rem; font-weight: normal;">
+                                    Col. Periodo: <code class="text-info">${sub.col_origen_periodo || '-'}</code> | 
+                                    Col. Mes: <code class="text-info">${sub.col_origen_mes || '-'}</code>
+                                </span>
+                            </span>
+                            <span class="badge bg-accent-subtle text-accent" style="font-size: 0.7rem;">${totalMonths} registros</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            // Sort periods keys
+            const periodsKeys = Object.keys(sub.periods);
+            if (sortVal === 'period_desc') {
+                periodsKeys.sort((a, b) => b.localeCompare(a));
+            } else if (sortVal === 'period_asc') {
+                periodsKeys.sort((a, b) => a.localeCompare(b));
+            } else {
+                periodsKeys.sort((a, b) => b.localeCompare(a)); // Default: recent first
+            }
+
+            periodsKeys.forEach(per => {
+                const monthsList = sub.periods[per];
+                monthsList.sort((a, b) => a.mes.localeCompare(b.mes));
+
+                // Year Sub-header row
+                tbody.innerHTML += `
+                    <tr style="background: rgba(255, 255, 255, 0.02); font-weight: 500;">
+                        <td colspan="6" class="py-1 ps-4 text-secondary small" style="font-size: 0.8rem;">
+                            <i class="bi bi-calendar-check me-2 text-primary"></i>Año ${per}
+                        </td>
+                    </tr>
+                `;
+
+                // Render months
+                monthsList.forEach(c => {
+                    const idx = currentCorrelativosList.findIndex(item => item.id === c.id);
+                    tbody.innerHTML += `
+                        <tr style="border-left: 2px dashed rgba(188, 140, 255, 0.3);">
+                            <td class="ps-5 text-secondary small" style="font-size: 0.78rem;">
+                                <i class="bi bi-calendar-event me-2 text-secondary"></i>Mes ${c.mes}
+                            </td>
+                            <td class="text-center font-monospace small">${c.periodo}</td>
+                            <td class="text-center font-monospace small">${c.mes}</td>
+                            <td class="text-center font-monospace small">${c.asiento_inicial}</td>
+                            <td class="text-center font-monospace small text-warning">${c.asiento_actual}</td>
+                            <td class="text-end py-1">
+                                <div class="d-flex gap-1 justify-content-end">
+                                    <button class="btn btn-outline-primary btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="editCorrelativo(${idx})">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="deleteCorrelativo(${c.id})">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        });
+    }
+
+    function filterCorrelativosUI() {
+        renderCorrelativos();
+    }
+
+    async function onCorrCompanyChange() {
+        const compId = document.getElementById('corrCompany').value;
+        const subcatSel = document.getElementById('corrSubcategory');
+        subcatSel.innerHTML = '<option value="">-- Seleccionar Subcategoría --</option>';
+        if (!compId) {
+            subcatSel.disabled = true;
+            return;
+        }
+        subcatSel.disabled = false;
+        
+        try {
+            const res = await fetch(`/api/v1/mapeo/categorias?company_id=${compId}`, { headers: authHeaders });
+            if (res.ok) {
+                const cats = await res.json();
+                cats.forEach(cat => {
+                    if (cat.subcategorias && cat.subcategorias.length) {
+                        cat.subcategorias.forEach(sub => {
+                            if (sub.is_active) {
+                                const opt = document.createElement('option');
+                                opt.value = sub.id;
+                                opt.textContent = `${cat.nombre} → ${sub.nombre}`;
+                                subcatSel.appendChild(opt);
+                            }
+                        });
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("Error cargando subcategorías para correlativo:", e);
+        }
+    }
+
+    async function onCorrSubcatChange() {
+        const subcatId = document.getElementById('corrSubcategory').value;
+        const dlPeriod = document.getElementById('corrPeriodColsList');
+        const dlMes = document.getElementById('corrMesColsList');
+        if (dlPeriod) dlPeriod.innerHTML = '';
+        if (dlMes) dlMes.innerHTML = '';
+
+        if (!subcatId) return;
+
+        try {
+            const hRes = await fetch(`/api/v1/mapeo/subcategorias/${subcatId}/helper-data`, { headers: authHeaders });
+            if (hRes.ok) {
+                const hData = await hRes.json();
+                const cols = hData.columns || [];
+                const listOpts = cols.map(c => {
+                    const val = (typeof c === 'string') ? c : (c.column_name || '');
+                    return `<option value="${val}"></option>`;
+                }).join('');
+                if (dlPeriod) dlPeriod.innerHTML = listOpts;
+                if (dlMes) dlMes.innerHTML = listOpts;
+            }
+        } catch (e) {
+            console.error("Error cargando helper-data de columnas:", e);
+        }
+    }
+
+    function toggleCorrBulk(chk) {
+        const divMes = document.getElementById('divCorrMes');
+        const selectMes = document.getElementById('corrMes');
+        const inputAsientoActual = document.getElementById('corrAsientoActual');
+        
+        if (chk.checked) {
+            if (divMes) divMes.style.display = 'none';
+            if (selectMes) selectMes.required = false;
+            if (selectMes) selectMes.value = '';
+            if (inputAsientoActual) {
+                inputAsientoActual.value = '0';
+                const col = inputAsientoActual.closest('.col-6');
+                if (col) col.style.display = 'none';
+            }
+        } else {
+            if (divMes) divMes.style.display = 'block';
+            if (selectMes) selectMes.required = true;
+            if (inputAsientoActual) {
+                const col = inputAsientoActual.closest('.col-6');
+                if (col) col.style.display = 'block';
+            }
+        }
+    }
+
+    function openCorrelativoModal() {
+        document.getElementById('correlativoForm').reset();
+        document.getElementById('editCorrelativoId').value = '';
+        document.getElementById('correlativoModalTitle').innerHTML = '<i class="bi bi-hash text-primary me-2"></i>Registrar Correlativo por Periodo/Mes';
+        
+        // Enable fields
+        document.getElementById('corrCompany').disabled = false;
+        document.getElementById('corrSubcategory').disabled = true;
+        document.getElementById('corrPeriodo').disabled = false;
+        document.getElementById('corrMes').disabled = false;
+        
+        // Show bulk container and make sure it is unchecked
+        const chkBulk = document.getElementById('corrBulkYear');
+        if (chkBulk) {
+            chkBulk.checked = false;
+            const parent = chkBulk.closest('.form-check');
+            if (parent) parent.style.display = 'block';
+        }
+        toggleCorrBulk({ checked: false });
+
+        document.getElementById('corrSubcategory').innerHTML = '<option value="">-- Seleccionar Subcategoría --</option>';
+        document.getElementById('corrPeriodColsList').innerHTML = '';
+        document.getElementById('corrMesColsList').innerHTML = '';
+
+        // Prepopulate current period and month
+        document.getElementById('corrPeriodo').value = new Date().getFullYear();
+        document.getElementById('corrMes').value = String(new Date().getMonth() + 1).padStart(2, '0');
+
+        correlativoModalObj.show();
+    }
+
+    async function editCorrelativo(index) {
+        const c = currentCorrelativosList[index];
+        if (!c) return;
+
+        document.getElementById('editCorrelativoId').value = c.id;
+        document.getElementById('correlativoModalTitle').innerHTML = '<i class="bi bi-pencil-fill text-primary me-2"></i>Editar Correlativo por Periodo/Mes';
+
+        // Pre-fill fields
+        document.getElementById('corrCompany').value = c.company_id;
+        
+        // Load subcategories for this company
+        const subcatSel = document.getElementById('corrSubcategory');
+        subcatSel.innerHTML = '<option value="">-- Seleccionar Subcategoría --</option>';
+        try {
+            const res = await fetch(`/api/v1/mapeo/categorias?company_id=${c.company_id}`, { headers: authHeaders });
+            if (res.ok) {
+                const cats = await res.json();
+                cats.forEach(cat => {
+                    if (cat.subcategorias) {
+                        cat.subcategorias.forEach(sub => {
+                            if (sub.is_active) {
+                                const opt = new Option(`${cat.nombre} → ${sub.nombre}`, sub.id);
+                                subcatSel.add(opt);
+                            }
+                        });
+                    }
+                });
+            }
+        } catch (e) {
+            console.error(e);
+        }
+        
+        subcatSel.value = c.subcategoria_id;
+        document.getElementById('corrPeriodo').value = c.periodo;
+        document.getElementById('corrMes').value = c.mes;
+        document.getElementById('corrColPeriodo').value = c.col_origen_periodo || '';
+        document.getElementById('corrColMes').value = c.col_origen_mes || '';
+        document.getElementById('corrAsientoInicial').value = c.asiento_inicial;
+        document.getElementById('corrAsientoActual').value = c.asiento_actual;
+
+        // Load columns autocomplete list
+        await onCorrSubcatChange();
+
+        // Hide bulk container for editing
+        const chkBulk = document.getElementById('corrBulkYear');
+        if (chkBulk) {
+            chkBulk.checked = false;
+            const parent = chkBulk.closest('.form-check');
+            if (parent) parent.style.display = 'none';
+        }
+        toggleCorrBulk({ checked: false });
+
+        // Disable keys
+        document.getElementById('corrCompany').disabled = true;
+        document.getElementById('corrSubcategory').disabled = true;
+        document.getElementById('corrPeriodo').disabled = true;
+        document.getElementById('corrMes').disabled = true;
+
+        correlativoModalObj.show();
+    }
+
+    async function saveCorrelativo() {
+        const id = document.getElementById('editCorrelativoId').value;
+        const companyId = document.getElementById('corrCompany').value;
+        const subcatId = document.getElementById('corrSubcategory').value;
+        const periodo = document.getElementById('corrPeriodo').value;
+        const mes = document.getElementById('corrMes').value;
+        const colPeriodo = document.getElementById('corrColPeriodo').value || null;
+        const colMes = document.getElementById('corrColMes').value || null;
+        const asientoInicial = parseInt(document.getElementById('corrAsientoInicial').value) || 1;
+        const asientoActual = parseInt(document.getElementById('corrAsientoActual').value) || 0;
+        const isBulk = document.getElementById('corrBulkYear')?.checked || false;
+
+        if (!id) {
+            if (!companyId || !subcatId || !periodo) {
+                showToast('warning', 'Debe completar Empresa, Subcategoría y Periodo.');
+                return;
+            }
+            if (!isBulk && !mes) {
+                showToast('warning', 'Debe seleccionar un mes.');
+                return;
+            }
+        }
+
+        // If bulk register year
+        if (!id && isBulk) {
+            showToast('info', 'Registrando los 12 meses de manera masiva...');
+            const payload = {
+                company_id: parseInt(companyId),
+                subcategoria_id: parseInt(subcatId),
+                periodo: periodo,
+                col_origen_periodo: colPeriodo,
+                col_origen_mes: colMes,
+                asiento_inicial: asientoInicial,
+                bulk_year: true
+            };
+
+            try {
+                const res = await fetch('/api/v1/etl/correlativos', {
+                    method: 'POST',
+                    headers: authHeaders,
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('success', data.message || 'Registro masivo de periodo completado.');
+                    correlativoModalObj.hide();
+                    
+                    // Reload grid
+                    const filterComp = document.getElementById('correlativoFilterCompany').value;
+                    if (filterComp && String(filterComp) === String(companyId)) {
+                        loadCorrelativos();
+                    } else {
+                        document.getElementById('correlativoFilterCompany').value = companyId;
+                        loadCorrelativos();
+                    }
+                } else {
+                    showToast('error', data.detail || 'Fallo al realizar el registro masivo.');
+                }
+            } catch (e) {
+                showToast('error', 'Error de red.');
+            }
+            return;
+        }
+
+        const payload = {
+            company_id: parseInt(companyId),
+            subcategoria_id: parseInt(subcatId),
+            periodo: periodo,
+            mes: mes,
+            col_origen_periodo: colPeriodo,
+            col_origen_mes: colMes,
+            asiento_inicial: asientoInicial,
+            asiento_actual: asientoActual
+        };
+
+        try {
+            let res;
+            if (id) {
+                // Update
+                res = await fetch(`/api/v1/etl/correlativos/${id}`, {
+                    method: 'PUT',
+                    headers: authHeaders,
+                    body: JSON.stringify({
+                        asiento_inicial: asientoInicial,
+                        asiento_actual: asientoActual,
+                        col_origen_periodo: colPeriodo,
+                        col_origen_mes: colMes
+                    })
+                });
+            } else {
+                // Create
+                res = await fetch('/api/v1/etl/correlativos', {
+                    method: 'POST',
+                    headers: authHeaders,
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            const data = await res.json();
+            if (res.ok) {
+                showToast('success', data.message || 'Correlativo guardado correctamente.');
+                correlativoModalObj.hide();
+                
+                // If company matches currently selected filter, reload
+                const filterComp = document.getElementById('correlativoFilterCompany').value;
+                if (filterComp && String(filterComp) === String(companyId)) {
+                    loadCorrelativos();
+                } else {
+                    document.getElementById('correlativoFilterCompany').value = companyId;
+                    loadCorrelativos();
+                }
+            } else {
+                showToast('error', data.detail || 'Error al guardar correlativo.');
+            }
+        } catch (e) {
+            showToast('error', 'Error de red.');
+        }
+    }
+
+    async function deleteCorrelativo(id) {
+        const confirmResult = await Swal.fire({
+            title: '¿Eliminar correlativo?',
+            text: 'Se eliminará la configuración y el contador de correlativo para este periodo/mes.',
+            icon: 'warning',
+            showCancelButton: true,
+            background: '#161b22',
+            color: '#fff',
+            confirmButtonColor: '#bc8cff',
+            cancelButtonColor: '#30363d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (!confirmResult.isConfirmed) return;
+
+        try {
+            const res = await fetch(`/api/v1/etl/correlativos/${id}`, {
+                method: 'DELETE',
+                headers: authHeaders
+            });
+            if (res.ok) {
+                showToast('success', 'Correlativo eliminado correctamente.');
+                loadCorrelativos();
+            } else {
+                showToast('error', 'Fallo al eliminar correlativo.');
+            }
+        } catch {
+            showToast('error', 'Error de red.');
+        }
+    }
+</script>
+{% endblock %}

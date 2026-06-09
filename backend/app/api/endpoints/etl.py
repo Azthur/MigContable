@@ -10,7 +10,7 @@ from backend.app.models.models import (
     IntegLog, Company, SourceConnection, DestinationConnection,
     TableSelection, ColumnFilter, MigrationControl,
     MapeoSubcategoria, MapeoLineaAsiento, AsientoContableGenerado,
-    ComputedColumnRule
+    ComputedColumnRule, AsientoCorrelativo, EtlRealtimeLog
 )
 from backend.app.services.connection_manager import ConnectionManager
 
@@ -496,7 +496,7 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                 
             log.records_processed = 0
             db.commit()
-            return {"status": "OK", "message": log.message, "records": 0}
+            return {"status": "OK", "message": log.message, "records": 0, "extracted_rows": []}
 
         # Insertar en BD intermedia (append o replace)
         table_dest = sel.table_name.lower().replace(" ", "_")
@@ -534,6 +534,16 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
 
         # Escribir en destino (siempre append ya que borramos previamente)
         df.to_sql(table_dest, dst_engine, if_exists='append', index=False, chunksize=1000)
+
+        # Crear índices para acelerar consultas posteriores
+        try:
+            with dst_engine.connect() as conn:
+                conn.execute(text(f'CREATE INDEX IF NOT EXISTS "idx_{table_dest.lower()}_company_id" ON "{table_dest}" (company_id)'))
+                if "idcontrol" in df.columns:
+                    conn.execute(text(f'CREATE INDEX IF NOT EXISTS "idx_{table_dest.lower()}_idcontrol" ON "{table_dest}" (idcontrol)'))
+                conn.commit()
+        except Exception as idx_err:
+            print(f"Error creando indices en {table_dest}: {idx_err}")
 
         # Actualizar control incremental
         if sel.control_column and rows_count > 0:
@@ -577,7 +587,22 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
         
         log.records_processed = rows_count
         db.commit()
-        return {"status": "OK", "message": log.message, "records": rows_count}
+        
+        # Sanitize for JSON safety (converting NaN/NaT to None)
+        df_clean = df.copy()
+        for col in df_clean.columns:
+            try:
+                if df_clean[col].dtype == 'object':
+                    df_clean[col] = df_clean[col].apply(lambda x: None if pd.isna(x) else x)
+                elif pd.api.types.is_numeric_dtype(df_clean[col]):
+                    df_clean[col] = df_clean[col].apply(lambda x: None if pd.isna(x) else x)
+                else:
+                    df_clean[col] = df_clean[col].apply(lambda x: None if pd.isna(x) else str(x))
+            except:
+                pass
+        extracted_rows_dict = df_clean.to_dict(orient="records")
+        
+        return {"status": "OK", "message": log.message, "records": rows_count, "extracted_rows": extracted_rows_dict}
 
     except Exception as e:
         import traceback
@@ -1110,3 +1135,833 @@ def run_full_etl(company_id: int, body: dict = {}, db: Session = Depends(get_des
         "company_id": company_id,
         "resultados": results
     }
+
+
+# ─── ETL en Tiempo Real & Control de Correlativos ─────────────────────────────
+
+def format_source_row_log(row):
+    import pandas as pd
+    # Try to find standard columns like coddoc, cserie, cnumero, nrodoc, ffechadoc, etc.
+    cols = {str(k).lower(): str(k) for k in row.keys()}
+    
+    # Extract values
+    doc_type = row.get(cols.get("coddoc")) or row.get(cols.get("ccoddoc")) or ""
+    serie = row.get(cols.get("cserie")) or row.get(cols.get("serie")) or ""
+    numero = row.get(cols.get("cnumero")) or row.get(cols.get("nrodoc")) or row.get(cols.get("numero")) or ""
+    fecha = row.get(cols.get("ffechadoc")) or row.get(cols.get("fchdoc")) or row.get(cols.get("fecha")) or ""
+    ruc = row.get(cols.get("ccodruc")) or row.get(cols.get("ruc")) or ""
+    total = row.get(cols.get("ntot")) or row.get(cols.get("total")) or row.get(cols.get("impnet")) or ""
+    
+    parts = []
+    if doc_type: parts.append(f"Doc: {doc_type}")
+    if serie or numero: parts.append(f"Num: {serie}-{numero}")
+    if fecha: parts.append(f"Fecha: {fecha}")
+    if ruc: parts.append(f"RUC: {ruc}")
+    if total: parts.append(f"Monto: {total}")
+    
+    if not parts:
+        # Fallback to listing first 5 columns and values
+        p_list = []
+        for k, v in list(row.items())[:5]:
+            if v is not None and str(v).strip() != "":
+                p_list.append(f"{k}: {v}")
+        return ", ".join(p_list)
+        
+    return " | ".join(parts)
+
+
+def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Optional[List[int]] = None):
+    """
+    Ejecuta el flujo completo de migración en tiempo real (Steps 1 + 2 + 3):
+    1. ETL incremental (extrae de SQL Server a migconta_db)
+    2. Genera asientos en cf_diariol (staging) sin borrar anteriores (clear_previous=False)
+    3. Migra a Contasis (copia cf_diariol staging a Contasis final)
+    Guarda los resultados estructurados en etl_realtime_logs.
+    """
+    from backend.app.models.models import Company, TableSelection, MapeoCategoria, FinalDestConnection, EtlRealtimeLog
+    from backend.app.api.endpoints.mapeo import generate_to_cf_diariol, migrate_to_final
+    from datetime import datetime
+    import traceback
+
+    # Resolve companies to process
+    if company_id:
+        companies = db.query(Company).filter(Company.id == company_id, Company.is_active == True).all()
+    else:
+        companies = db.query(Company).filter(Company.is_active == True).all()
+
+    overall_results = []
+
+    for comp in companies:
+        records_extracted = 0
+        records_generated = 0
+        records_migrated = 0
+        status = "SUCCESS"
+        message_parts = []
+        history_list = []
+
+        try:
+            # ── Paso 1: ETL Incremental ──
+            selections = db.query(TableSelection).filter(
+                TableSelection.company_id == comp.id,
+                TableSelection.is_selected == True
+            ).order_by(TableSelection.extraction_order).all()
+
+            for sel in selections:
+                try:
+                    etl_res = run_incremental_etl(comp.id, sel.id, db, full_refresh=False)
+                    if etl_res.get("status") == "ERROR":
+                        status = "WARNING"
+                        message_parts.append(f"Error ETL {sel.table_name}: {etl_res.get('message')}")
+                        history_list.append({
+                            "step": "ETL",
+                            "table": sel.table_name,
+                            "reference": "Extracción Incremental",
+                            "status": "ERROR",
+                            "column": None,
+                            "error": etl_res.get("message")
+                        })
+                    else:
+                        recs = etl_res.get("records", 0)
+                        records_extracted += recs
+                        history_list.append({
+                            "step": "ETL",
+                            "table": sel.table_name,
+                            "reference": "Extracción Incremental",
+                            "status": "SUCCESS",
+                            "column": None,
+                            "error": f"Extraídos {recs} registros nuevos delta."
+                        })
+                        
+                        # Log row-by-row extracted records
+                        extracted_rows = etl_res.get("extracted_rows", [])
+                        for row in extracted_rows:
+                            formatted_desc = format_source_row_log(row)
+                            id_ctrl = row.get("idcontrol") or ""
+                            history_list.append({
+                                "step": "ETL",
+                                "table": sel.table_name,
+                                "reference": f"Fila ID: {id_ctrl}" if id_ctrl else "Fila Extraída",
+                                "status": "SUCCESS",
+                                "column": None,
+                                "error": f"Registro extraído de origen: {formatted_desc}"
+                            })
+                except Exception as ex_etl:
+                    status = "WARNING"
+                    message_parts.append(f"Fallo ETL {sel.table_name}: {str(ex_etl)}")
+                    history_list.append({
+                        "step": "ETL",
+                        "table": sel.table_name,
+                        "reference": "Extracción Incremental",
+                        "status": "ERROR",
+                        "column": None,
+                        "error": str(ex_etl)
+                    })
+
+            # ── Paso 2: Generar asientos (Staging) ──
+            # Se genera de manera incremental pero LIMPIANDO asientos previos no migrados (clear_previous=True)
+            lote_id = None
+            try:
+                if subcategorias:
+                    records_generated = 0
+                    errors_list = []
+                    for sub_id in subcategorias:
+                        gen_body = {"company_id": comp.id, "subcategoria_id": sub_id, "clear_previous": True}
+                        gen_res = generate_to_cf_diariol(gen_body, db)
+                        records_generated += gen_res.get("generated", 0)
+                        if gen_res.get("lote_id"):
+                            lote_id = gen_res.get("lote_id")
+                        if gen_res.get("errors"):
+                            errors_list.extend(gen_res["errors"])
+                    gen_res = {"generated": records_generated, "lote_id": lote_id, "errors": errors_list}
+                else:
+                    gen_body = {"company_id": comp.id, "clear_previous": True}
+                    gen_res = generate_to_cf_diariol(gen_body, db)
+                    records_generated = gen_res.get("generated", 0)
+                    lote_id = gen_res.get("lote_id")
+
+                # Log successful generations
+                if lote_id and records_generated > 0:
+                    from backend.app.models.models import CfDiariol
+                    try:
+                        gen_rows = db.query(CfDiariol).filter(
+                            CfDiariol.company_id == comp.id,
+                            CfDiariol.lote_id == lote_id
+                        ).all()
+                        for row in gen_rows:
+                            history_list.append({
+                                "step": "GENERATION",
+                                "table": "cf_diariol (Staging)",
+                                "reference": f"Asiento {row.nasiento} (Lín {row.nidlin})",
+                                "status": "SUCCESS",
+                                "column": None,
+                                "error": f"Asiento generado localmente. Cuenta: {row.ccodcue} | Debe: {row.ndebe} | Haber: {row.nhaber} | Glosa: {row.cglosa}"
+                            })
+                    except Exception as e_q:
+                        print(f"Error querying staging details: {e_q}")
+
+                if gen_res.get("errors"):
+                    # Hay advertencias/errores de validación
+                    status = "WARNING"
+                    for err in gen_res["errors"]:
+                        history_list.append({
+                            "step": "VALIDATION",
+                            "table": err.get("table", "cf_diariol"),
+                            "reference": f"Asiento {err.get('nasiento')} (Lín {err.get('nidlin')})",
+                            "status": "ERROR",
+                            "column": err.get("field"),
+                            "error": err.get("error")
+                        })
+            except Exception as ex_gen:
+                status = "ERROR"
+                message_parts.append(f"Fallo Generación: {str(ex_gen)}")
+                history_list.append({
+                    "step": "GENERATION",
+                    "table": "Staging",
+                    "reference": "Secuencia de Generación",
+                    "status": "ERROR",
+                    "column": None,
+                    "error": str(ex_gen)
+                })
+
+            # ── Paso 3: Migración Final a Contasis ──
+            if status != "ERROR":
+                try:
+                    # check final connection
+                    final_conn = db.query(FinalDestConnection).filter(
+                        FinalDestConnection.company_id == comp.id,
+                        FinalDestConnection.is_active == True
+                    ).first()
+                    
+                    if not final_conn:
+                        message_parts.append("No hay conexión destino final configurada (Tratado como SKIP)")
+                        history_list.append({
+                            "step": "MIGRATION",
+                            "table": "Contasis Final",
+                            "reference": "Conexión Contasis",
+                            "status": "WARNING",
+                            "column": None,
+                            "error": "No hay conexión destino final configurada. Omitido."
+                        })
+                    else:
+                        # Migrate only pending selected subcategories
+                        if subcategorias:
+                            records_migrated = 0
+                            for sub_id in subcategorias:
+                                try:
+                                    mig_res = migrate_to_final(company_id=comp.id, subcategoria_id=sub_id, allow_overwrite=False, db=db)
+                                    records_migrated += mig_res.get("migrated_lineas", 0)
+                                except Exception as e_mig_sub:
+                                    print(f"Error migrating subcategory {sub_id}: {e_mig_sub}")
+                        else:
+                            mig_res = migrate_to_final(company_id=comp.id, allow_overwrite=False, db=db)
+                            records_migrated = mig_res.get("migrated_lineas", 0)
+
+                        # Log successful migrations
+                        if lote_id and records_migrated > 0:
+                            from backend.app.models.models import CfDiariol
+                            try:
+                                mig_rows = db.query(CfDiariol).filter(
+                                    CfDiariol.company_id == comp.id,
+                                    CfDiariol.lote_id == lote_id,
+                                    CfDiariol.estado == "MIGRADO"
+                                ).all()
+                                for row in mig_rows:
+                                    history_list.append({
+                                        "step": "MIGRATION",
+                                        "table": "Contasis Final",
+                                        "reference": f"Asiento {row.nasiento} (Lín {row.nidlin})",
+                                        "status": "SUCCESS",
+                                        "column": None,
+                                        "error": f"Migrado correctamente a Contasis. Cuenta: {row.ccodcue} | Debe: {row.ndebe} | Haber: {row.nhaber} | Glosa: {row.cglosa}"
+                                    })
+                            except Exception as e_m:
+                                print(f"Error querying migrated details: {e_m}")
+
+                except HTTPException as ex_http:
+                    status = "WARNING"
+                    detail = ex_http.detail
+                    if isinstance(detail, dict):
+                        message_parts.append(detail.get("message", "Error de migración"))
+                        for row in detail.get("failed_rows", []):
+                            history_list.append({
+                                "step": "MIGRATION",
+                                "table": "Contasis Final",
+                                "reference": f"Asiento {row.get('seat')}",
+                                "status": "ERROR",
+                                "column": None,
+                                "error": row.get("error")
+                            })
+                    else:
+                        message_parts.append(str(detail))
+                        history_list.append({
+                            "step": "MIGRATION",
+                            "table": "Contasis Final",
+                            "reference": "Proceso de Migración",
+                            "status": "ERROR",
+                            "column": None,
+                            "error": str(detail)
+                        })
+                except Exception as ex_mig:
+                    status = "WARNING"
+                    message_parts.append(f"Fallo Migración: {str(ex_mig)}")
+                    history_list.append({
+                        "step": "MIGRATION",
+                        "table": "Contasis Final",
+                        "reference": "Proceso de Migración",
+                        "status": "ERROR",
+                        "column": None,
+                        "error": str(ex_mig)
+                    })
+
+        except Exception as e:
+            status = "ERROR"
+            message_parts.append(f"Fallo general del proceso: {str(e)}")
+            history_list.append({
+                "step": "SYSTEM",
+                "table": "General",
+                "reference": "Ciclo Principal",
+                "status": "ERROR",
+                "column": None,
+                "error": str(e)
+            })
+
+        # Armar mensaje resumen
+        if not message_parts:
+            message = f"Ejecución exitosa: Extracción ({records_extracted}), Generación ({records_generated}), Migración ({records_migrated})"
+        else:
+            message = " | ".join(message_parts)
+
+        # Crear y persistir log de tiempo real
+        rt_log = EtlRealtimeLog(
+            company_id=comp.id,
+            status=status,
+            message=message,
+            records_extracted=records_extracted,
+            records_generated=records_generated,
+            records_migrated=records_migrated,
+            errors=history_list
+        )
+        db.add(rt_log)
+        db.commit()
+
+        overall_results.append({
+            "company_name": comp.name,
+            "status": status,
+            "extracted": records_extracted,
+            "generated": records_generated,
+            "migrated": records_migrated,
+            "message": message,
+            "errors_count": len(history_list)
+        })
+
+    return overall_results
+
+
+# API Endpoints: Correlativos
+
+@router.get("/correlativos")
+def list_correlativos(
+    company_id: Optional[int] = None,
+    subcategoria_id: Optional[int] = None,
+    periodo: Optional[str] = None,
+    mes: Optional[str] = None,
+    db: Session = Depends(get_dest_db)
+):
+    query = db.query(AsientoCorrelativo)
+    if company_id:
+        query = query.filter(AsientoCorrelativo.company_id == company_id)
+    if subcategoria_id:
+        query = query.filter(AsientoCorrelativo.subcategoria_id == subcategoria_id)
+    if periodo:
+        query = query.filter(AsientoCorrelativo.periodo == periodo)
+    if mes:
+        query = query.filter(AsientoCorrelativo.mes == mes)
+    
+    correlativos = query.order_by(AsientoCorrelativo.periodo.desc(), AsientoCorrelativo.mes.desc()).all()
+    
+    result = []
+    for c in correlativos:
+        from backend.app.models.models import MapeoSubcategoria
+        sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == c.subcategoria_id).first()
+        result.append({
+            "id": c.id,
+            "company_id": c.company_id,
+            "company_name": c.company.name if c.company else f"Empresa {c.company_id}",
+            "subcategoria_id": c.subcategoria_id,
+            "subcategoria_name": sub.nombre if sub else f"Subcat {c.subcategoria_id}",
+            "periodo": c.periodo,
+            "mes": c.mes,
+            "asiento_inicial": c.asiento_inicial,
+            "asiento_actual": c.asiento_actual,
+            "col_origen_periodo": sub.col_origen_periodo if sub else None,
+            "col_origen_mes": sub.col_origen_mes if sub else None,
+            "updated_at": str(c.updated_at) if c.updated_at else None
+        })
+    return result
+
+
+@router.post("/correlativos")
+def create_correlativo(body: dict, db: Session = Depends(get_dest_db)):
+    company_id = body.get("company_id")
+    subcategoria_id = body.get("subcategoria_id")
+    periodo = str(body.get("periodo") or "").strip()
+    mes = str(body.get("mes") or "").strip()
+    asiento_inicial = int(body.get("asiento_inicial") or 1)
+    
+    col_origen_periodo = body.get("col_origen_periodo")
+    col_origen_mes = body.get("col_origen_mes")
+    bulk_year = body.get("bulk_year", False)
+    
+    if not company_id or not subcategoria_id or not periodo:
+        raise HTTPException(status_code=400, detail="Faltan campos obligatorios")
+        
+    if not bulk_year and not mes:
+        raise HTTPException(status_code=400, detail="Falta el campo obligatorio: mes")
+
+    # Sync subcategory columns if specified
+    from backend.app.models.models import MapeoSubcategoria
+    sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == subcategoria_id).first()
+    if sub:
+        if col_origen_periodo is not None:
+            sub.col_origen_periodo = col_origen_periodo
+        if col_origen_mes is not None:
+            sub.col_origen_mes = col_origen_mes
+
+    if bulk_year:
+        months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+        created_count = 0
+        updated_count = 0
+        last_id = None
+        for m in months:
+            existing = db.query(AsientoCorrelativo).filter(
+                AsientoCorrelativo.company_id == company_id,
+                AsientoCorrelativo.subcategoria_id == subcategoria_id,
+                AsientoCorrelativo.periodo == periodo,
+                AsientoCorrelativo.mes == m
+            ).first()
+            if existing:
+                existing.asiento_inicial = asiento_inicial
+                existing.asiento_actual = max(existing.asiento_actual, asiento_inicial - 1)
+                updated_count += 1
+                last_id = existing.id
+            else:
+                new_corr = AsientoCorrelativo(
+                    company_id=company_id,
+                    subcategoria_id=subcategoria_id,
+                    periodo=periodo,
+                    mes=m,
+                    asiento_inicial=asiento_inicial,
+                    asiento_actual=asiento_inicial - 1
+                )
+                db.add(new_corr)
+                created_count += 1
+        try:
+            db.commit()
+            if not last_id:
+                # Get the id of one of the newly created elements to return
+                last_corr = db.query(AsientoCorrelativo).filter(
+                    AsientoCorrelativo.company_id == company_id,
+                    AsientoCorrelativo.subcategoria_id == subcategoria_id,
+                    AsientoCorrelativo.periodo == periodo
+                ).first()
+                last_id = last_corr.id if last_corr else 0
+            return {
+                "id": last_id,
+                "message": f"Registro masivo completado. Creados: {created_count}, Actualizados: {updated_count}"
+            }
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=str(e))
+
+    else:
+        if len(mes) == 1 and mes.isdigit():
+            mes = f"0{mes}"
+
+        existing = db.query(AsientoCorrelativo).filter(
+            AsientoCorrelativo.company_id == company_id,
+            AsientoCorrelativo.subcategoria_id == subcategoria_id,
+            AsientoCorrelativo.periodo == periodo,
+            AsientoCorrelativo.mes == mes
+        ).first()
+
+        if existing:
+            existing.asiento_inicial = asiento_inicial
+            existing.asiento_actual = max(existing.asiento_actual, asiento_inicial - 1)
+            message = "Correlativo actualizado exitosamente (Upsert)"
+        else:
+            existing = AsientoCorrelativo(
+                company_id=company_id,
+                subcategoria_id=subcategoria_id,
+                periodo=periodo,
+                mes=mes,
+                asiento_inicial=asiento_inicial,
+                asiento_actual=asiento_inicial - 1
+            )
+            db.add(existing)
+            message = "Correlativo creado exitosamente"
+
+        try:
+            db.commit()
+            return {"id": existing.id, "message": message}
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/correlativos/{id}")
+def update_correlativo(id: int, body: dict, db: Session = Depends(get_dest_db)):
+    corr = db.query(AsientoCorrelativo).filter(AsientoCorrelativo.id == id).first()
+    if not corr:
+        raise HTTPException(status_code=404, detail="Correlativo no encontrado")
+        
+    if "asiento_inicial" in body:
+        corr.asiento_inicial = int(body["asiento_inicial"])
+    if "asiento_actual" in body:
+        corr.asiento_actual = int(body["asiento_actual"])
+        
+    col_origen_periodo = body.get("col_origen_periodo")
+    col_origen_mes = body.get("col_origen_mes")
+    
+    # Sync subcategory columns if specified
+    from backend.app.models.models import MapeoSubcategoria
+    sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == corr.subcategoria_id).first()
+    if sub:
+        if col_origen_periodo is not None:
+            sub.col_origen_periodo = col_origen_periodo
+        if col_origen_mes is not None:
+            sub.col_origen_mes = col_origen_mes
+        
+    try:
+        db.commit()
+        return {"id": corr.id, "message": "Correlativo actualizado exitosamente"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/correlativos/{id}")
+def delete_correlativo(id: int, db: Session = Depends(get_dest_db)):
+    corr = db.query(AsientoCorrelativo).filter(AsientoCorrelativo.id == id).first()
+    if not corr:
+        raise HTTPException(status_code=404, detail="Correlativo no encontrado")
+        
+    try:
+        db.delete(corr)
+        db.commit()
+        return {"message": "Correlativo eliminado"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# API Endpoints: Realtime Logs
+
+@router.get("/realtime-logs")
+def list_realtime_logs(
+    company_id: Optional[int] = None,
+    status: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 50,
+    db: Session = Depends(get_dest_db)
+):
+    query = db.query(EtlRealtimeLog)
+    if company_id:
+        query = query.filter(EtlRealtimeLog.company_id == company_id)
+    if status:
+        query = query.filter(EtlRealtimeLog.status == status)
+        
+    logs = query.order_by(EtlRealtimeLog.run_date.desc()).offset(skip).limit(limit).all()
+    
+    result = []
+    for l in logs:
+        result.append({
+            "id": l.id,
+            "company_id": l.company_id,
+            "company_name": l.company.name if l.company else f"Empresa {l.company_id}",
+            "run_date": str(l.run_date) if l.run_date else None,
+            "status": l.status,
+            "message": l.message,
+            "records_extracted": l.records_extracted,
+            "records_generated": l.records_generated,
+            "records_migrated": l.records_migrated,
+            "errors": l.errors
+        })
+    return result
+
+
+@router.get("/staging-summary")
+def staging_summary(
+    company_id: int,
+    periodo: Optional[str] = None,
+    mes: Optional[str] = None,
+    db: Session = Depends(get_dest_db)
+):
+    """Resumen de staging agrupado por subcategoría con conteos por estado."""
+    from backend.app.models.models import CfDiariol, MapeoSubcategoria
+    from sqlalchemy import func
+
+    query = db.query(
+        CfDiariol.subcategoria_id,
+        MapeoSubcategoria.nombre.label("subcategoria_nombre"),
+        CfDiariol.estado,
+        func.count(CfDiariol.id).label("total")
+    ).outerjoin(
+        MapeoSubcategoria, CfDiariol.subcategoria_id == MapeoSubcategoria.id
+    ).filter(
+        CfDiariol.company_id == company_id
+    )
+
+    if periodo:
+        query = query.filter(CfDiariol.cper == periodo)
+    if mes:
+        query = query.filter(CfDiariol.cmes == mes)
+
+    rows = query.group_by(
+        CfDiariol.subcategoria_id,
+        MapeoSubcategoria.nombre,
+        CfDiariol.estado
+    ).all()
+
+    # Agrupar por subcategoría
+    summary = {}
+    for row in rows:
+        sid = row.subcategoria_id
+        if sid not in summary:
+            summary[sid] = {
+                "subcategoria_id": sid,
+                "subcategoria_nombre": row.subcategoria_nombre or f"Subcat {sid}",
+                "pendiente": 0,
+                "migrado": 0,
+                "error": 0,
+                "total": 0
+            }
+        estado = (row.estado or "PENDIENTE").upper()
+        count = row.total or 0
+        summary[sid]["total"] += count
+        if estado == "MIGRADO":
+            summary[sid]["migrado"] += count
+        elif estado == "ERROR":
+            summary[sid]["error"] += count
+        else:
+            summary[sid]["pendiente"] += count
+
+    return list(summary.values())
+
+
+@router.post("/run-realtime")
+def trigger_realtime_etl(body: dict, db: Session = Depends(get_dest_db)):
+    company_id = body.get("company_id")
+    subcategorias = body.get("subcategorias")
+    try:
+        results = run_realtime_etl(company_id, db, subcategorias=subcategorias)
+        return {"message": "Proceso de ETL en tiempo real ejecutado exitosamente", "resultados": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def reprocess_staging_seat(company_id: int, nasiento: str, db: Session):
+    from backend.app.models.models import CfDiariol, CfDiario, FinalDestConnection, MapeoSubcategoria
+    from backend.app.services.connection_manager import ConnectionManager
+    from sqlalchemy import Table, MetaData
+    
+    # 1. Fetch staging details for this seat
+    details = db.query(CfDiariol).filter(
+        CfDiariol.company_id == company_id,
+        CfDiariol.nasiento == nasiento
+    ).all()
+    
+    if not details:
+        raise Exception(f"No se encontraron líneas de detalle en staging para el asiento {nasiento}")
+        
+    cper = details[0].cper
+    cmes = details[0].cmes
+    ccodori = details[0].ccodori
+    subcategoria_id = details[0].subcategoria_id
+    
+    sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == subcategoria_id).first()
+    if not sub:
+        raise Exception("Subcategoría de mapeo no encontrada")
+        
+    # Fetch header if generate_headers is True
+    header = None
+    if sub.generate_headers is not False:
+        header = db.query(CfDiario).filter(
+            CfDiario.company_id == company_id,
+            CfDiario.nasiento == nasiento,
+            CfDiario.cper == cper,
+            CfDiario.cmes == cmes
+        ).first()
+        if not header:
+            raise Exception(f"No se encontró cabecera en staging para el asiento {nasiento}")
+            
+    # 2. Connect to Final Contasis DB
+    final_conn = db.query(FinalDestConnection).filter(
+        FinalDestConnection.company_id == company_id,
+        FinalDestConnection.is_active == True
+    ).first()
+    if not final_conn:
+        raise Exception("No hay conexión destino final configurada")
+        
+    conn_data = {
+        "host": final_conn.host, "port": final_conn.port,
+        "database_name": final_conn.database_name,
+        "username": final_conn.username, "password": final_conn.password
+    }
+    final_engine = ConnectionManager.get_dest_engine(conn_data)
+    
+    metadata_final = MetaData()
+    head_table_name = sub.tabla_destino_cabecera or "cf_diario"
+    det_table_name = sub.tabla_destino_detalle or "cf_diariol"
+    
+    try: FinalHeadTable = Table(head_table_name, metadata_final, autoload_with=final_engine)
+    except: FinalHeadTable = None
+        
+    try: FinalDetTable = Table(det_table_name, metadata_final, autoload_with=final_engine)
+    except: FinalDetTable = None
+    
+    remote_head_cols = [c.name for c in FinalHeadTable.columns] if FinalHeadTable is not None else []
+    remote_det_cols = [c.name for c in FinalDetTable.columns] if FinalDetTable is not None else []
+    
+    # 3. Perform Insert / Upsert into final Contasis
+    with final_engine.begin() as final_db:
+        # Clean existing seat in final DB first
+        if FinalDetTable is not None:
+            final_db.execute(FinalDetTable.delete().where(
+                FinalDetTable.c.cper == cper,
+                FinalDetTable.c.cmes == cmes,
+                FinalDetTable.c.ccodori == ccodori,
+                getattr(FinalDetTable.c, sub.col_destino_nasiento or "nasiento") == nasiento
+            ))
+        if FinalHeadTable is not None:
+            final_db.execute(FinalHeadTable.delete().where(
+                FinalHeadTable.c.cper == cper,
+                FinalHeadTable.c.cmes == cmes,
+                FinalHeadTable.c.ccodori == ccodori,
+                getattr(FinalHeadTable.c, sub.col_destino_nasiento or "nasiento") == nasiento
+            ))
+            
+        # Insert Header
+        if header and FinalHeadTable is not None:
+            h_dict = {c.name: getattr(header, c.name) for c in header.__table__.columns if c.name in remote_head_cols}
+            final_db.execute(FinalHeadTable.insert(), [h_dict])
+            
+        # Insert Details
+        if details and FinalDetTable is not None:
+            d_list = []
+            for d in details:
+                insert_item = {}
+                for c in d.__table__.columns:
+                    k = c.name
+                    v = getattr(d, k)
+                    if k in remote_det_cols:
+                        if v is not None and str(FinalDetTable.columns[k].type) in ['NUMERIC', 'FLOAT', 'INTEGER']:
+                            try: insert_item[k] = float(v)
+                            except: insert_item[k] = None
+                        else:
+                            insert_item[k] = v
+                d_list.append(insert_item)
+            final_db.execute(FinalDetTable.insert(), d_list)
+            
+    # 4. Mark staging status as MIGRADO
+    for d in details:
+        d.estado = "MIGRADO"
+    if header:
+        header.estado = "MIGRADO"
+        
+    db.commit()
+    return f"Asiento {nasiento} remigrado exitosamente a Contasis"
+
+
+@router.post("/reprocess-row")
+def reprocess_row(body: dict, db: Session = Depends(get_dest_db)):
+    company_id = body.get("company_id")
+    step = body.get("step")
+    table = body.get("table")
+    reference = str(body.get("reference") or "")
+    subcategoria_id = body.get("subcategoria_id")
+
+    if not company_id:
+        raise HTTPException(status_code=400, detail="Falta company_id")
+
+    import re
+    # Extract nasiento from reference if present (e.g. "Asiento 150 (Lín 1)" or "Asiento 150")
+    m = re.search(r"Asiento\s+([A-Za-z0-9\-]+)", reference)
+    nasiento = None
+    if m:
+        try:
+            nasiento = int(m.group(1))
+        except ValueError:
+            nasiento = m.group(1)
+
+    # Step A: Attempt direct staging re-migration if staging seat rows exist
+    if nasiento:
+        try:
+            from backend.app.models.models import CfDiariol
+            staging_exists = db.query(CfDiariol).filter(
+                CfDiariol.company_id == company_id,
+                CfDiariol.nasiento == nasiento
+            ).first()
+            if staging_exists:
+                msg = reprocess_staging_seat(company_id, nasiento, db)
+                return {"status": "SUCCESS", "message": msg}
+        except Exception as ex_direct:
+            db.rollback()
+            print(f"Direct seat migration failed, falling back to subcategory generation: {ex_direct}")
+
+    # Step B: Fallback - Regenerate and migrate the entire subcategory
+    if not subcategoria_id and nasiento:
+        from backend.app.models.models import CfDiariol
+        try:
+            row = db.query(CfDiariol).filter(
+                CfDiariol.company_id == company_id,
+                CfDiariol.nasiento == nasiento
+            ).first()
+            if row:
+                subcategoria_id = row.subcategoria_id
+        except Exception as ex_fallback_sub:
+            db.rollback()
+            print(f"Failed to find subcategory from seat: {ex_fallback_sub}")
+
+    if not subcategoria_id:
+        from backend.app.models.models import MapeoSubcategoria
+        sub = db.query(MapeoSubcategoria).filter(
+            MapeoSubcategoria.tabla_origen.ilike(table) | 
+            MapeoSubcategoria.tabla_destino_detalle.ilike(table)
+        ).first()
+        if sub:
+            subcategoria_id = sub.id
+
+    if not subcategoria_id:
+        raise HTTPException(
+            status_code=400,
+            detail="No se pudo determinar la subcategoría de mapeo para esta fila para reprocesar"
+        )
+
+    # Trigger generation & migration for this subcategory
+    from backend.app.api.endpoints.mapeo import generate_to_cf_diariol, migrate_to_final
+    try:
+        # 1. Regenerate seats (clear_previous=True deletes prior failed staging seats)
+        gen_res = generate_to_cf_diariol({
+            "company_id": company_id,
+            "subcategoria_id": subcategoria_id,
+            "clear_previous": True
+        }, db)
+        
+        # 2. Migrate subcategory to final
+        mig_res = migrate_to_final(
+            company_id=company_id,
+            subcategoria_id=subcategoria_id,
+            allow_overwrite=True,
+            db=db
+        )
+        
+        return {
+            "status": "SUCCESS",
+            "message": f"Subcategoría reprocesada. Generado: {gen_res.get('generated')} líneas. Migrado: {mig_res.get('migrated_lineas')} líneas."
+        }
+    except Exception as ex_reproc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Fallo al reprocesar subcategoría: {str(ex_reproc)}"
+        )
+
