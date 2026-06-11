@@ -1,0 +1,469 @@
+{% extends "base.html" %}
+
+{% block title %}Tipo de Cambio SUNAT - SistemaMigConta{% endblock %}
+{% block page_title %}Tipo de Cambio SUNAT{% endblock %}
+{% block breadcrumb %}Inicio › Tipo de Cambio{% endblock %}
+
+{% block extra_head %}
+<style>
+    .glass-panel {
+        background: rgba(22, 27, 34, 0.4);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-panel:hover {
+        border-color: rgba(88, 166, 255, 0.4);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+    .table-container {
+        max-height: 550px;
+        overflow-y: auto;
+    }
+    .table-dark-custom tbody tr:hover {
+        background: rgba(88, 166, 255, 0.06);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <!-- Top Action Bar -->
+    <div class="col-12">
+        <div class="glass-panel p-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <h5 class="m-0 text-primary"><i class="bi bi-currency-exchange me-2"></i>Control de Tipo de Cambio</h5>
+                    <p class="text-secondary small mb-0 mt-1">Sincronice el tipo de cambio oficial de la SUNAT desde el API externa o regístrelo manualmente.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-accent btn-sm" onclick="syncToday()">
+                        <i class="bi bi-cloud-arrow-down-fill me-1"></i> Sincronizar Hoy
+                    </button>
+                    <button class="btn btn-ghost btn-sm" onclick="openSyncMonthModal()">
+                        <i class="bi bi-calendar-range me-1"></i> Sincronizar Mes
+                    </button>
+                    <button class="btn btn-ghost btn-sm" onclick="openManualModal()">
+                        <i class="bi bi-plus-lg me-1"></i> Registro Manual
+                    </button>
+                </div>
+            </div>
+
+            <hr class="border-secondary opacity-25 my-3">
+
+            <!-- Filter Controls -->
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label-dark small text-secondary">Filtrar por Año</label>
+                    <select class="form-select-dark form-select-sm w-100" id="filterYear" onchange="loadRates()">
+                        <option value="">-- Todos los Años --</option>
+                        <!-- Dynamic options in JS -->
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label-dark small text-secondary">Filtrar por Mes</label>
+                    <select class="form-select-dark form-select-sm w-100" id="filterMonth" onchange="loadRates()">
+                        <option value="">-- Todos los Meses --</option>
+                        <option value="1">01 - Enero</option>
+                        <option value="2">02 - Febrero</option>
+                        <option value="3">03 - Marzo</option>
+                        <option value="4">04 - Abril</option>
+                        <option value="5">05 - Mayo</option>
+                        <option value="6">06 - Junio</option>
+                        <option value="7">07 - Julio</option>
+                        <option value="8">08 - Agosto</option>
+                        <option value="9">09 - Septiembre</option>
+                        <option value="10">10 - Octubre</option>
+                        <option value="11">11 - Noviembre</option>
+                        <option value="12">12 - Diciembre</option>
+                    </select>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-ghost btn-sm w-100" onclick="clearFilters()" title="Restaurar Filtros">
+                        <i class="bi bi-x-circle me-1"></i> Limpiar Filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table of Exchange Rates -->
+    <div class="col-12">
+        <div class="glass-panel p-4">
+            <h5 class="m-0 mb-3 text-light font-weight-bold d-flex align-items-center">
+                <i class="bi bi-table me-2 text-primary"></i> Historial de Tipo de Cambio
+            </h5>
+            <div class="table-responsive table-container">
+                <table class="table-dark-custom">
+                    <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Compra (S/.)</th>
+                            <th>Venta (S/.)</th>
+                            <th>Origen</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ratesTableBody">
+                        <tr>
+                            <td colspan="5" class="text-center text-secondary py-4">
+                                <span class="spinner-sm"></span> Cargando registros...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Sincronización Mensual -->
+<div class="modal fade modal-dark" id="syncMonthModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title"><i class="bi bi-calendar-range text-primary me-2"></i>Sincronizar Mes Completo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="syncMonthForm">
+                    <div class="mb-3">
+                        <label class="form-label-dark small">Año y Mes</label>
+                        <input type="month" class="form-control-dark" id="syncYearMonth" required>
+                        <small class="text-secondary">Descargará todos los tipos de cambio diarios de ese mes desde el API de SUNAT.</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-header border-top-0 d-flex justify-content-end gap-2 pt-0 pb-3">
+                <button type="button" class="btn-ghost btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn-accent btn-sm" onclick="executeSyncMonth()">Sincronizar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Registro / Edición Manual -->
+<div class="modal fade modal-dark" id="manualModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title" id="manualModalTitle"><i class="bi bi-pencil text-primary me-2"></i>Registrar Tipo de Cambio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="manualForm">
+                    <div class="mb-3">
+                        <label class="form-label-dark small">Fecha</label>
+                        <input type="date" class="form-control-dark" id="manualFecha" required>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-6 mb-3">
+                            <label class="form-label-dark small">Compra (S/.)</label>
+                            <input type="number" step="0.0001" min="0" class="form-control-dark" id="manualCompra" placeholder="Ej: 3.750" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label-dark small">Venta (S/.)</label>
+                            <input type="number" step="0.0001" min="0" class="form-control-dark" id="manualVenta" placeholder="Ej: 3.765" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-header border-top-0 d-flex justify-content-end gap-2 pt-0 pb-3">
+                <button type="button" class="btn-ghost btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn-accent btn-sm" onclick="saveManual()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const authHeaders = {
+        'Authorization': `Bearer ${localStorage.getItem('migconta_token')}`
+    };
+
+    let syncMonthModalObj = null;
+    let manualModalObj = null;
+    let currentRatesList = [];
+
+    document.addEventListener("DOMContentLoaded", function () {
+        syncMonthModalObj = new bootstrap.Modal(document.getElementById('syncMonthModal'));
+        manualModalObj = new bootstrap.Modal(document.getElementById('manualModal'));
+
+        // Initialize year filters (current year down to 2020)
+        const yearSelect = document.getElementById("filterYear");
+        const currentYear = new Date().getFullYear();
+        for (let y = currentYear; y >= 2020; y--) {
+            const opt = document.createElement("option");
+            opt.value = y;
+            opt.textContent = y;
+            yearSelect.appendChild(opt);
+        }
+
+        // Set default filter to current year and month
+        document.getElementById("filterYear").value = currentYear;
+        document.getElementById("filterMonth").value = new Date().getMonth() + 1;
+
+        loadRates();
+    });
+
+    async function loadRates() {
+        const year = document.getElementById("filterYear").value;
+        const month = document.getElementById("filterMonth").value;
+        
+        let url = '/api/v1/tipo-cambio';
+        const params = [];
+        if (year) params.push(`year=${year}`);
+        if (month) params.push(`month=${month}`);
+        if (params.length > 0) {
+            url += '?' + params.join('&');
+        }
+
+        const tbody = document.getElementById("ratesTableBody");
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-secondary py-4">
+                    <span class="spinner-sm"></span> Cargando registros...
+                </td>
+            </tr>
+        `;
+
+        try {
+            const res = await fetch(url, { headers: authHeaders });
+            if (!res.ok) throw new Error("Fallo al listar tipos de cambio");
+            const data = await res.json();
+            currentRatesList = data;
+            renderRates();
+        } catch (err) {
+            showToast('error', 'Error al cargar tipo de cambio');
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-3">Error al conectar con la base de datos.</td></tr>`;
+        }
+    }
+
+    function renderRates() {
+        const tbody = document.getElementById("ratesTableBody");
+        tbody.innerHTML = "";
+
+        if (currentRatesList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-secondary py-3">No hay tipos de cambio registrados para los filtros seleccionados.</td></tr>`;
+            return;
+        }
+
+        currentRatesList.forEach((r, idx) => {
+            const sourceBadge = r.source === 'Manual'
+                ? `<span class="badge bg-info-subtle text-info">Manual</span>`
+                : `<span class="badge bg-success-subtle text-success">${r.source}</span>`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td class="fw-semibold font-monospace">${r.fecha}</td>
+                    <td class="text-light fw-bold">${r.compra.toFixed(4)}</td>
+                    <td class="text-light fw-bold">${r.venta.toFixed(4)}</td>
+                    <td>${sourceBadge}</td>
+                    <td class="text-end">
+                        <button class="btn btn-outline-primary btn-sm px-2 py-0 me-1" onclick="editRate(${idx})" title="Editar manualmente">
+                            <i class="bi bi-pencil-fill"></i>
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm px-2 py-0" onclick="deleteRate('${r.fecha}')" title="Eliminar registro">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function clearFilters() {
+        document.getElementById("filterYear").value = "";
+        document.getElementById("filterMonth").value = "";
+        loadRates();
+    }
+
+    async function syncToday() {
+        showToast('info', 'Sincronizando hoy...');
+        try {
+            const res = await fetch('/api/v1/tipo-cambio/sync-today', {
+                method: 'POST',
+                headers: authHeaders
+            });
+            const data = await res.json();
+            if (res.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sincronizado',
+                    text: data.message,
+                    background: '#161b22',
+                    color: '#fff',
+                    confirmButtonColor: '#0d6efd'
+                });
+                loadRates();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de Sincronización',
+                    text: data.detail || 'No se pudo obtener el tipo de cambio.',
+                    background: '#161b22',
+                    color: '#fff',
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        } catch (e) {
+            showToast('error', 'Error de red al sincronizar');
+        }
+    }
+
+    function openSyncMonthModal() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        document.getElementById("syncYearMonth").value = `${year}-${month}`;
+        syncMonthModalObj.show();
+    }
+
+    async function executeSyncMonth() {
+        const ym = document.getElementById("syncYearMonth").value;
+        if (!ym) {
+            showToast('error', 'Seleccione año y mes');
+            return;
+        }
+
+        syncMonthModalObj.hide();
+        showToast('info', 'Sincronizando mes...');
+        
+        try {
+            const res = await fetch('/api/v1/tipo-cambio/sync-month', {
+                method: 'POST',
+                headers: {
+                    ...authHeaders,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ year_month: ym })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sincronización Completada',
+                    text: data.message,
+                    background: '#161b22',
+                    color: '#fff',
+                    confirmButtonColor: '#0d6efd'
+                });
+                // Set filters to matching values
+                const [y, m] = ym.split('-');
+                document.getElementById("filterYear").value = parseInt(y);
+                document.getElementById("filterMonth").value = parseInt(m);
+                loadRates();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al sincronizar mes',
+                    text: data.detail || 'Fallo desconocido',
+                    background: '#161b22',
+                    color: '#fff',
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        } catch (e) {
+            showToast('error', 'Error de red');
+        }
+    }
+
+    function openManualModal() {
+        document.getElementById("manualForm").reset();
+        document.getElementById("manualFecha").disabled = false;
+        document.getElementById("manualModalTitle").innerHTML = '<i class="bi bi-plus-lg text-primary me-2"></i>Registrar Tipo de Cambio';
+        
+        // Default date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("manualFecha").value = today;
+
+        manualModalObj.show();
+    }
+
+    function editRate(index) {
+        const rate = currentRatesList[index];
+        document.getElementById("manualFecha").value = rate.fecha;
+        document.getElementById("manualFecha").disabled = true; // Lock date key on update
+        document.getElementById("manualCompra").value = rate.compra;
+        document.getElementById("manualVenta").value = rate.venta;
+        
+        document.getElementById("manualModalTitle").innerHTML = '<i class="bi bi-pencil-fill text-primary me-2"></i>Editar Tipo de Cambio';
+        manualModalObj.show();
+    }
+
+    async function saveManual() {
+        const fecha = document.getElementById("manualFecha").value;
+        const compra = parseFloat(document.getElementById("manualCompra").value);
+        const venta = parseFloat(document.getElementById("manualVenta").value);
+
+        if (!fecha || isNaN(compra) || isNaN(venta)) {
+            showToast('error', 'Complete todos los campos con valores válidos');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/v1/tipo-cambio', {
+                method: 'POST',
+                headers: {
+                    ...authHeaders,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ fecha, compra, venta })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showToast('success', data.message || 'Guardado correctamente');
+                manualModalObj.hide();
+                loadRates();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al registrar',
+                    text: data.detail || 'Fallo al guardar',
+                    background: '#161b22',
+                    color: '#fff',
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        } catch (e) {
+            showToast('error', 'Error de red');
+        }
+    }
+
+    async function deleteRate(fecha) {
+        Swal.fire({
+            title: `¿Eliminar Tipo de Cambio?`,
+            text: `Se borrará el registro del día ${fecha}.`,
+            icon: 'warning',
+            showCancelButton: true,
+            background: '#161b22',
+            color: '#fff',
+            confirmButtonColor: '#f85149',
+            cancelButtonColor: '#30363d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch(`/api/v1/tipo-cambio/${fecha}`, {
+                        method: 'DELETE',
+                        headers: authHeaders
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        showToast('success', 'Registro eliminado');
+                        loadRates();
+                    } else {
+                        showToast('error', data.detail || 'Fallo al eliminar');
+                    }
+                } catch {
+                    showToast('error', 'Error de red');
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

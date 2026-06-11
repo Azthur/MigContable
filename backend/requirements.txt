@@ -15,3 +15,7 @@ passlib[bcrypt]
 PyJWT
 email-validator
 apscheduler
+pytz
+celery
+redis
+flower

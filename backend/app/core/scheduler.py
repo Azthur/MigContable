@@ -30,7 +30,7 @@ def execute_scheduled_task(task_id: int):
             try:
                 import httpx
                 today = datetime.now().strftime("%Y-%m-%d")
-                TC_API_TOKEN = "ebf3feafb06f11f09f1d005056563c20"
+                TC_API_TOKEN = "7964086d139cec9233e0581c3ceb49cQ"
                 TC_API_BASE = "https://api.org.pe/v1"
                 url = f"{TC_API_BASE}/tc/{today}"
                 headers = {"Authorization": f"Bearer {TC_API_TOKEN}"}
@@ -160,13 +160,17 @@ def start_scheduler():
         if not scheduler.running:
             scheduler.start()
             
-        # Cargar tareas de la BD
-        tasks = db.query(ScheduledTask).filter(ScheduledTask.is_active == True).all()
+        # Cargar todas las tareas de la BD para sincronizar su estado con APScheduler
+        tasks = db.query(ScheduledTask).all()
         for t in tasks:
             job_id = f"task_{t.id}"
             if scheduler.get_job(job_id):
                 scheduler.remove_job(job_id)
                 
+            # Si la tarea está desactivada, no la programamos
+            if not t.is_active:
+                continue
+
             if t.schedule_type == "DAILY":
                 hour, minute = map(int, t.time_str.split(':'))
                 scheduler.add_job(

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel
@@ -104,14 +104,9 @@ def update_task(task_id: int, task_data: TaskUpdate, db: Session = Depends(get_d
         raise HTTPException(status_code=404, detail="Task not found")
         
     try:
-        if task_data.company_id is not None: task.company_id = task_data.company_id
-        if task_data.task_type is not None: task.task_type = task_data.task_type
-        if task_data.schedule_type is not None: task.schedule_type = task_data.schedule_type
-        if task_data.time_str is not None: task.time_str = task_data.time_str
-        if task_data.day_of_week is not None: task.day_of_week = task_data.day_of_week
-        if task_data.day_of_month is not None: task.day_of_month = task_data.day_of_month
-        if task_data.is_active is not None: task.is_active = task_data.is_active
-        if task_data.params is not None: task.params = task_data.params
+        update_data = task_data.model_dump(exclude_unset=True)
+        for key, val in update_data.items():
+            setattr(task, key, val)
         
         db.commit()
         db.refresh(task)
@@ -158,3 +153,13 @@ def get_task_logs(task_id: int, limit: int = 50, db: Session = Depends(get_dest_
     from backend.app.models.models import TaskLog
     logs = db.query(TaskLog).filter(TaskLog.task_id == task_id).order_by(TaskLog.id.desc()).limit(limit).all()
     return [{'id': l.id, 'status': l.status, 'message': l.message, 'details': l.details, 'started_at': str(l.started_at) if l.started_at else None, 'finished_at': str(l.finished_at) if l.finished_at else None} for l in logs]
+
+@router.post("/{task_id}/run")
+def run_task_immediately(task_id: int, background_tasks: BackgroundTasks, db: Session = Depends(get_dest_db)):
+    task = db.query(ScheduledTask).filter(ScheduledTask.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    from backend.app.core.scheduler import execute_scheduled_task
+    background_tasks.add_task(execute_scheduled_task, task_id)
+    return {"message": "Tarea iniciada en segundo plano"}

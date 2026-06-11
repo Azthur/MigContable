@@ -1,16 +1,4 @@
-GLOBAL EXCEPTION CAUGHT for http://localhost:8080/api/v1/mapeo/cf-diariol?company_id=4&skip=0&limit=50&subcategoria_id=28&periodo=2026
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
-    self.dialect.do_execute(
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
-    cursor.execute(statement, parameters)
-psycopg2.errors.UndefinedColumn: column cf_diariol.extra_data does not exist
-LINE 2: ..., cf_diariol.ctipoparti AS cf_diariol_ctipoparti, cf_diariol...
-                                                             ^
-
-
-The above exception was the direct cause of the following exception:
-
+GLOBAL EXCEPTION CAUGHT for http://localhost:8080/api/v1/mapeo/origen-preview?company_id=1
 Traceback (most recent call last):
   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
     await self.app(scope, receive, _send)
@@ -22,25 +10,25 @@ Traceback (most recent call last):
     await app(scope, receive, sender)
   File "/usr/local/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
     await self.app(scope, receive, send)
-  File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 716, in __call__
+  File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 660, in __call__
     await self.middleware_stack(scope, receive, send)
-  File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 736, in app
+  File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 680, in app
     await route.handle(scope, receive, send)
-  File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 290, in handle
+  File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 276, in handle
     await self.app(scope, receive, send)
-  File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 130, in app
+  File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 134, in app
     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
     raise exc
   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
     await app(scope, receive, sender)
-  File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 116, in app
+  File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 120, in app
     response = await f(request)
                ^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 670, in app
+  File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 674, in app
     raw_response = await run_endpoint_function(
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 326, in run_endpoint_function
+  File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 330, in run_endpoint_function
     return await run_in_threadpool(dependant.call, **values)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/usr/local/lib/python3.11/site-packages/starlette/concurrency.py", line 32, in run_in_threadpool
@@ -49,62 +37,13 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.11/site-packages/anyio/to_thread.py", line 63, in run_sync
     return await get_async_backend().run_sync_in_worker_thread(
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2502, in run_sync_in_worker_thread
+  File "/usr/local/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 2518, in run_sync_in_worker_thread
     return await future
            ^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 986, in run
+  File "/usr/local/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 1002, in run
     result = context.run(func, *args)
              ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/app/backend/app/api/endpoints/mapeo.py", line 2468, in list_cf_diariol
-    total = query.count()
-            ^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 3146, in count
-    self._legacy_from_self(col).enable_eagerloads(False).scalar()
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2835, in scalar
-    ret = self.one()
-          ^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2808, in one
-    return self._iter().one()  # type: ignore
-           ^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2857, in _iter
-    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
-                                                  ^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2351, in execute
-    return self._execute_internal(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2249, in _execute_internal
-    result: Result[Any] = compile_state_cls.orm_execute_statement(
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
-    result = conn.execute(
-             ^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
-    return meth(
-           ^^^^^
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
-    return connection._execute_clauseelement(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
-    ret = self._execute_context(
-          ^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
-    return self._exec_single_context(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
-    self._handle_dbapi_exception(
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
-    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
-    self.dialect.do_execute(
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
-    cursor.execute(statement, parameters)
-sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column cf_diariol.extra_data does not exist
-LINE 2: ..., cf_diariol.ctipoparti AS cf_diariol_ctipoparti, cf_diariol...
-                                                             ^
-
-[SQL: SELECT count(*) AS count_1 
-FROM (SELECT cf_diariol.id AS cf_diariol_id, cf_diariol.company_id AS cf_diariol_company_id, cf_diariol.subcategoria_id AS cf_diariol_subcategoria_id, cf_diariol.lote_id AS cf_diariol_lote_id, cf_diariol.estado AS cf_diariol_estado, cf_diariol.idcontrol AS cf_diariol_idcontrol, cf_diariol.created_at AS cf_diariol_created_at, cf_diariol.cper AS cf_diariol_cper, cf_diariol.cmes AS cf_diariol_cmes, cf_diariol.ccodori AS cf_diariol_ccodori, cf_diariol.nasiento AS cf_diariol_nasiento, cf_diariol.nidlin AS cf_diariol_nidlin, cf_diariol.ntc AS cf_diariol_ntc, cf_diariol.ccodcue AS cf_diariol_ccodcue, cf_diariol.ndebe AS cf_diariol_ndebe, cf_diariol.nhaber AS cf_diariol_nhaber, cf_diariol.cglosa AS cf_diariol_cglosa, cf_diariol.ndebes AS cf_diariol_ndebes, cf_diariol.nhabers AS cf_diariol_nhabers, cf_diariol.ndebed AS cf_diariol_ndebed, cf_diariol.nhaberd AS cf_diariol_nhaberd, cf_diariol.cdes AS cf_diariol_cdes, cf_diariol.cdestino AS cf_diariol_cdestino, cf_diariol.ndifauto AS cf_diariol_ndifauto, cf_diariol.najusauto AS cf_diariol_najusauto, cf_diariol.cregis AS cf_diariol_cregis, cf_diariol.ncomp AS cf_diariol_ncomp, cf_diariol.ccoddoc AS cf_diariol_ccoddoc, cf_diariol.cserie AS cf_diariol_cserie, cf_diariol.cnumero AS cf_diariol_cnumero, cf_diariol.cnumfin AS cf_diariol_cnumfin, cf_diariol.ffechadoc AS cf_diariol_ffechadoc, cf_diariol.ccodruc AS cf_diariol_ccodruc, cf_diariol.ccodenti AS cf_diariol_ccodenti, cf_diariol.ffechaven AS cf_diariol_ffechaven, cf_diariol.nbase1 AS cf_diariol_nbase1, cf_diariol.nigv1 AS cf_diariol_nigv1, cf_diariol.nbase2 AS cf_diariol_nbase2, cf_diariol.nigv2 AS cf_diariol_nigv2, cf_diariol.nbase3 AS cf_diariol_nbase3, cf_diariol.nigv3 AS cf_diariol_nigv3, cf_diariol.nina AS cf_diariol_nina, cf_diariol.nexo AS cf_diariol_nexo, cf_diariol.nisc AS cf_diariol_nisc, cf_diariol.nivabase AS cf_diariol_nivabase, cf_diariol.nivaimp AS cf_diariol_nivaimp, cf_diariol.ntot AS cf_diariol_ntot, cf_diariol.nbase1s AS cf_diariol_nbase1s, cf_diariol.nigv1s AS cf_diariol_nigv1s, cf_diariol.nbase2s AS cf_diariol_nbase2s, cf_diariol.nigv2s AS cf_diariol_nigv2s, cf_diariol.nbase3s AS cf_diariol_nbase3s, cf_diariol.nigv3s AS cf_diariol_nigv3s, cf_diariol.ninas AS cf_diariol_ninas, cf_diariol.nexos AS cf_diariol_nexos, cf_diariol.niscs AS cf_diariol_niscs, cf_diariol.nivabases AS cf_diariol_nivabases, cf_diariol.nivaimps AS cf_diariol_nivaimps, cf_diariol.ntots AS cf_diariol_ntots, cf_diariol.nbase1d AS cf_diariol_nbase1d, cf_diariol.nigv1d AS cf_diariol_nigv1d, cf_diariol.nbase2d AS cf_diariol_nbase2d, cf_diariol.nigv2d AS cf_diariol_nigv2d, cf_diariol.nbase3d AS cf_diariol_nbase3d, cf_diariol.nigv3d AS cf_diariol_nigv3d, cf_diariol.ninad AS cf_diariol_ninad, cf_diariol.nexod AS cf_diariol_nexod, cf_diariol.niscd AS cf_diariol_niscd, cf_diariol.nivabased AS cf_diariol_nivabased, cf_diariol.nivaimpd AS cf_diariol_nivaimpd, cf_diariol.ntotd AS cf_diariol_ntotd, cf_diariol.ccodclas AS cf_diariol_ccodclas, cf_diariol.ccodflu AS cf_diariol_ccodflu, cf_diariol.ccodpago AS cf_diariol_ccodpago, cf_diariol.ccodcos AS cf_diariol_ccodcos, cf_diariol.ccodcos2 AS cf_diariol_ccodcos2, cf_diariol.ccodpresu AS cf_diariol_ccodpresu, cf_diariol.ccodcam AS cf_diariol_ccodcam, cf_diariol.ccodcam2 AS cf_diariol_ccodcam2, cf_diariol.ccodecpntribcol AS cf_diariol_ccodecpntribcol, cf_diariol.ccodecpnniifcol AS cf_diariol_ccodecpnniifcol, cf_diariol.cglosa2 AS cf_diariol_cglosa2, cf_diariol.cmesc AS cf_diariol_cmesc, cf_diariol.cmreg AS cf_diariol_cmreg, cf_diariol.ccodocon AS cf_diariol_ccodocon, cf_diariol.ndiferido AS cf_diariol_ndiferido, cf_diariol.ffechadif AS cf_diariol_ffechadif, cf_diariol.nresp AS cf_diariol_nresp, cf_diariol.ccodpps AS cf_diariol_ccodpps, cf_diariol.ccodpds AS cf_diariol_ccodpds, cf_diariol.cregisre AS cf_diariol_cregisre, cf_diariol.nperdenre AS cf_diariol_nperdenre, cf_diariol.nporre AS cf_diariol_nporre, cf_diariol.ffecre AS cf_diariol_ffecre, cf_diariol.cserre AS cf_diariol_cserre, cf_diariol.cnumre AS cf_diariol_cnumre, cf_diariol.cnumdere AS cf_diariol_cnumdere, cf_diariol.ntcre AS cf_diariol_ntcre, cf_diariol.nbaseres AS cf_diariol_nbaseres, cf_diariol.nbasered AS cf_diariol_nbasered, cf_diariol.nimpres AS cf_diariol_nimpres, cf_diariol.nimpred AS cf_diariol_nimpred, cf_diariol.cpdbdetcod AS cf_diariol_cpdbdetcod, cf_diariol.ccodretran AS cf_diariol_ccodretran, cf_diariol.ccodtopdet AS cf_diariol_ccodtopdet, cf_diariol.npagdetra AS cf_diariol_npagdetra, cf_diariol.cdocnodom AS cf_diariol_cdocnodom, cf_diariol.ccodtipren AS cf_diariol_ccodtipren, cf_diariol.crefdoc AS cf_diariol_crefdoc, cf_diariol.freffec AS cf_diariol_freffec, cf_diariol.crefser AS cf_diariol_crefser, cf_diariol.crefnum AS cf_diariol_crefnum, cf_diariol.ccoddas AS cf_diariol_ccoddas, cf_diariol.cyeardas AS cf_diariol_cyeardas, cf_diariol.ccorrdas AS cf_diariol_ccorrdas, cf_diariol.ffembdas AS cf_diariol_ffembdas, cf_diariol.ffregdas AS cf_diariol_ffregdas, cf_diariol.nfobdas AS cf_diariol_nfobdas, cf_diariol.nfobdad AS cf_diariol_nfobdad, cf_diariol.nlecorre AS cf_diariol_nlecorre, cf_diariol.clecvesta AS cf_diariol_clecvesta, cf_diariol.clecvmes AS cf_diariol_clecvmes, cf_diariol.clecvper AS cf_diariol_clecvper, cf_diariol.cledmcesta AS cf_diariol_cledmcesta, cf_diariol.cledmcmes AS cf_diariol_cledmcmes, cf_diariol.cledmcper AS cf_diariol_cledmcper, cf_diariol.nlecorrere AS cf_diariol_nlecorrere, cf_diariol.nautamo AS cf_diariol_nautamo, cf_diariol.ffec_dc AS cf_diariol_ffec_dc, cf_diariol.cdoc_dc AS cf_diariol_cdoc_dc, cf_diariol.cser_dc AS cf_diariol_cser_dc, cf_diariol.cnum_dc AS cf_diariol_cnum_dc, cf_diariol.cdoc_nd AS cf_diariol_cdoc_nd, cf_diariol.cser_nd AS cf_diariol_cser_nd, cf_diariol.cnum_nd AS cf_diariol_cnum_nd, cf_diariol.nrenbru_nd AS cf_diariol_nrenbru_nd, cf_diariol.nrennet_nd AS cf_diariol_nrennet_nd, cf_diariol.nimpret_nd AS cf_diariol_nimpret_nd, cf_diariol.ndedcos_nd AS cf_diariol_ndedcos_nd, cf_diariol.ntasret_nd AS cf_diariol_ntasret_nd, cf_diariol.ccodmon AS cf_diariol_ccodmon, cf_diariol.ntc_nd AS cf_diariol_ntc_nd, cf_diariol.nintext AS cf_diariol_nintext, cf_diariol.nicbper AS cf_diariol_nicbper, cf_diariol.nicbpers AS cf_diariol_nicbpers, cf_diariol.nicbperd AS cf_diariol_nicbperd, cf_diariol.nigvxacre AS cf_diariol_nigvxacre, cf_diariol.ccodsu AS cf_diariol_ccodsu, cf_diariol.ffecasi AS cf_diariol_ffecasi, cf_diariol.idxacre AS cf_diariol_idxacre, cf_diariol.cmonxacre AS cf_diariol_cmonxacre, cf_diariol.nidreglin AS cf_diariol_nidreglin, cf_diariol.crvieap AS cf_diariol_crvieap, cf_diariol.valida_sunat AS cf_diariol_valida_sunat, cf_diariol.nflgigvrec AS cf_diariol_nflgigvrec, cf_diariol.nflgprorrateo AS cf_diariol_nflgprorrateo, cf_diariol.cctapro AS cf_diariol_cctapro, cf_diariol.npigv AS cf_diariol_npigv, cf_diariol.nadopcion AS cf_diariol_nadopcion, cf_diariol.nporceparti AS cf_diariol_nporceparti, cf_diariol.nimpbenefley AS cf_diariol_nimpbenefley, cf_diariol.nbasetg AS cf_diariol_nbasetg, cf_diariol.nbasetgs AS cf_diariol_nbasetgs, cf_diariol.nbasetgd AS cf_diariol_nbasetgd, cf_diariol.nigvtg AS cf_diariol_nigvtg, cf_diariol.nigvtgs AS cf_diariol_nigvtgs, cf_diariol.nigvtgd AS cf_diariol_nigvtgd, cf_diariol.ninatg AS cf_diariol_ninatg, cf_diariol.ninatgs AS cf_diariol_ninatgs, cf_diariol.ninatgd AS cf_diariol_ninatgd, cf_diariol.nexotg AS cf_diariol_nexotg, cf_diariol.nexotgs AS cf_diariol_nexotgs, cf_diariol.nexotgd AS cf_diariol_nexotgd, cf_diariol.nexptg AS cf_diariol_nexptg, cf_diariol.nexptgs AS cf_diariol_nexptgs, cf_diariol.nexptgd AS cf_diariol_nexptgd, cf_diariol.idparti AS cf_diariol_idparti, cf_diariol.ctipoparti AS cf_diariol_ctipoparti, cf_diariol.extra_data AS cf_diariol_extra_data, mapeo_subcategorias.nombre AS subcategoria_nombre 
-FROM cf_diariol LEFT OUTER JOIN mapeo_subcategorias ON cf_diariol.subcategoria_id = mapeo_subcategorias.id 
-WHERE cf_diariol.company_id = %(company_id_1)s AND cf_diariol.subcategoria_id = %(subcategoria_id_1)s AND cf_diariol.cper = %(cper_1)s) AS anon_1]
-[parameters: {'company_id_1': 4, 'subcategoria_id_1': 28, 'cper_1': '2026'}]
-(Background on this error at: https://sqlalche.me/e/20/f405)
+  File "/app/backend/app/api/endpoints/mapeo.py", line 2813, in list_origen_preview
+    selections = db.query(TableSelection).join(SourceConnection).filter(
+                          ^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'TableSelection' where it is not associated with a value

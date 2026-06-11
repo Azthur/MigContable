@@ -68,289 +68,454 @@
         min-width: 40px;
         text-align: center;
     }
+    /* Custom premium tabs */
+    .nav-tabs-custom {
+        border-bottom: 2px solid rgba(88, 166, 255, 0.1) !important;
+        gap: 4px;
+    }
+    .nav-tabs-custom .nav-link {
+        color: var(--text-secondary) !important;
+        background: transparent !important;
+        border: none !important;
+        border-bottom: 3px solid transparent !important;
+        padding: 12px 24px !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        transition: all 0.2s ease-in-out !important;
+        border-radius: 6px 6px 0 0 !important;
+    }
+    .nav-tabs-custom .nav-link:hover {
+        color: var(--text-primary) !important;
+        background: rgba(255, 255, 255, 0.03) !important;
+    }
+    .nav-tabs-custom .nav-link.active {
+        color: var(--accent) !important;
+        background: rgba(88, 166, 255, 0.06) !important;
+        border-bottom: 3px solid var(--accent) !important;
+    }
 </style>
 {% endblock %}
 
-{% block content %}
+{% block content %}<!-- Tabbed Navigation Bar -->
+<ul class="nav nav-tabs nav-tabs-custom mb-4" id="realtimeEtlTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#tab-summary" type="button" role="tab" aria-controls="tab-summary" aria-selected="true">
+            <i class="bi bi-pie-chart-fill me-2"></i>Resumen de Staging
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="visor-tab" data-bs-toggle="tab" data-bs-target="#tab-visor" type="button" role="tab" aria-controls="tab-visor" aria-selected="false">
+            <i class="bi bi-search me-2"></i>Visor de Datos
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="config-tab" data-bs-toggle="tab" data-bs-target="#tab-config" type="button" role="tab" aria-controls="tab-config" aria-selected="false">
+            <i class="bi bi-gear-fill me-2"></i>Configuración y Frecuencias
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#tab-logs" type="button" role="tab" aria-controls="tab-logs" aria-selected="false">
+            <i class="bi bi-journal-text me-2"></i>Auditoría y Logs
+        </button>
+    </li>
+</ul>
 
-<div class="row g-4 mb-4">
-    <!-- Recurrence Scheduler panel -->
-    <div class="col-md-12">
-        <div class="glass-panel p-4 h-100">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="m-0 text-primary"><i class="bi bi-alarm-fill me-2"></i>Frecuencia Automática</h5>
-                <button class="btn btn-ghost btn-sm px-2 py-1" onclick="openScheduleModal()">
-                    <i class="bi bi-plus-lg me-1"></i> Programar Tarea
-                </button>
-            </div>
-            <p class="text-secondary small">Configure intervalos o ejecuciones programadas diarias/semanales del ETL en tiempo real por empresa y subcategoría.</p>
-            
-            <div class="table-responsive mt-3" style="max-height: 320px; overflow-y: auto;">
-                <table class="table-dark-custom">
-                    <thead>
-                        <tr>
-                            <th>Empresa</th>
-                            <th>Subcategoría</th>
-                            <th>Frecuencia</th>
-                            <th>Info</th>
-                            <th>Estado</th>
-                            <th class="text-end">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="schedulesTableBody">
-                        <tr><td colspan="6" class="text-center text-secondary py-3">Cargando programaciones...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="tab-content" id="realtimeEtlTabsContent">
+    <!-- Tab 1: Resumen de Staging -->
+    <div class="tab-pane fade show active" id="tab-summary" role="tabpanel" aria-labelledby="summary-tab">
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="glass-panel p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="m-0 text-primary"><i class="bi bi-pie-chart-fill me-2"></i>Resumen por Subcategoría (Staging)</h5>
+                            <p class="text-secondary small mb-0 mt-1">Estado de migración agrupado por cada subcategoría configurada. Seleccione empresa para ver los conteos.</p>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center">
+                            <select class="form-select-dark form-select-sm" id="summaryCompany" onchange="loadStagingSummary()" style="min-width: 200px;">
+                                <option value="">-- Seleccionar Empresa --</option>
+                            </select>
+                            <button class="btn-ghost btn-sm" onclick="loadStagingSummary()">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
 
-<!-- Section: Staging Summary per Subcategory -->
-<div class="row g-4 mb-4">
-    <div class="col-12">
-        <div class="glass-panel p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h5 class="m-0 text-primary"><i class="bi bi-pie-chart-fill me-2"></i>Resumen por Subcategoría (Staging)</h5>
-                    <p class="text-secondary small mb-0 mt-1">Estado de migración agrupado por cada subcategoría configurada. Seleccione empresa para ver los conteos.</p>
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table-dark-custom mb-0">
+                            <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;">
+                                <tr>
+                                    <th>Subcategoría</th>
+                                    <th class="text-center">Total Registros</th>
+                                    <th class="text-center"><i class="bi bi-clock text-warning me-1"></i>Pendientes</th>
+                                    <th class="text-center"><i class="bi bi-check-circle text-success me-1"></i>Migrados</th>
+                                    <th class="text-center"><i class="bi bi-exclamation-triangle text-danger me-1"></i>Errores</th>
+                                    <th class="text-center">Progreso</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="summaryTableBody">
+                                <tr><td colspan="7" class="text-center text-secondary py-4">Seleccione una empresa para ver el resumen de staging.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="d-flex gap-2 align-items-center">
-                    <select class="form-select-dark form-select-sm" id="summaryCompany" onchange="loadStagingSummary()" style="min-width: 200px;">
-                        <option value="">-- Seleccionar Empresa --</option>
-                    </select>
-                    <button class="btn-ghost btn-sm" onclick="loadStagingSummary()">
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                <table class="table-dark-custom mb-0">
-                    <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;">
-                        <tr>
-                            <th>Subcategoría</th>
-                            <th class="text-center">Total Registros</th>
-                            <th class="text-center"><i class="bi bi-clock text-warning me-1"></i>Pendientes</th>
-                            <th class="text-center"><i class="bi bi-check-circle text-success me-1"></i>Migrados</th>
-                            <th class="text-center"><i class="bi bi-exclamation-triangle text-danger me-1"></i>Errores</th>
-                            <th class="text-center">Progreso</th>
-                            <th class="text-end">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="summaryTableBody">
-                        <tr><td colspan="7" class="text-center text-secondary py-4">Seleccione una empresa para ver el resumen de staging.</td></tr>
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Section: Control de Correlativos y Configuración de Periodo/Mes -->
-<div class="row g-4 mb-4">
-    <div class="col-12">
-        <div class="glass-panel p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h5 class="m-0 text-primary"><i class="bi bi-hash me-2"></i>Control de Correlativos y Columnas de Periodo/Mes</h5>
-                    <p class="text-secondary small mb-0 mt-1">Configure el número de asiento inicial, el correlativo actual y las columnas origen de periodo/mes de cada subcategoría por año y mes.</p>
-                </div>
-                <div class="d-flex gap-2 flex-wrap justify-content-end">
-                    <select class="form-select-dark form-select-sm" id="correlativoFilterCompany" onchange="onCorrelativoFilterCompanyChange()" style="min-width: 180px;">
-                        <option value="">-- Seleccionar Empresa --</option>
-                    </select>
-                    <select class="form-select-dark form-select-sm" id="correlativoFilterSubcategory" onchange="loadCorrelativos()" style="min-width: 180px;" disabled>
-                        <option value="">-- Todas las Subcategorías --</option>
-                    </select>
-                    <input type="text" class="form-control-dark form-control-sm" id="correlativoSearch" placeholder="Buscar subcategoría..." onkeyup="filterCorrelativosUI()" style="max-width: 180px;">
-                    <select class="form-select-dark form-select-sm" id="correlativoSort" onchange="loadCorrelativos()" style="min-width: 160px;">
-                        <option value="subcat_asc">Subcategoría A-Z</option>
-                        <option value="subcat_desc">Subcategoría Z-A</option>
-                        <option value="period_desc">Año: Reciente primero</option>
-                        <option value="period_asc">Año: Antiguo primero</option>
-                    </select>
-                    <button class="btn btn-accent btn-sm" onclick="openCorrelativoModal()">
-                        <i class="bi bi-plus-lg me-1"></i> Registrar Correlativo
-                    </button>
-                </div>
-            </div>
+    <!-- Tab 2: Visor de Datos -->
+    <div class="tab-pane fade" id="tab-visor" role="tabpanel" aria-labelledby="visor-tab">
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="glass-panel p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h5 class="m-0 text-primary"><i class="bi bi-table me-2"></i>Visor de Datos y Auditoría</h5>
+                            <p class="text-secondary small mb-0 mt-1">Busque, filtre y analice los datos extraídos en la base intermedia, así como los asientos generados en staging.</p>
+                        </div>
+                        <div>
+                            <button class="btn-ghost btn-sm" onclick="activeVisorTab === 'staging' ? loadStagingRows(0) : loadRawRows(0)">
+                                <i class="bi bi-arrow-clockwise"></i> Actualizar Visor
+                            </button>
+                        </div>
+                    </div>
 
-            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                <table class="table-dark-custom mb-0">
-                    <thead>
-                        <tr>
-                            <th>Subcategoría / Mes</th>
-                            <th class="text-center">Periodo</th>
-                            <th class="text-center">Mes</th>
-                            <th class="text-center">Asiento Inicial</th>
-                            <th class="text-center">Último Asiento</th>
-                            <th class="text-end">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="correlativosTableBody">
-                        <tr><td colspan="6" class="text-center text-secondary py-4">Seleccione una empresa para cargar los correlativos.</td></tr>
-                    </tbody>
-                </table>
+                    <!-- Navigation Tabs -->
+                    <ul class="nav nav-tabs border-secondary mb-3" id="visorTabs" role="tablist" style="border-bottom: 1px solid rgba(255,255,255,0.1) !important;">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active text-light border-0 bg-transparent py-2 px-3 position-relative" id="tabStaging" type="button" role="tab" onclick="switchVisorTab('staging')" style="font-weight: 500; font-size: 0.85rem;">
+                                <i class="bi bi-journal-text me-2"></i>Asientos Staging / Contasis
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link text-secondary border-0 bg-transparent py-2 px-3 position-relative" id="tabRaw" type="button" role="tab" onclick="switchVisorTab('raw')" style="font-weight: 500; font-size: 0.85rem;">
+                                <i class="bi bi-database-down me-2"></i>Tablas Extraídas (Base Intermedia)
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Filters Bar -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label-dark small text-secondary">Empresa</label>
+                            <select class="form-select-dark form-select-sm" id="visorCompany" onchange="onVisorCompanyChange()" required>
+                                <option value="">-- Seleccionar Empresa --</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Staging specific filters -->
+                        <div class="col-md-9" id="visorStagingFilters">
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <label class="form-label-dark small text-secondary">Subcategoría</label>
+                                    <select class="form-select-dark form-select-sm" id="visorSubcategory" onchange="loadStagingRows(0)" disabled>
+                                        <option value="">-- Todas --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label-dark small text-secondary">Año</label>
+                                    <input type="number" class="form-control-dark form-control-sm" id="visorPeriodo" placeholder="Año" onchange="loadStagingRows(0)">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label-dark small text-secondary">Mes</label>
+                                    <select class="form-select-dark form-select-sm" id="visorMes" onchange="loadStagingRows(0)">
+                                        <option value="">-- Todos --</option>
+                                        <option value="01">01 - Ene</option>
+                                        <option value="02">02 - Feb</option>
+                                        <option value="03">03 - Mar</option>
+                                        <option value="04">04 - Abr</option>
+                                        <option value="05">05 - May</option>
+                                        <option value="06">06 - Jun</option>
+                                        <option value="07">07 - Jul</option>
+                                        <option value="08">08 - Ago</option>
+                                        <option value="09">09 - Set</option>
+                                        <option value="10">10 - Oct</option>
+                                        <option value="11">11 - Nov</option>
+                                        <option value="12">12 - Dic</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label-dark small text-secondary">Estado</label>
+                                    <select class="form-select-dark form-select-sm" id="visorEstado" onchange="loadStagingRows(0)">
+                                        <option value="">-- Todos --</option>
+                                        <option value="PENDIENTE">PENDIENTE</option>
+                                        <option value="MIGRADO">MIGRADO</option>
+                                        <option value="ERROR">ERROR</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label-dark small text-secondary">Buscar (Glosa/Cuenta/Doc/RUC)</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control-dark form-control-sm" id="visorSearch" placeholder="Glosa, cuenta, ruc..." onkeyup="if(event.key === 'Enter') loadStagingRows(0)">
+                                        <button class="btn btn-accent btn-sm px-2 py-0" onclick="loadStagingRows(0)"><i class="bi bi-search"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Raw specific filters -->
+                        <div class="col-md-9 d-none" id="visorRawFilters">
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label class="form-label-dark small text-secondary">Tabla Extraída (Base Intermedia)</label>
+                                    <select class="form-select-dark form-select-sm" id="visorRawTable" onchange="loadRawRows(0)" disabled>
+                                        <option value="">-- Seleccionar Tabla --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label-dark small text-secondary">Buscar en todas las columnas de la tabla</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control-dark form-control-sm" id="visorRawSearch" placeholder="Buscar RUC, serie, correlativo, glosa..." onkeyup="if(event.key === 'Enter') loadRawRows(0)">
+                                        <button class="btn btn-accent btn-sm px-2 py-0" onclick="loadRawRows(0)"><i class="bi bi-search"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Staging Table Container -->
+                    <div id="panelStagingContainer">
+                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                            <table class="table-dark-custom mb-0">
+                                <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;">
+                                    <tr>
+                                        <th>Per/Mes</th>
+                                        <th>Subcategoría</th>
+                                        <th>Asiento</th>
+                                        <th>Lín</th>
+                                        <th>ID Control</th>
+                                        <th>Cuenta</th>
+                                        <th>Debe</th>
+                                        <th>Haber</th>
+                                        <th>Glosa</th>
+                                        <th>Estado</th>
+                                        <th class="text-end">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="visorTableBody">
+                                    <tr><td colspan="11" class="text-center text-secondary py-4">Seleccione una empresa para cargar los datos de staging.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination for Staging -->
+                        <div class="d-flex justify-content-between align-items-center mt-3 text-secondary small">
+                            <div>
+                                Mostrando del <span id="visorRangeStart">0</span> al <span id="visorRangeEnd">0</span> de <span id="visorTotalCount">0</span> registros
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-ghost btn-sm" id="btnVisorPrev" onclick="changeVisorPage(-1)" disabled>
+                                    <i class="bi bi-chevron-left"></i> Anterior
+                                </button>
+                                <button class="btn btn-ghost btn-sm" id="btnVisorNext" onclick="changeVisorPage(1)" disabled>
+                                    <i class="bi bi-chevron-right"></i> Siguiente
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Raw Table Container -->
+                    <div id="panelRawContainer" class="d-none">
+                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                            <table class="table-dark-custom mb-0">
+                                <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;" id="visorRawTableHeader">
+                                    <tr>
+                                        <th>Columna 1</th>
+                                        <th>Columna 2</th>
+                                        <th>Columna 3</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="visorRawTableBody">
+                                    <tr><td colspan="3" class="text-center text-secondary py-4">Seleccione una tabla para cargar los datos extraídos.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination for Raw -->
+                        <div class="d-flex justify-content-between align-items-center mt-3 text-secondary small">
+                            <div>
+                                Mostrando del <span id="visorRawRangeStart">0</span> al <span id="visorRawRangeEnd">0</span> de <span id="visorRawTotalCount">0</span> registros
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-ghost btn-sm" id="btnVisorRawPrev" onclick="changeRawPage(-1)" disabled>
+                                    <i class="bi bi-chevron-left"></i> Anterior
+                                </button>
+                                <button class="btn btn-ghost btn-sm" id="btnVisorRawNext" onclick="changeRawPage(1)" disabled>
+                                    <i class="bi bi-chevron-right"></i> Siguiente
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Section: Real-time Audit Logs & Error Control -->
-<div class="row g-4 mb-4">
-    <div class="col-12">
-        <div class="glass-panel p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h5 class="m-0 text-primary"><i class="bi bi-bug-fill me-2"></i>Auditoría y Errores en Tiempo Real</h5>
-                    <p class="text-secondary small mb-0 mt-1">Verifique en tiempo real qué registros pasaron correctamente y cuáles fueron bloqueados.</p>
-                </div>
-                <div class="d-flex gap-2">
-                    <select class="form-select-dark form-select-sm" id="logFilterCompany" onchange="loadRealtimeLogs()" style="min-width: 180px;">
-                        <option value="">-- Todas las Empresas --</option>
-                    </select>
-                    <select class="form-select-dark form-select-sm" id="logFilterStatus" onchange="loadRealtimeLogs()">
-                        <option value="">-- Todos los Estados --</option>
-                        <option value="SUCCESS">✅ Éxitos</option>
-                        <option value="WARNING">⚠️ Advertencias/Errores de Validación</option>
-                        <option value="ERROR">❌ Errores Críticos de Sistema</option>
-                    </select>
-                    <button class="btn-ghost btn-sm" onclick="loadRealtimeLogs()">
-                        <i class="bi bi-arrow-clockwise"></i> Actualizar
-                    </button>
-                </div>
-            </div>
-
-            <div class="table-responsive table-container">
-                <table class="table-dark-custom" id="realtimeLogsTable">
-                    <thead>
-                        <tr>
-                            <th>Empresa</th>
-                            <th>Fecha Ejecución</th>
-                            <th>Estado</th>
-                            <th>Extraídos</th>
-                            <th>Generados</th>
-                            <th>Migrados</th>
-                            <th>Mensaje / Resumen</th>
-                            <th class="text-end">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="realtimeLogsBody">
-                        <tr><td colspan="8" class="text-center text-secondary py-4"><span class="spinner-sm"></span> Cargando auditoría de ejecución...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Section: Staging Visor Grid -->
-<div class="row g-4 mb-4">
-    <div class="col-12">
-        <div class="glass-panel p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h5 class="m-0 text-primary"><i class="bi bi-table me-2"></i>Visor de Asientos en Staging</h5>
-                    <p class="text-secondary small mb-0 mt-1">Busque, filtre y vuelva a procesar asientos individuales que están pendientes de migrar o que fallaron.</p>
-                </div>
-                <div>
-                    <button class="btn-ghost btn-sm" onclick="loadStagingRows(0)">
-                        <i class="bi bi-arrow-clockwise"></i> Actualizar Visor
-                    </button>
-                </div>
-            </div>
-
-            <!-- Filters Bar -->
-            <div class="row g-2 mb-3">
-                <div class="col-md-3">
-                    <label class="form-label-dark small text-secondary">Empresa</label>
-                    <select class="form-select-dark form-select-sm" id="visorCompany" onchange="onVisorCompanyChange()" required>
-                        <option value="">-- Seleccionar Empresa --</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label-dark small text-secondary">Subcategoría</label>
-                    <select class="form-select-dark form-select-sm" id="visorSubcategory" onchange="loadStagingRows(0)" disabled>
-                        <option value="">-- Todas --</option>
-                    </select>
-                </div>
-                <div class="col-md-1.5">
-                    <label class="form-label-dark small text-secondary">Año</label>
-                    <input type="number" class="form-control-dark form-control-sm" id="visorPeriodo" placeholder="Año" onchange="loadStagingRows(0)">
-                </div>
-                <div class="col-md-1.5">
-                    <label class="form-label-dark small text-secondary">Mes</label>
-                    <select class="form-select-dark form-select-sm" id="visorMes" onchange="loadStagingRows(0)">
-                        <option value="">-- Todos --</option>
-                        <option value="01">01 - Ene</option>
-                        <option value="02">02 - Feb</option>
-                        <option value="03">03 - Mar</option>
-                        <option value="04">04 - Abr</option>
-                        <option value="05">05 - May</option>
-                        <option value="06">06 - Jun</option>
-                        <option value="07">07 - Jul</option>
-                        <option value="08">08 - Ago</option>
-                        <option value="09">09 - Set</option>
-                        <option value="10">10 - Oct</option>
-                        <option value="11">11 - Nov</option>
-                        <option value="12">12 - Dic</option>
-                    </select>
-                </div>
-                <div class="col-md-1.5">
-                    <label class="form-label-dark small text-secondary">Estado</label>
-                    <select class="form-select-dark form-select-sm" id="visorEstado" onchange="loadStagingRows(0)">
-                        <option value="">-- Todos --</option>
-                        <option value="PENDIENTE">PENDIENTE</option>
-                        <option value="MIGRADO">MIGRADO</option>
-                        <option value="ERROR">ERROR</option>
-                    </select>
-                </div>
-                <div class="col-md-2.5">
-                    <label class="form-label-dark small text-secondary">Buscar (Glosa/Cuenta/Doc/RUC)</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control-dark form-control-sm" id="visorSearch" placeholder="Glosa, cuenta, ruc..." onkeyup="if(event.key === 'Enter') loadStagingRows(0)">
-                        <button class="btn btn-accent btn-sm px-2 py-0" onclick="loadStagingRows(0)"><i class="bi bi-search"></i></button>
+    <!-- Tab 3: Configuración y Frecuencias -->
+    <div class="tab-pane fade" id="tab-config" role="tabpanel" aria-labelledby="config-tab">
+        <div class="row g-4 mb-4">
+            <!-- Top: Frecuencia Automática -->
+            <div class="col-12">
+                <div class="glass-panel p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="m-0 text-primary"><i class="bi bi-alarm-fill me-2"></i>Frecuencia Automática</h5>
+                        <button class="btn btn-accent btn-sm px-3 py-1.5" onclick="openScheduleModal()">
+                            <i class="bi bi-plus-lg me-1"></i> Programar Tarea
+                        </button>
+                    </div>
+                    <p class="text-secondary small">Configure intervalos o ejecuciones programadas diarias/semanales del ETL en tiempo real por empresa y subcategoría.</p>
+                    
+                    <!-- Filtro de Frecuencia Automática -->
+                    <div class="row g-2 mb-3 align-items-end">
+                        <div class="col-md-5">
+                            <label class="form-label-dark small text-secondary">Filtrar por Empresa</label>
+                            <select class="form-select-dark form-select-sm w-100" id="filterSchedCompany" onchange="onFilterSchedCompanyChange()">
+                                <option value="">-- Todas las Empresas --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label-dark small text-secondary">Filtrar por Subcategoría</label>
+                            <select class="form-select-dark form-select-sm w-100" id="filterSchedSubcategory" onchange="renderSchedules()" disabled>
+                                <option value="">-- Todas las Subcategorías --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <button class="btn btn-ghost btn-sm w-100" onclick="clearSchedFilters()" title="Limpiar Filtros">
+                                <i class="bi bi-x-circle me-1"></i>Limpiar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive mt-3" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table-dark-custom">
+                            <thead>
+                                <tr>
+                                    <th>Empresa</th>
+                                    <th>Subcategoría</th>
+                                    <th>Frecuencia</th>
+                                    <th>Info</th>
+                                    <th>Estado</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="schedulesTableBody">
+                                <tr><td colspan="6" class="text-center text-secondary py-3">Cargando programaciones...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Table -->
-            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                <table class="table-dark-custom mb-0">
-                    <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;">
-                        <tr>
-                            <th>Per/Mes</th>
-                            <th>Subcategoría</th>
-                            <th>Asiento</th>
-                            <th>Lín</th>
-                            <th>ID Control</th>
-                            <th>Cuenta</th>
-                            <th>Debe</th>
-                            <th>Haber</th>
-                            <th>Glosa</th>
-                            <th>Estado</th>
-                            <th class="text-end">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="visorTableBody">
-                        <tr><td colspan="11" class="text-center text-secondary py-4">Seleccione una empresa para cargar los datos de staging.</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <!-- Bottom: Control de Correlativos y Periodos -->
+            <div class="col-12">
+                <div class="glass-panel p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="m-0 text-primary"><i class="bi bi-hash me-2"></i>Control de Correlativos</h5>
+                        </div>
+                        <button class="btn btn-accent btn-sm" onclick="openCorrelativoModal()">
+                            <i class="bi bi-plus-lg me-1"></i> Registrar Correlativo
+                        </button>
+                    </div>
+                    <p class="text-secondary small">Configure el número de asiento inicial, correlativo actual y las columnas origen de periodo/mes de cada subcategoría.</p>
+                    
+                    <div class="row g-2 mb-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label-dark small text-secondary">Filtrar por Empresa</label>
+                            <select class="form-select-dark form-select-sm w-100" id="correlativoFilterCompany" onchange="onCorrelativoFilterCompanyChange()">
+                                <option value="">-- Seleccionar Empresa --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label-dark small text-secondary">Filtrar por Subcategoría</label>
+                            <select class="form-select-dark form-select-sm w-100" id="correlativoFilterSubcategory" onchange="loadCorrelativos()" disabled>
+                                <option value="">-- Todas las Subcategorías --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label-dark small text-secondary">Buscar Subcategoría</label>
+                            <input type="text" class="form-control-dark form-control-sm w-100" id="correlativoSearch" placeholder="Buscar subcategoría..." onkeyup="filterCorrelativosUI()">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label-dark small text-secondary">Ordenar por</label>
+                            <select class="form-select-dark form-select-sm w-100" id="correlativoSort" onchange="loadCorrelativos()">
+                                <option value="subcat_asc">Subcategoría A-Z</option>
+                                <option value="subcat_desc">Subcategoría Z-A</option>
+                                <option value="period_desc">Año: Reciente primero</option>
+                                <option value="period_asc">Año: Antiguo primero</option>
+                            </select>
+                        </div>
+                    </div>
 
-            <!-- Pagination -->
-            <div class="d-flex justify-content-between align-items-center mt-3 text-secondary small">
-                <div>
-                    Mostrando del <span id="visorRangeStart">0</span> al <span id="visorRangeEnd">0</span> de <span id="visorTotalCount">0</span> registros
+                    <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                        <table class="table-dark-custom mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Subcategoría / Mes</th>
+                                    <th class="text-center">Periodo</th>
+                                    <th class="text-center">Mes</th>
+                                    <th class="text-center">Asiento Inicial</th>
+                                    <th class="text-center">Último Asiento</th>
+                                    <th class="text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="correlativosTableBody">
+                                <tr><td colspan="6" class="text-center text-secondary py-4">Seleccione una empresa para cargar los correlativos.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-ghost btn-sm" id="btnVisorPrev" onclick="changeVisorPage(-1)" disabled>
-                        <i class="bi bi-chevron-left"></i> Anterior
-                    </button>
-                    <button class="btn btn-ghost btn-sm" id="btnVisorNext" onclick="changeVisorPage(1)" disabled>
-                        <i class="bi bi-chevron-right"></i> Siguiente
-                    </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 4: Auditoría y Logs -->
+    <div class="tab-pane fade" id="tab-logs" role="tabpanel" aria-labelledby="logs-tab">
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="glass-panel p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="m-0 text-primary"><i class="bi bi-bug-fill me-2"></i>Auditoría y Errores en Tiempo Real</h5>
+                            <p class="text-secondary small mb-0 mt-1">Verifique en tiempo real qué registros pasaron correctamente y cuáles fueron bloqueados.</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <select class="form-select-dark form-select-sm" id="logFilterCompany" onchange="loadRealtimeLogs()" style="min-width: 180px;">
+                                <option value="">-- Todas las Empresas --</option>
+                            </select>
+                            <select class="form-select-dark form-select-sm" id="logFilterStatus" onchange="loadRealtimeLogs()">
+                                <option value="">-- Todos los Estados --</option>
+                                <option value="SUCCESS">✅ Éxitos</option>
+                                <option value="WARNING">⚠️ Advertencias/Errores de Validación</option>
+                                <option value="ERROR">❌ Errores Críticos de Sistema</option>
+                            </select>
+                            <button class="btn-ghost btn-sm" onclick="loadRealtimeLogs()">
+                                <i class="bi bi-arrow-clockwise"></i> Actualizar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive table-container">
+                        <table class="table-dark-custom" id="realtimeLogsTable">
+                            <thead>
+                                <tr>
+                                    <th>Empresa</th>
+                                    <th>Fecha Ejecución</th>
+                                    <th>Subcategoría</th>
+                                    <th>Estado</th>
+                                    <th>Extraídos</th>
+                                    <th>Generados</th>
+                                    <th>Migrados</th>
+                                    <th>Mensaje / Resumen</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="realtimeLogsBody">
+                                <tr><td colspan="9" class="text-center text-secondary py-4"><span class="spinner-sm"></span> Cargando auditoría de ejecución...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -362,51 +527,47 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header border-bottom-0">
-                <h5 class="modal-title"><i class="bi bi-alarm-fill text-primary me-2"></i>Programar Ejecución Automática</h5>
+                <h5 class="modal-title" id="scheduleModalTitle"><i class="bi bi-alarm-fill text-primary me-2"></i>Programar Ejecución Automática</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="scheduleForm">
+                    <input type="hidden" id="editScheduleId">
                     <div class="mb-3">
-                        <label class="form-label-dark">Empresa</label>
+                        <label class="form-label-dark small">Empresa</label>
                         <select class="form-select-dark" id="schedCompany" onchange="onSchedCompanyChange()" required>
                             <option value="">-- Seleccionar Empresa --</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label-dark">Subcategoría (Opcional)</label>
-                        <select class="form-select-dark" id="schedSubcategory" disabled>
+                        <label class="form-label-dark small">Subcategoría</label>
+                        <select class="form-select-dark" id="schedSubcategory">
                             <option value="">-- Todas las Subcategorías (Recomendado) --</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label-dark">Frecuencia</label>
+                        <label class="form-label-dark small">Frecuencia</label>
                         <select class="form-select-dark" id="schedFrequency" onchange="toggleSchedInputs()" required>
-                            <option value="MINUTES">Cada X minutos</option>
-                            <option value="DAILY">Diaria (Todos los días)</option>
-                            <option value="WEEKLY">Semanal</option>
+                            <option value="MINUTES">Cada X Minutos</option>
+                            <option value="DAILY">Diario (Hora específica)</option>
+                            <option value="WEEKLY">Semanal (Día y hora específica)</option>
                         </select>
                     </div>
                     
-                    <div class="mb-3" id="divMinutes">
-                        <label class="form-label-dark">Intervalo (Minutos)</label>
+                    <div class="mb-3" id="divMinutes" style="display: none;">
+                        <label class="form-label-dark small">Intervalo en Minutos</label>
                         <select class="form-select-dark" id="schedMinutesVal">
-                            <option value="1">Cada 1 minuto (Pruebas)</option>
-                            <option value="5">Cada 5 minutos</option>
-                            <option value="10">Cada 10 minutos</option>
-                            <option value="15">Cada 15 minutos</option>
-                            <option value="30">Cada 30 minutos</option>
-                            <option value="60">Cada 1 hora</option>
+                            <option value="5">Cada 5 Minutos</option>
+                            <option value="10">Cada 10 Minutos</option>
+                            <option value="15">Cada 15 Minutos</option>
+                            <option value="30">Cada 30 Minutos</option>
+                            <option value="60">Cada Hora</option>
                         </select>
                     </div>
-
-                    <div class="row" id="divTime" style="display: none;">
-                        <div class="col-6 mb-3">
-                            <label class="form-label-dark">Hora Ejecución (24h)</label>
-                            <input type="time" class="form-control-dark" id="schedTimeVal" value="08:00">
-                        </div>
-                        <div class="col-6 mb-3" id="divDayOfWeek" style="display: none;">
-                            <label class="form-label-dark">Día de la semana</label>
+                    
+                    <div class="row g-2 mb-3" id="divTime" style="display: none;">
+                        <div class="col-12" id="divDayOfWeek" style="display: none;">
+                            <label class="form-label-dark small">Día de la Semana</label>
                             <select class="form-select-dark" id="schedDayOfWeek">
                                 <option value="mon">Lunes</option>
                                 <option value="tue">Martes</option>
@@ -416,6 +577,10 @@
                                 <option value="sat">Sábado</option>
                                 <option value="sun">Domingo</option>
                             </select>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <label class="form-label-dark small">Hora de Ejecución</label>
+                            <input type="time" class="form-control-dark" id="schedTimeVal" value="08:00">
                         </div>
                     </div>
                 </form>
@@ -463,6 +628,7 @@
                             <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;">
                                 <tr>
                                     <th>Paso</th>
+                                    <th>Subcategoría</th>
                                     <th>Referencia / Asiento</th>
                                     <th>Tabla / Campo</th>
                                     <th>Estado</th>
@@ -471,7 +637,7 @@
                                 </tr>
                             </thead>
                             <tbody id="detailErrorsBody">
-                                <tr><td colspan="6" class="text-center text-muted">Ningún registro procesado.</td></tr>
+                                <tr><td colspan="7" class="text-center text-muted">Ningún registro procesado.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -493,6 +659,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <!-- Status Banner / Explicación del Estado del Asiento -->
+                <div id="stagingRowStatusInfo" class="mb-3"></div>
+
                 <div class="table-responsive" style="max-height: 550px;">
                     <table class="table-dark-custom">
                         <thead>
@@ -540,7 +709,7 @@
                     <div class="row">
                         <div class="col-6 mb-3" id="divCorrPeriodo">
                             <label class="form-label-dark">Periodo (Año)</label>
-                            <input type="number" class="form-control-dark" id="corrPeriodo" placeholder="Ej: 2026" required>
+                            <input type="text" class="form-control-dark" id="corrPeriodo" placeholder="Ej: 2026" required>
                         </div>
                         <div class="col-6 mb-3" id="divCorrMes">
                             <label class="form-label-dark">Mes</label>
@@ -602,6 +771,19 @@
 
 {% block extra_scripts %}
 <script>
+    // ── Global fetch wrapper: NEVER cache API responses ──────────────
+    (function() {
+        const _originalFetch = window.fetch;
+        window.fetch = function(input, init) {
+            init = init || {};
+            const url = (typeof input === 'string') ? input : (input.url || '');
+            if (url.startsWith('/api/') || url.startsWith('/api')) {
+                init.cache = 'no-store';
+            }
+            return _originalFetch.call(this, input, init);
+        };
+    })();
+
     const authHeaders = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('migconta_token')}`
@@ -613,6 +795,7 @@
     let stagingRowModalObj = null;
     let correlativoModalObj = null;
     let currentVisorItems = [];
+    let currentSchedulesList = [];
 
     // Startup
     $(document).ready(function() {
@@ -646,7 +829,7 @@
             
             // Populate all company selectors on the page
             const selectors = [
-                'schedCompany', 'visorCompany', 'summaryCompany', 'logFilterCompany', 'corrCompany', 'correlativoFilterCompany'
+                'schedCompany', 'visorCompany', 'summaryCompany', 'logFilterCompany', 'corrCompany', 'correlativoFilterCompany', 'filterSchedCompany'
             ];
             
             allCompanies.forEach(c => {
@@ -657,6 +840,8 @@
                     });
                 }
             });
+            // Populate filter subcategories on load (all companies initially)
+            onFilterSchedCompanyChange();
         } catch (err) {
             console.error("Error cargando empresas:", err);
         }
@@ -674,17 +859,14 @@
 
         tbody.innerHTML = '<tr><td colspan="7" class="text-center text-secondary py-4"><span class="spinner-sm"></span> Cargando resumen...</td></tr>';
 
-        const currentYear = new Date().getFullYear();
-        const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
-
         try {
-            const res = await fetch(`/api/v1/etl/staging-summary?company_id=${compId}&periodo=${currentYear}&mes=${currentMonth}`, { headers: authHeaders });
+            const res = await fetch(`/api/v1/etl/staging-summary?company_id=${compId}`, { headers: authHeaders });
             const data = res.ok ? await res.json() : [];
             
             tbody.innerHTML = '';
             
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-secondary py-4">No hay datos de staging para esta empresa en el periodo actual.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-secondary py-4">No hay datos de staging para esta empresa.</td></tr>';
                 return;
             }
 
@@ -695,9 +877,14 @@
                 else if (pct >= 50) progressColor = 'bg-info';
                 else if (s.error > 0) progressColor = 'bg-danger';
 
+                const toggleId = `subcat-details-${s.subcategoria_id}`;
+
                 tbody.innerHTML += `
-                    <tr>
-                        <td class="fw-semibold">${s.subcategoria_nombre}</td>
+                    <tr class="align-middle" style="cursor: pointer;" onclick="toggleSubcatDetails('${toggleId}', this)">
+                        <td class="fw-semibold">
+                            <i class="bi bi-chevron-right me-2 toggle-icon" style="transition: transform 0.2s; display: inline-block;"></i>
+                            ${s.subcategoria_nombre}
+                        </td>
                         <td class="text-center font-monospace">${s.total}</td>
                         <td class="text-center">
                             <span class="badge bg-warning-subtle text-warning">${s.pendiente}</span>
@@ -720,9 +907,65 @@
                         </td>
                         <td class="text-end">
                             <button class="btn btn-outline-primary btn-sm px-2 py-0" style="font-size:0.75rem;" 
-                                onclick="reprocessSubcategory(${compId}, ${s.subcategoria_id}, '${s.subcategoria_nombre}', this)">
+                                onclick="event.stopPropagation(); reprocessSubcategory(${compId}, ${s.subcategoria_id}, '${s.subcategoria_nombre}', this)">
                                 <i class="bi bi-arrow-clockwise me-1"></i> Reprocesar
                             </button>
+                        </td>
+                    </tr>
+                    <tr id="${toggleId}" class="d-none" style="background: rgba(255, 255, 255, 0.02); border-left: 3px solid var(--accent);">
+                        <td colspan="7" class="p-3">
+                            <div class="table-responsive">
+                                <table class="table-dark-custom mb-0" style="font-size: 0.8rem; background: rgba(0,0,0,0.2);">
+                                    <thead>
+                                        <tr>
+                                            <th>Periodo</th>
+                                            <th class="text-center">Total Registros</th>
+                                            <th class="text-center">Pendientes</th>
+                                            <th class="text-center">Migrados</th>
+                                            <th class="text-center">Errores</th>
+                                            <th class="text-center">Progreso</th>
+                                            <th class="text-end">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${(s.periodos || []).map(p => {
+                                            const subPct = p.total > 0 ? Math.round((p.migrado / p.total) * 100) : 0;
+                                            let subProgColor = 'bg-warning';
+                                            if (subPct >= 100) subProgColor = 'bg-success';
+                                            else if (subPct >= 50) subProgColor = 'bg-info';
+                                            else if (p.error > 0) subProgColor = 'bg-danger';
+
+                                            return `
+                                                <tr>
+                                                    <td><i class="bi bi-calendar-event me-2 text-primary"></i>${p.periodo}-${p.mes}</td>
+                                                    <td class="text-center font-monospace">${p.total}</td>
+                                                    <td class="text-center"><span class="badge bg-warning-subtle text-warning">${p.pendiente}</span></td>
+                                                    <td class="text-center"><span class="badge bg-success-subtle text-success">${p.migrado}</span></td>
+                                                    <td class="text-center">
+                                                        ${p.error > 0 
+                                                            ? `<span class="badge bg-danger-subtle text-danger">${p.error}</span>` 
+                                                            : '<span class="text-secondary">0</span>'}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <div class="d-inline-flex align-items-center gap-2" style="width: 120px;">
+                                                            <div class="progress flex-grow-1" style="height: 4px; background: rgba(255,255,255,0.1);">
+                                                                <div class="progress-bar ${subProgColor}" style="width: ${subPct}%"></div>
+                                                            </div>
+                                                            <span class="text-secondary font-monospace" style="font-size: 0.75rem;">${subPct}%</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <button class="btn btn-outline-danger btn-sm px-2 py-0" style="font-size:0.75rem;" 
+                                                            onclick="event.stopPropagation(); clearAndReprocessPeriod(${compId}, ${s.subcategoria_id}, '${s.subcategoria_nombre}', '${p.periodo}', '${p.mes}', this)">
+                                                            <i class="bi bi-trash me-1"></i> Reiniciar
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -730,6 +973,19 @@
         } catch (err) {
             console.error("Error loading staging summary:", err);
             tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Error al cargar resumen.</td></tr>';
+        }
+    }
+
+    // Toggle subcategory detailed periods
+    function toggleSubcatDetails(id, rowEl) {
+        const detailRow = document.getElementById(id);
+        const icon = rowEl.querySelector('.toggle-icon');
+        if (detailRow.classList.contains('d-none')) {
+            detailRow.classList.remove('d-none');
+            icon.style.transform = 'rotate(90deg)';
+        } else {
+            detailRow.classList.add('d-none');
+            icon.style.transform = 'rotate(0deg)';
         }
     }
 
@@ -782,61 +1038,211 @@
         }
     }
 
+    async function clearAndReprocessPeriod(companyId, subcatId, subcatName, periodo, mes, btn) {
+        const confirmResult = await Swal.fire({
+            title: '¿Reiniciar Periodo en Staging?',
+            html: `
+                <div class="text-start">
+                    <p class="mb-2">Se eliminarán permanentemente los registros de staging para:</p>
+                    <ul class="mb-3">
+                        <li><strong>Subcategoría:</strong> ${subcatName}</li>
+                        <li><strong>Periodo:</strong> ${periodo}-${mes}</li>
+                    </ul>
+                    <div class="alert alert-warning py-2 px-3 mb-0" style="font-size: 0.85rem; background: rgba(255,193,7,0.1); border: 1px solid rgba(255,193,7,0.2); color: #ffc107;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Esta action <strong>NO</strong> borrará datos del sistema final Contasis (debe eliminarlos manualmente en Contasis si lo desea). Solo limpiará la base intermedia para permitir volver a procesar y migrar.
+                    </div>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            background: '#161b22',
+            color: '#fff',
+            confirmButtonColor: '#ea4c89',
+            cancelButtonColor: '#30363d',
+            confirmButtonText: 'Sí, eliminar staging y reiniciar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (!confirmResult.isConfirmed) return;
+
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+        try {
+            const res = await fetch('/api/v1/etl/clear-period-staging', {
+                method: 'POST',
+                headers: authHeaders,
+                body: JSON.stringify({
+                    company_id: companyId,
+                    subcategoria_id: subcatId,
+                    periodo: periodo,
+                    mes: mes
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.status === 'SUCCESS') {
+                showToast('success', data.message || `Periodo ${periodo}-${mes} reiniciado correctamente`);
+                loadStagingSummary();
+                if (typeof loadRealtimeLogs === 'function') {
+                    loadRealtimeLogs();
+                }
+            } else {
+                showToast('error', data.detail || 'Fallo al reiniciar el periodo');
+            }
+        } catch (err) {
+            showToast('error', 'Error de red');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    }
+
     // Load Scheduled Tasks of type ETL_REALTIME
     async function loadSchedules() {
         try {
-            const res = await fetch('/api/v1/tasks', { headers: authHeaders });
+            const res = await fetch('/api/v1/pipelines', { headers: authHeaders });
             const tasks = await res.json();
             const scheds = tasks.filter(t => t.task_type === 'ETL_REALTIME');
             
-            const tbody = document.getElementById('schedulesTableBody');
-            tbody.innerHTML = '';
+            currentSchedulesList = scheds;
             
-            if (scheds.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-secondary py-3">No hay programaciones automáticas registradas.</td></tr>';
-                return;
-            }
-
-            scheds.forEach(s => {
-                const comp = allCompanies.find(c => c.id === s.company_id);
-                const compName = comp ? comp.name : `Empresa ${s.company_id}`;
-                
-                let freqBadge = '';
-                let infoStr = '';
-                if (s.schedule_type === 'MINUTES') {
-                    freqBadge = `<span class="badge bg-info">Cada ${s.time_str} Minutos</span>`;
-                    infoStr = '-';
-                } else if (s.schedule_type === 'DAILY') {
-                    freqBadge = `<span class="badge bg-primary">Diario</span>`;
-                    infoStr = `<i class="bi bi-clock me-1"></i>${s.time_str}`;
-                } else if (s.schedule_type === 'WEEKLY') {
-                    freqBadge = `<span class="badge bg-secondary">Semanal</span>`;
-                    const daysMap = { mon: 'Lunes', tue: 'Martes', wed: 'Miércoles', thu: 'Jueves', fri: 'Viernes', sat: 'Sábado', sun: 'Domingo' };
-                    infoStr = `${daysMap[s.day_of_week] || s.day_of_week} a las ${s.time_str}`;
-                }
-
-                const statusBadge = s.is_active 
-                    ? `<span class="badge bg-success-subtle text-success">Activo</span>`
-                    : `<span class="badge bg-danger-subtle text-danger">Inactivo</span>`;
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="fw-semibold">${compName}</td>
-                        <td class="text-secondary small font-monospace">${s.subcategoria_nombres || 'Todas las Subcategorías'}</td>
-                        <td>${freqBadge}</td>
-                        <td>${infoStr}</td>
-                        <td>${statusBadge}</td>
-                        <td class="text-end">
-                            <button class="btn btn-outline-danger btn-sm px-2 py-0" onclick="deleteSchedule(${s.id})">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
+            renderSchedules();
         } catch (err) {
             console.error("Error loading tasks schedules:", err);
         }
+    }
+
+    // Filter and Render Schedules in the Table
+    function renderSchedules() {
+        const compFilter = document.getElementById('filterSchedCompany').value;
+        const subcatFilter = document.getElementById('filterSchedSubcategory').value;
+        const tbody = document.getElementById('schedulesTableBody');
+        
+        tbody.innerHTML = '';
+        
+        let filtered = currentSchedulesList;
+        if (compFilter) {
+            filtered = filtered.filter(s => String(s.company_id) === String(compFilter));
+        }
+        if (subcatFilter) {
+            filtered = filtered.filter(s => s.params && s.params.subcategorias && s.params.subcategorias.includes(parseInt(subcatFilter)));
+        }
+        
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-secondary py-3">No hay programaciones automáticas registradas.</td></tr>';
+            return;
+        }
+
+        filtered.forEach((s) => {
+            const idx = currentSchedulesList.findIndex(item => item.id === s.id);
+            const comp = allCompanies.find(c => c.id === s.company_id);
+            const compName = comp ? comp.name : `Empresa ${s.company_id}`;
+            
+            let freqBadge = '';
+            let infoStr = '';
+            if (s.schedule_type === 'MINUTES') {
+                freqBadge = `<span class="badge bg-info">Cada ${s.time_str} Minutos</span>`;
+                infoStr = '-';
+            } else if (s.schedule_type === 'DAILY') {
+                freqBadge = `<span class="badge bg-primary">Diario</span>`;
+                infoStr = `<i class="bi bi-clock me-1"></i>${s.time_str}`;
+            } else if (s.schedule_type === 'WEEKLY') {
+                freqBadge = `<span class="badge bg-secondary">Semanal</span>`;
+                const daysMap = { mon: 'Lunes', tue: 'Martes', wed: 'Miércoles', thu: 'Jueves', fri: 'Viernes', sat: 'Sábado', sun: 'Domingo' };
+                infoStr = `${daysMap[s.day_of_week] || s.day_of_week} a las ${s.time_str}`;
+            }
+
+            const statusBadge = s.is_active 
+                ? `<span class="badge bg-success-subtle text-success">Activo</span>`
+                : `<span class="badge bg-danger-subtle text-danger">Inactivo</span>`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td class="fw-semibold">${compName}</td>
+                    <td class="text-secondary small font-monospace">${s.subcategoria_nombres || 'Todas las Subcategorías'}</td>
+                    <td>${freqBadge}</td>
+                    <td>${infoStr}</td>
+                    <td>${statusBadge}</td>
+                    <td class="text-end">
+                        <button class="btn ${s.is_active ? 'btn-outline-success' : 'btn-outline-secondary'} btn-sm px-2 py-0 me-1" onclick="toggleSchedule(${s.id}, ${s.is_active})" title="${s.is_active ? 'Desactivar Tarea' : 'Activar Tarea'}">
+                            <i class="bi ${s.is_active ? 'bi-toggle-on' : 'bi-toggle-off'}"></i>
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm px-2 py-0 me-1" onclick="editSchedule(${idx})">
+                            <i class="bi bi-pencil-fill"></i>
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm px-2 py-0" onclick="deleteSchedule(${s.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // Populate filter subcategories when company filter changes
+    async function onFilterSchedCompanyChange() {
+        const compSel = document.getElementById('filterSchedCompany');
+        const subcatSel = document.getElementById('filterSchedSubcategory');
+        if (!subcatSel) return;
+        
+        const compId = compSel ? compSel.value : '';
+        
+        subcatSel.innerHTML = '<option value="">-- Todas las Subcategorías --</option>';
+        subcatSel.disabled = true;
+        
+        let url = '/api/v1/mapeo/categorias';
+        if (compId) {
+            url += `?company_id=${compId}`;
+        }
+        
+        try {
+            console.log("onFilterSchedCompanyChange: fetching categories from:", url);
+            const res = await fetch(url, { headers: authHeaders });
+            if (res.ok) {
+                const cats = await res.json();
+                console.log("onFilterSchedCompanyChange: cats loaded:", cats);
+                let count = 0;
+                
+                (cats || []).forEach(cat => {
+                    if (cat && cat.subcategorias && cat.subcategorias.length) {
+                        cat.subcategorias.forEach(sub => {
+                            if (sub && sub.is_active) {
+                                const opt = document.createElement('option');
+                                opt.value = sub.id;
+                                
+                                // Include company prefix if viewing all companies
+                                const comp = (allCompanies || []).find(c => String(c.id) === String(cat.company_id));
+                                const prefix = comp && !compId ? `[${comp.name}] ` : '';
+                                
+                                opt.textContent = `${prefix}${cat.nombre || ''} → ${sub.nombre || ''}`;
+                                subcatSel.appendChild(opt);
+                                count++;
+                            }
+                        });
+                    }
+                });
+                
+                console.log("onFilterSchedCompanyChange: subcategories added to dropdown:", count);
+                if (count > 0) {
+                    subcatSel.disabled = false;
+                }
+            } else {
+                console.error("onFilterSchedCompanyChange: Failed with status:", res.status);
+            }
+        } catch (e) {
+            console.error("Error cargando subcategorías para filtros de programación:", e);
+        }
+        renderSchedules();
+    }
+
+
+    // Clear schedules filters
+    function clearSchedFilters() {
+        document.getElementById('filterSchedCompany').value = '';
+        onFilterSchedCompanyChange();
     }
 
     // Toggle Schedule Type inputs in modal
@@ -861,18 +1267,17 @@
         }
     }
 
-    async function onSchedCompanyChange() {
-        const compId = document.getElementById('schedCompany').value;
+    async function loadSchedSubcategories(companyId, selectVal = null) {
         const subcatSel = document.getElementById('schedSubcategory');
         subcatSel.innerHTML = '<option value="">-- Todas las Subcategorías (Recomendado) --</option>';
-        if (!compId) {
+        if (!companyId) {
             subcatSel.disabled = true;
             return;
         }
         subcatSel.disabled = false;
         
         try {
-            const res = await fetch(`/api/v1/mapeo/categorias?company_id=${compId}`, { headers: authHeaders });
+            const res = await fetch(`/api/v1/mapeo/categorias?company_id=${companyId}`, { headers: authHeaders });
             if (res.ok) {
                 const cats = await res.json();
                 cats.forEach(cat => {
@@ -885,21 +1290,66 @@
                         });
                     }
                 });
+                if (selectVal) {
+                    subcatSel.value = selectVal;
+                }
             }
         } catch (e) {
             console.error("Error loading subcategories for scheduler:", e);
         }
     }
 
+    async function onSchedCompanyChange() {
+        const compId = document.getElementById('schedCompany').value;
+        await loadSchedSubcategories(compId);
+    }
+
     function openScheduleModal() {
         document.getElementById('scheduleForm').reset();
+        document.getElementById('editScheduleId').value = '';
+        document.getElementById('scheduleModalTitle').innerHTML = '<i class="bi bi-alarm-fill text-primary me-2"></i>Programar Ejecución Automática';
+        document.getElementById('schedCompany').disabled = false;
         document.getElementById('schedSubcategory').innerHTML = '<option value="">-- Todas las Subcategorías (Recomendado) --</option>';
         document.getElementById('schedSubcategory').disabled = true;
         toggleSchedInputs();
         scheduleModalObj.show();
     }
 
+    async function editSchedule(index) {
+        const s = currentSchedulesList[index];
+        if (!s) return;
+
+        document.getElementById('scheduleForm').reset();
+        document.getElementById('editScheduleId').value = s.id;
+        document.getElementById('scheduleModalTitle').innerHTML = '<i class="bi bi-pencil-fill text-primary me-2"></i>Editar Programación Automática';
+        
+        document.getElementById('schedCompany').value = s.company_id;
+        document.getElementById('schedCompany').disabled = true; // No permitir cambiar de empresa al editar
+
+        let subId = "";
+        if (s.params && s.params.subcategorias && s.params.subcategorias.length > 0) {
+            subId = s.params.subcategorias[0];
+        }
+
+        await loadSchedSubcategories(s.company_id, subId);
+
+        document.getElementById('schedFrequency').value = s.schedule_type;
+        toggleSchedInputs();
+
+        if (s.schedule_type === 'MINUTES') {
+            document.getElementById('schedMinutesVal').value = s.time_str;
+        } else {
+            document.getElementById('schedTimeVal').value = s.time_str;
+            if (s.schedule_type === 'WEEKLY') {
+                document.getElementById('schedDayOfWeek').value = s.day_of_week;
+            }
+        }
+
+        scheduleModalObj.show();
+    }
+
     async function saveSchedule() {
+        const id = document.getElementById('editScheduleId').value;
         const companyId = document.getElementById('schedCompany').value;
         const subcatId = document.getElementById('schedSubcategory').value;
         const freq = document.getElementById('schedFrequency').value;
@@ -935,18 +1385,28 @@
         };
 
         try {
-            const res = await fetch('/api/v1/tasks', {
-                method: 'POST',
-                headers: authHeaders,
-                body: JSON.stringify(payload)
-            });
+            let res;
+            if (id) {
+                res = await fetch(`/api/v1/pipelines/${id}`, {
+                    method: 'PUT',
+                    headers: authHeaders,
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                res = await fetch('/api/v1/pipelines', {
+                    method: 'POST',
+                    headers: authHeaders,
+                    body: JSON.stringify(payload)
+                });
+            }
+
             if (res.ok) {
-                showToast('success', 'Programación automatizada guardada');
+                showToast('success', id ? 'Programación automatizada actualizada' : 'Programación automatizada guardada');
                 scheduleModalObj.hide();
                 loadSchedules();
             } else {
                 const data = await res.json();
-                showToast('error', data.detail || 'Fallo al programar tarea');
+                showToast('error', data.detail || 'Fallo al guardar tarea');
             }
         } catch (e) {
             showToast('error', 'Error de red');
@@ -968,7 +1428,7 @@
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    const res = await fetch(`/api/v1/tasks/${taskId}`, {
+                    const res = await fetch(`/api/v1/pipelines/${taskId}`, {
                         method: 'DELETE',
                         headers: authHeaders
                     });
@@ -983,6 +1443,31 @@
                 }
             }
         });
+    }
+
+    async function toggleSchedule(taskId, currentlyActive) {
+        const newStatus = !currentlyActive;
+        const actionText = newStatus ? 'activada' : 'desactivada';
+        
+        try {
+            const res = await fetch(`/api/v1/pipelines/${taskId}`, {
+                method: 'PUT',
+                headers: {
+                    ...authHeaders,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ is_active: newStatus })
+            });
+            if (res.ok) {
+                showToast('success', `Tarea ${actionText} con éxito`);
+                loadSchedules();
+            } else {
+                const data = await res.json();
+                showToast('error', data.detail || 'Fallo al cambiar estado de la tarea');
+            }
+        } catch (e) {
+            showToast('error', 'Error de red');
+        }
     }
 
 
@@ -1009,7 +1494,7 @@
             tbody.innerHTML = '';
             
             if (currentLogsList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-secondary py-3">No hay registros de auditoría que coincidan.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center text-secondary py-3">No hay registros de auditoría que coincidan.</td></tr>';
                 return;
             }
 
@@ -1048,11 +1533,12 @@
                     <tr>
                         <td class="fw-semibold">${l.company_name}</td>
                         <td class="font-monospace text-secondary" style="font-size: 0.75rem;">${localDateStr}</td>
+                        <td class="text-secondary small">${l.subcategorias || 'Todas'}</td>
                         <td>${statusBadge}</td>
                         <td class="text-success font-monospace">+${l.records_extracted}</td>
                         <td class="text-primary font-monospace">+${l.records_generated}</td>
                         <td class="text-warning font-monospace">+${l.records_migrated}</td>
-                        <td class="text-truncate text-secondary" style="max-width: 320px;" title="${l.message || ''}">${l.message || ''}</td>
+                        <td class="text-truncate text-secondary" style="max-width: 250px;" title="${l.message || ''}">${l.message || ''}</td>
                         <td class="text-end">
                             <button class="btn btn-ghost btn-sm px-2 py-1" onclick="viewLogDetail(${idx})" ${hasAction ? '' : 'disabled'}>
                                 <i class="bi bi-eye-fill"></i> Detalle
@@ -1121,12 +1607,14 @@
                 const col = String(e.column || '').toLowerCase();
                 const ref = String(e.reference || '').toLowerCase();
                 const err = String(e.error || '').toLowerCase();
+                const subcat = String(e.subcategoria_nombre || '').toLowerCase();
                 
                 if (!step.includes(searchQuery) &&
                     !table.includes(searchQuery) &&
                     !col.includes(searchQuery) &&
                     !ref.includes(searchQuery) &&
-                    !err.includes(searchQuery)) {
+                    !err.includes(searchQuery) &&
+                    !subcat.includes(searchQuery)) {
                     return false;
                 }
             }
@@ -1136,7 +1624,7 @@
         document.getElementById('detailLogCount').textContent = filtered.length;
 
         if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-secondary py-3">Ningún registro coincide con los filtros.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-secondary py-3">Ningún registro coincide con los filtros.</td></tr>';
             return;
         }
 
@@ -1182,6 +1670,7 @@
             tbody.innerHTML += `
                 <tr>
                     <td>${stepBadge}</td>
+                    <td class="small text-light">${e.subcategoria_nombre || '-'}</td>
                     <td class="font-monospace small">${refStr}</td>
                     <td class="small">${tableStr}</td>
                     <td>${statusBadge}</td>
@@ -1244,11 +1733,193 @@
     }
 
     // ─── Visor de Asientos en Staging JS ───
+    let activeVisorTab = 'staging';
+
+    function switchVisorTab(tab) {
+        activeVisorTab = tab;
+        const tabStaging = document.getElementById('tabStaging');
+        const tabRaw = document.getElementById('tabRaw');
+        const filtersStaging = document.getElementById('visorStagingFilters');
+        const filtersRaw = document.getElementById('visorRawFilters');
+        const panelStaging = document.getElementById('panelStagingContainer');
+        const panelRaw = document.getElementById('panelRawContainer');
+
+        if (tab === 'staging') {
+            tabStaging.classList.add('active');
+            tabStaging.classList.remove('text-secondary');
+            tabStaging.classList.add('text-light');
+            tabRaw.classList.remove('active');
+            tabRaw.classList.remove('text-light');
+            tabRaw.classList.add('text-secondary');
+
+            filtersStaging.classList.remove('d-none');
+            filtersRaw.classList.add('d-none');
+            panelStaging.classList.remove('d-none');
+            panelRaw.classList.add('d-none');
+
+            loadStagingRows(visorSkip);
+        } else {
+            tabRaw.classList.add('active');
+            tabRaw.classList.remove('text-secondary');
+            tabRaw.classList.add('text-light');
+            tabStaging.classList.remove('active');
+            tabStaging.classList.remove('text-light');
+            tabStaging.classList.add('text-secondary');
+
+            filtersRaw.classList.remove('d-none');
+            filtersStaging.classList.add('d-none');
+            panelRaw.classList.remove('d-none');
+            panelStaging.classList.add('d-none');
+
+            loadRawTablesList();
+        }
+    }
+
+    async function loadRawTablesList() {
+        const compId = document.getElementById('visorCompany').value;
+        const select = document.getElementById('visorRawTable');
+        if (!compId) return;
+
+        select.innerHTML = '<option value="">-- Seleccionar Tabla --</option>';
+        select.disabled = true;
+
+        try {
+            const res = await fetch(`/api/v1/etl/raw-tables/${compId}`, { headers: authHeaders });
+            if (res.ok) {
+                const tables = await res.json();
+                tables.forEach(t => {
+                    const opt = new Option(`${t.table_name} (${t.table_dest})`, t.table_dest);
+                    select.add(opt);
+                });
+                if (tables.length > 0) {
+                    select.disabled = false;
+                }
+            }
+        } catch (e) {
+            console.error("Error loading raw tables:", e);
+        }
+    }
+
+    let rawSkip = 0;
+    const rawLimit = 50;
+
+    async function loadRawRows(skip = 0) {
+        rawSkip = skip;
+        const compId = document.getElementById('visorCompany').value;
+        const tableDest = document.getElementById('visorRawTable').value;
+        if (!compId) return;
+
+        const header = document.getElementById('visorRawTableHeader');
+        const tbody = document.getElementById('visorRawTableBody');
+
+        if (!tableDest) {
+            header.innerHTML = '<tr><th>Columna 1</th><th>Columna 2</th><th>Columna 3</th></tr>';
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-secondary py-4">Seleccione una tabla para cargar los datos extraídos.</td></tr>';
+            document.getElementById('visorRawRangeStart').textContent = '0';
+            document.getElementById('visorRawRangeEnd').textContent = '0';
+            document.getElementById('visorRawTotalCount').textContent = '0';
+            document.getElementById('btnVisorRawPrev').disabled = true;
+            document.getElementById('btnVisorRawNext').disabled = true;
+            return;
+        }
+
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center text-secondary py-4"><span class="spinner-sm"></span> Cargando datos extraídos de la tabla '${tableDest}'...</td></tr>`;
+
+        const search = document.getElementById('visorRawSearch').value;
+        let url = `/api/v1/etl/raw-table-data/${compId}/${tableDest}?skip=${rawSkip}&limit=${rawLimit}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+
+        try {
+            const res = await fetch(url, { headers: authHeaders });
+            if (!res.ok) {
+                const errData = await res.json();
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center text-danger py-4">Error: ${errData.detail || 'Fallo al obtener datos'}</td></tr>`;
+                return;
+            }
+
+            const data = await res.json();
+            const cols = data.columns || [];
+
+            header.innerHTML = '';
+            const trHead = document.createElement('tr');
+            cols.forEach(c => {
+                const th = document.createElement('th');
+                th.textContent = c;
+                trHead.appendChild(th);
+            });
+            header.appendChild(trHead);
+
+            tbody.innerHTML = '';
+            const rows = data.items || [];
+
+            if (rows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${cols.length || 1}" class="text-center text-secondary py-4">No se encontraron registros.</td></tr>`;
+                document.getElementById('visorRawRangeStart').textContent = '0';
+                document.getElementById('visorRawRangeEnd').textContent = '0';
+                document.getElementById('visorRawTotalCount').textContent = '0';
+                document.getElementById('btnVisorRawPrev').disabled = true;
+                document.getElementById('btnVisorRawNext').disabled = true;
+                return;
+            }
+
+            rows.forEach(row => {
+                const tr = document.createElement('tr');
+                cols.forEach(c => {
+                    const td = document.createElement('td');
+                    const val = row[c];
+                    if (val === null || val === undefined) {
+                        td.innerHTML = '<span class="text-muted small">NULL</span>';
+                    } else if (typeof val === 'number') {
+                        td.textContent = val.toString();
+                        td.className = 'font-monospace text-end';
+                    } else if (c.toLowerCase().includes('id') || c.toLowerCase().includes('codigo') || c.toLowerCase().includes('nro') || c.toLowerCase().includes('ruc') || c.toLowerCase().includes('numero')) {
+                        td.textContent = val;
+                        td.className = 'font-monospace';
+                    } else {
+                        td.textContent = val;
+                    }
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+
+            const start = rawSkip + 1;
+            const end = rawSkip + rows.length;
+            document.getElementById('visorRawRangeStart').textContent = start;
+            document.getElementById('visorRawRangeEnd').textContent = end;
+            document.getElementById('visorRawTotalCount').textContent = data.total;
+
+            document.getElementById('btnVisorRawPrev').disabled = (rawSkip === 0);
+            document.getElementById('btnVisorRawNext').disabled = (end >= data.total);
+        } catch (err) {
+            console.error("Error loading raw rows:", err);
+            tbody.innerHTML = `<tr><td colspan="10" class="text-center text-danger py-4">Error de red al conectar con el servidor.</td></tr>`;
+        }
+    }
+
+    function changeRawPage(direction) {
+        const newSkip = rawSkip + (direction * rawLimit);
+        if (newSkip >= 0) {
+            loadRawRows(newSkip);
+        }
+    }
+
     async function onVisorCompanyChange() {
         const compId = document.getElementById('visorCompany').value;
         const subcatSel = document.getElementById('visorSubcategory');
         subcatSel.innerHTML = '<option value="">-- Todas --</option>';
         subcatSel.disabled = true;
+
+        // Limpiar controles de tablas raw
+        document.getElementById('visorRawTable').innerHTML = '<option value="">-- Seleccionar Tabla --</option>';
+        document.getElementById('visorRawTable').disabled = true;
+        document.getElementById('visorRawTableHeader').innerHTML = '<tr><th>Columna 1</th><th>Columna 2</th><th>Columna 3</th></tr>';
+        document.getElementById('visorRawTableBody').innerHTML = '<tr><td colspan="3" class="text-center text-secondary py-4">Seleccione una tabla para cargar los datos extraídos.</td></tr>';
+        document.getElementById('visorRawRangeStart').textContent = '0';
+        document.getElementById('visorRawRangeEnd').textContent = '0';
+        document.getElementById('visorRawTotalCount').textContent = '0';
+        document.getElementById('btnVisorRawPrev').disabled = true;
+        document.getElementById('btnVisorRawNext').disabled = true;
         
         if (!compId) {
             document.getElementById('visorTableBody').innerHTML = '<tr><td colspan="10" class="text-center text-secondary py-4">Seleccione una empresa para cargar los datos de staging.</td></tr>';
@@ -1281,8 +1952,14 @@
         } catch (e) {
             console.error("Error loading subcategories for visor:", e);
         }
+
+        await loadRawTablesList();
         
-        loadStagingRows(0);
+        if (activeVisorTab === 'staging') {
+            loadStagingRows(0);
+        } else {
+            loadRawRows(0);
+        }
     }
 
     let visorSkip = 0;
@@ -1330,7 +2007,7 @@
                 let stateBadge = '';
                 if (r.estado === 'MIGRADO') {
                     stateBadge = '<span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle me-1"></i>MIGRADO</span>';
-                } else if (r.estado === 'PENDIENTE') {
+                } else if (r.estado === 'PENDIENTE' || r.estado === '1') {
                     stateBadge = '<span class="badge bg-warning-subtle text-warning"><i class="bi bi-clock me-1"></i>PENDIENTE</span>';
                 } else {
                     stateBadge = `<span class="badge bg-danger-subtle text-danger"><i class="bi bi-exclamation-triangle me-1"></i>${r.estado || 'PENDIENTE'}</span>`;
@@ -1428,6 +2105,89 @@
         const r = currentVisorItems.find(item => item.id === rowId);
         if (!r) return;
         
+        // Buscar errores/advertencias de validación en currentLogsList correspondientes a este registro
+        let foundError = null;
+        if (typeof currentLogsList !== 'undefined' && currentLogsList) {
+            for (const log of currentLogsList) {
+                if (log.errors && log.errors.length > 0) {
+                    const nasientoStr = String(r.nasiento).toLowerCase();
+                    const nidlinStr = String(r.nidlin).toLowerCase();
+                    const idcontrolStr = String(r.idcontrol || '').toLowerCase();
+                    
+                    foundError = log.errors.find(e => {
+                        if (String(e.subcategoria_id) !== String(r.subcategoria_id)) {
+                            return false;
+                        }
+                        const refLower = String(e.reference || '').toLowerCase();
+                        // Coincidencia por asiento/línea o idcontrol
+                        return (
+                            refLower.includes("asiento " + nasientoStr) ||
+                            refLower === nasientoStr ||
+                            (idcontrolStr && refLower.includes(idcontrolStr)) ||
+                            (idcontrolStr && idcontrolStr.includes(refLower))
+                        );
+                    });
+                    if (foundError) break;
+                }
+            }
+        }
+        
+        // Poblar banner de estado
+        const statusInfoDiv = document.getElementById('stagingRowStatusInfo');
+        if (statusInfoDiv) {
+            statusInfoDiv.innerHTML = '';
+            
+            let statusHtml = '';
+            if (r.estado === 'MIGRADO') {
+                statusHtml = `
+                    <div class="alert alert-success border-0 bg-success-subtle text-success p-3 rounded-3 mb-0 d-flex align-items-start gap-3">
+                        <i class="bi bi-check-circle-fill fs-4 mt-0"></i>
+                        <div>
+                            <strong class="d-block mb-1">Registro Migrado</strong>
+                            <span class="small opacity-75">Este asiento ha sido procesado y transferido correctamente al sistema Contasis final. No requiere ninguna acción adicional.</span>
+                        </div>
+                    </div>
+                `;
+            } else if (foundError) {
+                const fieldInfo = foundError.column ? `<br><strong>Campo / Columna:</strong> <code>${foundError.column}</code>` : '';
+                statusHtml = `
+                    <div class="alert alert-danger border-0 bg-danger-subtle text-danger p-3 rounded-3 mb-0 d-flex align-items-start gap-3">
+                        <i class="bi bi-exclamation-triangle-fill fs-4 mt-0"></i>
+                        <div>
+                            <strong class="d-block mb-1">Bloqueado por Validación Fallida</strong>
+                            <span class="small">
+                                <strong>Paso:</strong> ${foundError.step || 'Validación'}<br>
+                                <strong>Detalle del error:</strong> ${foundError.error || 'Desconocido'}${fieldInfo}
+                                <br><br>
+                                <span class="d-block opacity-75 mt-1">Este asiento se mantiene en staging como <strong>PENDIENTE</strong> debido a esta falla. Debe corregir las equivalencias contables o el origen y volver a "Reprocesar".</span>
+                            </span>
+                        </div>
+                    </div>
+                `;
+            } else if (r.estado === 'PENDIENTE' || r.estado === '1') {
+                statusHtml = `
+                    <div class="alert alert-warning border-0 bg-warning-subtle text-warning p-3 rounded-3 mb-0 d-flex align-items-start gap-3">
+                        <i class="bi bi-clock-fill fs-4 mt-0"></i>
+                        <div>
+                            <strong class="d-block mb-1">Listo para Migrar (Pendiente)</strong>
+                            <span class="small">Este asiento se ha generado en Staging sin errores de validación, pero aún no se ha transferido a Contasis final. Está esperando la ejecución automática programada o la migración manual.</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                statusHtml = `
+                    <div class="alert alert-info border-0 bg-info-subtle text-info p-3 rounded-3 mb-0 d-flex align-items-start gap-3">
+                        <i class="bi bi-info-circle-fill fs-4 mt-0"></i>
+                        <div>
+                            <strong class="d-block mb-1">Estado: ${r.estado || 'Desconocido'}</strong>
+                            <span class="small opacity-75">El registro se encuentra en estado '${r.estado}'. Puede hacer clic en reprocesar para intentar migrarlo nuevamente.</span>
+                        </div>
+                    </div>
+                `;
+            }
+            statusInfoDiv.innerHTML = statusHtml;
+        }
+
         const tbody = document.getElementById('stagingRowModalBody');
         tbody.innerHTML = '';
         
@@ -1472,6 +2232,9 @@
                             const opt = document.createElement('option');
                             opt.value = sub.id;
                             opt.textContent = `${cat.nombre} → ${sub.nombre}${sub.is_active ? '' : ' (Inactivo)'}`;
+                            opt.setAttribute('data-period-col', sub.col_origen_periodo || '');
+                            opt.setAttribute('data-mes-col', sub.col_origen_mes || '');
+                            opt.setAttribute('data-generate-headers', sub.generate_headers !== false ? 'true' : 'false');
                             subcatSel.appendChild(opt);
                             count++;
                         });
@@ -1607,10 +2370,11 @@
                 monthsList.sort((a, b) => a.mes.localeCompare(b.mes));
 
                 // Year Sub-header row
+                const yearText = per === 'GLOBAL' ? 'Global (Sin Periodo)' : `Año ${per}`;
                 tbody.innerHTML += `
                     <tr style="background: rgba(255, 255, 255, 0.02); font-weight: 500;">
                         <td colspan="6" class="py-1 ps-4 text-secondary small" style="font-size: 0.8rem;">
-                            <i class="bi bi-calendar-check me-2 text-primary"></i>Año ${per}
+                            <i class="bi bi-calendar-check me-2 text-primary"></i>${yearText}
                         </td>
                     </tr>
                 `;
@@ -1618,10 +2382,11 @@
                 // Render months
                 monthsList.forEach(c => {
                     const idx = currentCorrelativosList.findIndex(item => item.id === c.id);
+                    const mesText = c.mes === '00' ? 'Global / Sin Mes' : `Mes ${c.mes}`;
                     tbody.innerHTML += `
                         <tr style="border-left: 2px dashed rgba(188, 140, 255, 0.3);">
                             <td class="ps-5 text-secondary small" style="font-size: 0.78rem;">
-                                <i class="bi bi-calendar-event me-2 text-secondary"></i>Mes ${c.mes}
+                                <i class="bi bi-calendar-event me-2 text-secondary"></i>${mesText}
                             </td>
                             <td class="text-center font-monospace small">${c.periodo}</td>
                             <td class="text-center font-monospace small">${c.mes}</td>
@@ -1669,6 +2434,9 @@
                                 const opt = document.createElement('option');
                                 opt.value = sub.id;
                                 opt.textContent = `${cat.nombre} → ${sub.nombre}`;
+                                opt.setAttribute('data-period-col', sub.col_origen_periodo || '');
+                                opt.setAttribute('data-mes-col', sub.col_origen_mes || '');
+                                opt.setAttribute('data-generate-headers', sub.generate_headers !== false ? 'true' : 'false');
                                 subcatSel.appendChild(opt);
                             }
                         });
@@ -1680,14 +2448,72 @@
         }
     }
 
-    async function onCorrSubcatChange() {
-        const subcatId = document.getElementById('corrSubcategory').value;
+    async function onCorrSubcatChange(keepValues = false) {
+        const subcatSel = document.getElementById('corrSubcategory');
+        const subcatId = subcatSel.value;
         const dlPeriod = document.getElementById('corrPeriodColsList');
         const dlMes = document.getElementById('corrMesColsList');
         if (dlPeriod) dlPeriod.innerHTML = '';
         if (dlMes) dlMes.innerHTML = '';
 
         if (!subcatId) return;
+
+        const selectedOpt = subcatSel.options[subcatSel.selectedIndex];
+        const periodCol = selectedOpt ? selectedOpt.getAttribute('data-period-col') : '';
+        const mesCol = selectedOpt ? selectedOpt.getAttribute('data-mes-col') : '';
+
+        const generateHeaders = selectedOpt ? selectedOpt.getAttribute('data-generate-headers') === 'true' : true;
+
+        // Auto-detect global correlative: Global if subcategory generate_headers is false (Mode B / row-by-row)
+        const isGlobal = !generateHeaders;
+        const inputPeriodo = document.getElementById('corrPeriodo');
+        const selectMes = document.getElementById('corrMes');
+        const chkBulk = document.getElementById('corrBulkYear');
+
+        if (isGlobal) {
+            inputPeriodo.type = 'text';
+            if (!keepValues || !inputPeriodo.value) {
+                inputPeriodo.value = 'GLOBAL';
+            }
+            inputPeriodo.readOnly = true;
+
+            let globalOpt = selectMes.querySelector('option[value="00"]');
+            if (!globalOpt) {
+                globalOpt = document.createElement('option');
+                globalOpt.value = '00';
+                globalOpt.textContent = 'GLOBAL / Sin Mes';
+                selectMes.appendChild(globalOpt);
+            }
+            if (!keepValues || !selectMes.value) {
+                selectMes.value = '00';
+            }
+            selectMes.disabled = true;
+
+            if (chkBulk) {
+                chkBulk.checked = false;
+                const parent = chkBulk.closest('.form-check');
+                if (parent) parent.style.display = 'none';
+            }
+            toggleCorrBulk({ checked: false });
+        } else {
+            inputPeriodo.type = 'number';
+            inputPeriodo.readOnly = false;
+            if (!keepValues) {
+                inputPeriodo.value = new Date().getFullYear();
+            }
+
+            selectMes.disabled = false;
+            let globalOpt = selectMes.querySelector('option[value="00"]');
+            if (globalOpt) globalOpt.remove();
+            if (!keepValues) {
+                selectMes.value = String(new Date().getMonth() + 1).padStart(2, '0');
+            }
+
+            if (chkBulk) {
+                const parent = chkBulk.closest('.form-check');
+                if (parent) parent.style.display = 'block';
+            }
+        }
 
         try {
             const hRes = await fetch(`/api/v1/mapeo/subcategorias/${subcatId}/helper-data`, { headers: authHeaders });
@@ -1782,8 +2608,13 @@
                     if (cat.subcategorias) {
                         cat.subcategorias.forEach(sub => {
                             if (sub.is_active) {
-                                const opt = new Option(`${cat.nombre} → ${sub.nombre}`, sub.id);
-                                subcatSel.add(opt);
+                                const opt = document.createElement('option');
+                                opt.value = sub.id;
+                                opt.textContent = `${cat.nombre} → ${sub.nombre}`;
+                                opt.setAttribute('data-period-col', sub.col_origen_periodo || '');
+                                opt.setAttribute('data-mes-col', sub.col_origen_mes || '');
+                                opt.setAttribute('data-generate-headers', sub.generate_headers !== false ? 'true' : 'false');
+                                subcatSel.appendChild(opt);
                             }
                         });
                     }
@@ -1802,7 +2633,7 @@
         document.getElementById('corrAsientoActual').value = c.asiento_actual;
 
         // Load columns autocomplete list
-        await onCorrSubcatChange();
+        await onCorrSubcatChange(true);
 
         // Hide bulk container for editing
         const chkBulk = document.getElementById('corrBulkYear');

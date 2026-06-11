@@ -94,7 +94,7 @@ def __get_col_simple(col_name, dataframe):
         if c.strip().upper() == col_clean: return c
     return None
 
-def __apply_computed_rules(df, computed_rules, db, company_id, table_name):
+def __apply_computed_rules(df, computed_rules, db, company_id, table_name, db_engine=None):
     df_cols_lower = {str(c).lower(): str(c) for c in df.columns}
     # 1. Pre-escanear e inicializar columnas con su valor por defecto (o vacío)
     col_defaults = {}
@@ -131,7 +131,7 @@ def __apply_computed_rules(df, computed_rules, db, company_id, table_name):
                         df[new_col] = df[new_col].fillna(0)
                         
             elif func_match and func_match.group(1) in [
-                "CONCAT", "CONCAT_EXACTO", "LEFT", "RIGHT", "SI.CONJUNTO", 
+                "CONCAT", "CONCAT_EXACTO", "LEFT", "RIGHT", "SI.CONJUNTO", "SI", "IF",
                 "BUSCARX", "BUSCARX_EXT", "BUSCARX_LOCAL", "SUMA", "RESTA", "MULTIPLICA", "DIVIDE", "REDONDEAR", "ABS",
                 "LARGO", "ESPACIOS", "MAYUSC", "REPETIR", "TEXTO", "AÑO", "MES", "Y", "O", "CHR", "CARACTER", "SUMAR.SI.CONJUNTO",
                 "ENCONTRAR", "EXTRAER"
@@ -139,7 +139,8 @@ def __apply_computed_rules(df, computed_rules, db, company_id, table_name):
                 from backend.app.core.formula_parser import evaluate_formula_on_df
                 df[new_col] = evaluate_formula_on_df(
                     df=df, formula_str=rule.condition_value,
-                    db=db, company_id=company_id, default=default if default else ""
+                    db=db, company_id=company_id, default=default if default else "",
+                    db_engine=db_engine
                 )
             else:
                 actual_src = __get_col_simple(rule.source_column, df)
@@ -151,13 +152,13 @@ def __apply_computed_rules(df, computed_rules, db, company_id, table_name):
                     func_match_res = re.match(r'^([\w\.]+)\s*\(', res_upper)
                     
                     if func_match_res and func_match_res.group(1) in [
-                        "CONCAT", "CONCAT_EXACTO", "LEFT", "RIGHT", "SI.CONJUNTO", 
+                        "CONCAT", "CONCAT_EXACTO", "LEFT", "RIGHT", "SI.CONJUNTO", "SI", "IF",
                         "BUSCARX", "BUSCARX_EXT", "BUSCARX_LOCAL", "SUMA", "RESTA", "MULTIPLICA", "DIVIDE", "REDONDEAR", "ABS",
                         "LARGO", "ESPACIOS", "MAYUSC", "REPETIR", "TEXTO", "AÑO", "MES", "Y", "O", "CHR", "CARACTER", "SUMAR.SI.CONJUNTO",
                         "ENCONTRAR", "EXTRAER"
                     ]:
                         from backend.app.core.formula_parser import evaluate_formula_on_df
-                        eval_res = evaluate_formula_on_df(df=df, formula_str=res_val, db=db, company_id=company_id, default="")
+                        eval_res = evaluate_formula_on_df(df=df, formula_str=res_val, db=db, company_id=company_id, default="", db_engine=db_engine)
                         df.loc[mask, new_col] = eval_res[mask]
                     else:
                         df.loc[mask, new_col] = rule.result_value
@@ -316,7 +317,7 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
             
             # ── Aplicar Columnas Calculadas (condicionales tipo Excel) ──
             if computed_rules:
-                __apply_computed_rules(df, computed_rules, db, company_id, sel.table_name)
+                __apply_computed_rules(df, computed_rules, db, company_id, sel.table_name, db_engine=dst_engine)
 
         # ── Reaplicar reglas a registros pendientes (Incremental sin Full Refresh) ──
         if not full_refresh and computed_rules:
@@ -359,7 +360,7 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                 
                 if not df_pending.empty:
                     print("DEBUG ETL: Running __apply_computed_rules")
-                    __apply_computed_rules(df_pending, computed_rules, db, company_id, sel.table_name)
+                    __apply_computed_rules(df_pending, computed_rules, db, company_id, sel.table_name, db_engine=dst_engine)
                     
                     # Identificar columnas calculadas a actualizar
                     update_cols = []
@@ -1065,7 +1066,8 @@ def run_full_etl(company_id: int, body: dict = {}, db: Session = Depends(get_des
                     gen_result = generate_to_cf_diariol(
                         {
                             "subcategoria_id": sub.id, 
-                            "clear_previous": clear_prev
+                            "clear_previous": clear_prev,
+                            "is_realtime": body.get("is_realtime", True)
                         },
                         db
                     )
@@ -1178,10 +1180,20 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
     3. Migra a Contasis (copia cf_diariol staging a Contasis final)
     Guarda los resultados estructurados en etl_realtime_logs.
     """
-    from backend.app.models.models import Company, TableSelection, MapeoCategoria, FinalDestConnection, EtlRealtimeLog
+    from backend.app.models.models import Company, TableSelection, MapeoCategoria, FinalDestConnection, EtlRealtimeLog, MapeoSubcategoria
     from backend.app.api.endpoints.mapeo import generate_to_cf_diariol, migrate_to_final
     from datetime import datetime
     import traceback
+
+    # Map subcategory IDs to names
+    subcat_map = {s.id: s.nombre for s in db.query(MapeoSubcategoria).all()}
+
+    # Resolve subcategory names for this run
+    subcat_names = "Todas"
+    if subcategorias:
+        subs = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id.in_(subcategorias)).all()
+        if subs:
+            subcat_names = ", ".join([s.nombre for s in subs])
 
     # Resolve companies to process
     if company_id:
@@ -1208,6 +1220,10 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
 
             for sel in selections:
                 try:
+                    # Resolve table subcategory
+                    sub_id_etl = None
+                    sub_name_etl = "Extracción"
+
                     etl_res = run_incremental_etl(comp.id, sel.id, db, full_refresh=False)
                     if etl_res.get("status") == "ERROR":
                         status = "WARNING"
@@ -1218,7 +1234,9 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                             "reference": "Extracción Incremental",
                             "status": "ERROR",
                             "column": None,
-                            "error": etl_res.get("message")
+                            "error": etl_res.get("message"),
+                            "subcategoria_id": sub_id_etl,
+                            "subcategoria_nombre": sub_name_etl
                         })
                     else:
                         recs = etl_res.get("records", 0)
@@ -1229,7 +1247,9 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                             "reference": "Extracción Incremental",
                             "status": "SUCCESS",
                             "column": None,
-                            "error": f"Extraídos {recs} registros nuevos delta."
+                            "error": f"Extraídos {recs} registros nuevos delta.",
+                            "subcategoria_id": sub_id_etl,
+                            "subcategoria_nombre": sub_name_etl
                         })
                         
                         # Log row-by-row extracted records
@@ -1243,7 +1263,9 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                                 "reference": f"Fila ID: {id_ctrl}" if id_ctrl else "Fila Extraída",
                                 "status": "SUCCESS",
                                 "column": None,
-                                "error": f"Registro extraído de origen: {formatted_desc}"
+                                "error": f"Registro extraído de origen: {formatted_desc}",
+                                "subcategoria_id": sub_id_etl,
+                                "subcategoria_nombre": sub_name_etl
                             })
                 except Exception as ex_etl:
                     status = "WARNING"
@@ -1254,7 +1276,9 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                         "reference": "Extracción Incremental",
                         "status": "ERROR",
                         "column": None,
-                        "error": str(ex_etl)
+                        "error": str(ex_etl),
+                        "subcategoria_id": None,
+                        "subcategoria_nombre": "Extracción"
                     })
 
             # ── Paso 2: Generar asientos (Staging) ──
@@ -1265,7 +1289,7 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                     records_generated = 0
                     errors_list = []
                     for sub_id in subcategorias:
-                        gen_body = {"company_id": comp.id, "subcategoria_id": sub_id, "clear_previous": True}
+                        gen_body = {"company_id": comp.id, "subcategoria_id": sub_id, "clear_previous": True, "is_realtime": True}
                         gen_res = generate_to_cf_diariol(gen_body, db)
                         records_generated += gen_res.get("generated", 0)
                         if gen_res.get("lote_id"):
@@ -1274,7 +1298,7 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                             errors_list.extend(gen_res["errors"])
                     gen_res = {"generated": records_generated, "lote_id": lote_id, "errors": errors_list}
                 else:
-                    gen_body = {"company_id": comp.id, "clear_previous": True}
+                    gen_body = {"company_id": comp.id, "clear_previous": True, "is_realtime": True}
                     gen_res = generate_to_cf_diariol(gen_body, db)
                     records_generated = gen_res.get("generated", 0)
                     lote_id = gen_res.get("lote_id")
@@ -1294,7 +1318,9 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                                 "reference": f"Asiento {row.nasiento} (Lín {row.nidlin})",
                                 "status": "SUCCESS",
                                 "column": None,
-                                "error": f"Asiento generado localmente. Cuenta: {row.ccodcue} | Debe: {row.ndebe} | Haber: {row.nhaber} | Glosa: {row.cglosa}"
+                                "error": f"Asiento generado localmente. Cuenta: {row.ccodcue} | Debe: {row.ndebe} | Haber: {row.nhaber} | Glosa: {row.cglosa}",
+                                "subcategoria_id": row.subcategoria_id,
+                                "subcategoria_nombre": subcat_map.get(row.subcategoria_id, "Generación")
                             })
                     except Exception as e_q:
                         print(f"Error querying staging details: {e_q}")
@@ -1303,13 +1329,16 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                     # Hay advertencias/errores de validación
                     status = "WARNING"
                     for err in gen_res["errors"]:
+                        err_sub_id = err.get("subcategoria_id")
                         history_list.append({
                             "step": "VALIDATION",
                             "table": err.get("table", "cf_diariol"),
                             "reference": f"Asiento {err.get('nasiento')} (Lín {err.get('nidlin')})",
                             "status": "ERROR",
                             "column": err.get("field"),
-                            "error": err.get("error")
+                            "error": err.get("error"),
+                            "subcategoria_id": err_sub_id,
+                            "subcategoria_nombre": subcat_map.get(err_sub_id, "Validación")
                         })
             except Exception as ex_gen:
                 status = "ERROR"
@@ -1320,7 +1349,9 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                     "reference": "Secuencia de Generación",
                     "status": "ERROR",
                     "column": None,
-                    "error": str(ex_gen)
+                    "error": str(ex_gen),
+                    "subcategoria_id": None,
+                    "subcategoria_nombre": "Generación"
                 })
 
             # ── Paso 3: Migración Final a Contasis ──
@@ -1340,7 +1371,9 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                             "reference": "Conexión Contasis",
                             "status": "WARNING",
                             "column": None,
-                            "error": "No hay conexión destino final configurada. Omitido."
+                            "error": "No hay conexión destino final configurada. Omitido.",
+                            "subcategoria_id": None,
+                            "subcategoria_nombre": "Migración"
                         })
                     else:
                         # Migrate only pending selected subcategories
@@ -1372,7 +1405,9 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                                         "reference": f"Asiento {row.nasiento} (Lín {row.nidlin})",
                                         "status": "SUCCESS",
                                         "column": None,
-                                        "error": f"Migrado correctamente a Contasis. Cuenta: {row.ccodcue} | Debe: {row.ndebe} | Haber: {row.nhaber} | Glosa: {row.cglosa}"
+                                        "error": f"Migrado correctamente a Contasis. Cuenta: {row.ccodcue} | Debe: {row.ndebe} | Haber: {row.nhaber} | Glosa: {row.cglosa}",
+                                        "subcategoria_id": row.subcategoria_id,
+                                        "subcategoria_nombre": subcat_map.get(row.subcategoria_id, "Migración")
                                     })
                             except Exception as e_m:
                                 print(f"Error querying migrated details: {e_m}")
@@ -1383,13 +1418,16 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                     if isinstance(detail, dict):
                         message_parts.append(detail.get("message", "Error de migración"))
                         for row in detail.get("failed_rows", []):
+                            row_sub_id = row.get("subcategoria_id")
                             history_list.append({
                                 "step": "MIGRATION",
                                 "table": "Contasis Final",
                                 "reference": f"Asiento {row.get('seat')}",
                                 "status": "ERROR",
                                 "column": None,
-                                "error": row.get("error")
+                                "error": row.get("error"),
+                                "subcategoria_id": row_sub_id,
+                                "subcategoria_nombre": subcat_map.get(row_sub_id, "Migración")
                             })
                     else:
                         message_parts.append(str(detail))
@@ -1399,7 +1437,9 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                             "reference": "Proceso de Migración",
                             "status": "ERROR",
                             "column": None,
-                            "error": str(detail)
+                            "error": str(detail),
+                            "subcategoria_id": None,
+                            "subcategoria_nombre": "Migración"
                         })
                 except Exception as ex_mig:
                     status = "WARNING"
@@ -1410,7 +1450,9 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                         "reference": "Proceso de Migración",
                         "status": "ERROR",
                         "column": None,
-                        "error": str(ex_mig)
+                        "error": str(ex_mig),
+                        "subcategoria_id": None,
+                        "subcategoria_nombre": "Migración"
                     })
 
         except Exception as e:
@@ -1422,7 +1464,9 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
                 "reference": "Ciclo Principal",
                 "status": "ERROR",
                 "column": None,
-                "error": str(e)
+                "error": str(e),
+                "subcategoria_id": None,
+                "subcategoria_nombre": "Sistema"
             })
 
         # Armar mensaje resumen
@@ -1439,7 +1483,8 @@ def run_realtime_etl(company_id: Optional[int], db: Session, subcategorias: Opti
             records_extracted=records_extracted,
             records_generated=records_generated,
             records_migrated=records_migrated,
-            errors=history_list
+            errors=history_list,
+            subcategorias=subcat_names
         )
         db.add(rt_log)
         db.commit()
@@ -1684,7 +1729,8 @@ def list_realtime_logs(
             "records_extracted": l.records_extracted,
             "records_generated": l.records_generated,
             "records_migrated": l.records_migrated,
-            "errors": l.errors
+            "errors": l.errors,
+            "subcategorias": l.subcategorias or "Todas"
         })
     return result
 
@@ -1696,56 +1742,141 @@ def staging_summary(
     mes: Optional[str] = None,
     db: Session = Depends(get_dest_db)
 ):
-    """Resumen de staging agrupado por subcategoría con conteos por estado."""
-    from backend.app.models.models import CfDiariol, MapeoSubcategoria
-    from sqlalchemy import func
+    """Resumen de staging agrupado por subcategoría con conteos por estado y desglose por período."""
+    from backend.app.models.models import MapeoSubcategoria, MapeoCategoria
+    from sqlalchemy import Table, MetaData, select, func, literal
 
-    query = db.query(
-        CfDiariol.subcategoria_id,
-        MapeoSubcategoria.nombre.label("subcategoria_nombre"),
-        CfDiariol.estado,
-        func.count(CfDiariol.id).label("total")
-    ).outerjoin(
-        MapeoSubcategoria, CfDiariol.subcategoria_id == MapeoSubcategoria.id
+    # Get all active subcategories for the company
+    subcategorias = db.query(MapeoSubcategoria).join(
+        MapeoCategoria, MapeoSubcategoria.categoria_id == MapeoCategoria.id
     ).filter(
-        CfDiariol.company_id == company_id
-    )
-
-    if periodo:
-        query = query.filter(CfDiariol.cper == periodo)
-    if mes:
-        query = query.filter(CfDiariol.cmes == mes)
-
-    rows = query.group_by(
-        CfDiariol.subcategoria_id,
-        MapeoSubcategoria.nombre,
-        CfDiariol.estado
+        MapeoCategoria.company_id == company_id,
+        MapeoSubcategoria.is_active == True
     ).all()
 
-    # Agrupar por subcategoría
-    summary = {}
-    for row in rows:
-        sid = row.subcategoria_id
-        if sid not in summary:
-            summary[sid] = {
-                "subcategoria_id": sid,
-                "subcategoria_nombre": row.subcategoria_nombre or f"Subcat {sid}",
-                "pendiente": 0,
-                "migrado": 0,
-                "error": 0,
-                "total": 0
-            }
-        estado = (row.estado or "PENDIENTE").upper()
-        count = row.total or 0
-        summary[sid]["total"] += count
-        if estado == "MIGRADO":
-            summary[sid]["migrado"] += count
-        elif estado == "ERROR":
-            summary[sid]["error"] += count
-        else:
-            summary[sid]["pendiente"] += count
+    result = []
+    metadata = MetaData()
 
-    return list(summary.values())
+    for sub in subcategorias:
+        # Determine staging/destination table name
+        tabla_name = sub.tabla_destino_detalle or "cf_diariol"
+        try:
+            target_table = Table(tabla_name, metadata, autoload_with=db.bind)
+        except Exception as e:
+            print(f"Error loading staging table {tabla_name} for subcat {sub.id}: {e}")
+            continue
+
+        has_company = "company_id" in target_table.c
+        has_subcat = "subcategoria_id" in target_table.c
+        has_cper = "cper" in target_table.c
+        has_cmes = "cmes" in target_table.c
+        has_estado = "estado" in target_table.c
+
+        # Select columns
+        select_cols = [
+            target_table.c.estado if has_estado else literal("1").label("estado"),
+            func.count().label("total")
+        ]
+        group_cols = []
+        if has_estado:
+            group_cols.append(target_table.c.estado)
+
+        if has_cper:
+            select_cols.append(target_table.c.cper)
+            group_cols.append(target_table.c.cper)
+        if has_cmes:
+            select_cols.append(target_table.c.cmes)
+            group_cols.append(target_table.c.cmes)
+
+        stmt = select(*select_cols)
+        if has_company:
+            stmt = stmt.where(target_table.c.company_id == company_id)
+        if has_subcat:
+            stmt = stmt.where(target_table.c.subcategoria_id == sub.id)
+
+        # Filters from query parameters (only filter if columns exist in the table)
+        if periodo and has_cper:
+            stmt = stmt.where(target_table.c.cper == periodo)
+        if mes and has_cmes:
+            stmt = stmt.where(target_table.c.cmes == mes)
+
+        if group_cols:
+            stmt = stmt.group_by(*group_cols)
+
+        try:
+            rows = db.execute(stmt).fetchall()
+        except Exception as e:
+            print(f"Error executing staging query for subcat {sub.id} on table {tabla_name}: {e}")
+            continue
+
+        if not rows:
+            continue
+
+        sub_summary = {
+            "subcategoria_id": sub.id,
+            "subcategoria_nombre": sub.nombre,
+            "pendiente": 0,
+            "migrado": 0,
+            "error": 0,
+            "total": 0,
+            "periodos_dict": {}
+        }
+
+        for row in rows:
+            # Resolve estado
+            raw_estado = getattr(row, "estado", "1")
+            estado_str = str(raw_estado or "1").strip().upper()
+            if estado_str in ("1", "PENDIENTE") or not estado_str:
+                norm_estado = "PENDIENTE"
+            elif estado_str == "MIGRADO":
+                norm_estado = "MIGRADO"
+            elif estado_str in ("0", "ERROR"):
+                norm_estado = "ERROR"
+            else:
+                norm_estado = "PENDIENTE"
+
+            # Resolve period/month
+            r_cper = getattr(row, "cper", "GLOBAL") if has_cper else "GLOBAL"
+            r_cmes = getattr(row, "cmes", "00") if has_cmes else "00"
+            r_cper = str(r_cper or "GLOBAL")
+            r_cmes = str(r_cmes or "00")
+
+            count = getattr(row, "total", 0) or 0
+            sub_summary["total"] += count
+            if norm_estado == "MIGRADO":
+                sub_summary["migrado"] += count
+            elif norm_estado == "ERROR":
+                sub_summary["error"] += count
+            else:
+                sub_summary["pendiente"] += count
+
+            pkey = (r_cper, r_cmes)
+            if pkey not in sub_summary["periodos_dict"]:
+                sub_summary["periodos_dict"][pkey] = {
+                    "periodo": r_cper,
+                    "mes": r_cmes,
+                    "pendiente": 0,
+                    "migrado": 0,
+                    "error": 0,
+                    "total": 0
+                }
+
+            sub_summary["periodos_dict"][pkey]["total"] += count
+            if norm_estado == "MIGRADO":
+                sub_summary["periodos_dict"][pkey]["migrado"] += count
+            elif norm_estado == "ERROR":
+                sub_summary["periodos_dict"][pkey]["error"] += count
+            else:
+                sub_summary["periodos_dict"][pkey]["pendiente"] += count
+
+        # Convert periodos_dict to list
+        periodos_list = list(sub_summary["periodos_dict"].values())
+        periodos_list.sort(key=lambda x: (x["periodo"], x["mes"]), reverse=True)
+        sub_summary["periodos"] = periodos_list
+        del sub_summary["periodos_dict"]
+        result.append(sub_summary)
+
+    return result
 
 
 @router.post("/run-realtime")
@@ -1944,7 +2075,8 @@ def reprocess_row(body: dict, db: Session = Depends(get_dest_db)):
         gen_res = generate_to_cf_diariol({
             "company_id": company_id,
             "subcategoria_id": subcategoria_id,
-            "clear_previous": True
+            "clear_previous": True,
+            "is_realtime": True
         }, db)
         
         # 2. Migrate subcategory to final
@@ -1964,4 +2096,255 @@ def reprocess_row(body: dict, db: Session = Depends(get_dest_db)):
             status_code=500,
             detail=f"Fallo al reprocesar subcategoría: {str(ex_reproc)}"
         )
+
+
+@router.get("/raw-tables/{company_id}")
+def list_raw_tables(company_id: int, db: Session = Depends(get_dest_db)):
+    """Lista las tablas intermedias seleccionadas para una empresa"""
+    selections = db.query(TableSelection).filter(
+        TableSelection.company_id == company_id,
+        TableSelection.is_selected == True
+    ).order_by(TableSelection.extraction_order).all()
+    return [{"id": s.id, "table_name": s.table_name, "table_dest": s.table_name.lower().replace(" ", "_")} for s in selections]
+
+
+@router.get("/raw-table-data/{company_id}/{table_dest}")
+def get_raw_table_data(
+    company_id: int,
+    table_dest: str,
+    skip: int = 0,
+    limit: int = 100,
+    search: Optional[str] = None,
+    db: Session = Depends(get_dest_db)
+):
+    """Obtiene los datos de la tabla intermedia con paginación y búsqueda global"""
+    from backend.app.core.database import dest_engine
+    from sqlalchemy import inspect, text
+    import numpy as np
+    from decimal import Decimal
+    from datetime import datetime as _dt, date as _date
+    
+    # Validar que el nombre de la tabla sea seguro
+    insp = inspect(dest_engine)
+    all_tables = [t.lower() for t in insp.get_table_names()]
+    
+    clean_table = table_dest.strip().lower()
+    if clean_table not in all_tables:
+        raise HTTPException(status_code=400, detail=f"Tabla '{table_dest}' no existe en la base de datos intermedia")
+    
+    # Obtener las columnas reales de la tabla
+    columns = [c['name'] for c in insp.get_columns(clean_table)]
+    
+    # Construir query con filtros
+    if "company_id" in columns:
+        query_str = f'SELECT * FROM "{clean_table}" WHERE company_id = :cid'
+        query_params = {"cid": company_id}
+    else:
+        query_str = f'SELECT * FROM "{clean_table}" WHERE 1=1'
+        query_params = {}
+    
+    if search:
+        # Búsqueda global en todas las columnas
+        search_parts = []
+        for idx, col in enumerate(columns):
+            search_parts.append(f'CAST("{col}" AS TEXT) ILIKE :search_{idx}')
+            query_params[f"search_{idx}"] = f"%{search}%"
+        if search_parts:
+            query_str += " AND (" + " OR ".join(search_parts) + ")"
+            
+    # Contar total
+    count_query = f'SELECT COUNT(*) FROM ({query_str}) AS sub'
+    try:
+        with dest_engine.connect() as conn:
+            total = conn.execute(text(count_query), query_params).scalar() or 0
+    except Exception as e:
+        total = 0
+        print(f"Error counting table rows: {e}")
+        
+    # Obtener filas paginadas
+    paginated_query = f'{query_str} LIMIT :limit OFFSET :offset'
+    query_params["limit"] = limit
+    query_params["offset"] = skip
+    
+    try:
+        with dest_engine.connect() as conn:
+            result = conn.execute(text(paginated_query), query_params)
+            rows = result.fetchall()
+            keys = list(result.keys())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al leer la tabla '{clean_table}': {str(e)}")
+        
+    # Sanitizar filas
+    sanitized_items = []
+    
+    def _clean_val(v):
+        if v is None: return None
+        if isinstance(v, Decimal): return float(v)
+        if isinstance(v, (_dt, _date)): return str(v)
+        if isinstance(v, bytes): return v.decode("utf-8", errors="replace")
+        if isinstance(v, float) and np.isnan(v): return None
+        return v
+
+    for row in rows:
+        row_dict = dict(zip(keys, row))
+        sanitized_items.append({k: _clean_val(v) for k, v in row_dict.items()})
+        
+    return {
+        "columns": columns,
+        "total": total,
+        "items": sanitized_items
+    }
+
+
+@router.post("/clear-period-staging")
+def clear_period_staging(body: dict, db: Session = Depends(get_dest_db)):
+    company_id = body.get("company_id")
+    subcategoria_id = body.get("subcategoria_id")
+    periodo = body.get("periodo")
+    mes = body.get("mes")
+
+    if not company_id or not subcategoria_id or not periodo or not mes:
+        raise HTTPException(status_code=400, detail="Falta company_id, subcategoria_id, periodo o mes")
+
+    from backend.app.models.models import MapeoSubcategoria, AsientoCorrelativo
+    from sqlalchemy import Table, MetaData, select, func
+
+    sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == subcategoria_id).first()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Subcategoría no encontrada")
+
+    tabla_det_name = sub.tabla_destino_detalle or "cf_diariol"
+    tabla_head_name = sub.tabla_destino_cabecera or "cf_diario"
+
+    metadata = MetaData()
+    engine = db.get_bind()
+
+    try:
+        DetTable = Table(tabla_det_name, metadata, autoload_with=engine)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"No se pudo cargar la tabla de detalle '{tabla_det_name}': {str(e)}")
+
+    try:
+        HeadTable = Table(tabla_head_name, metadata, autoload_with=engine)
+    except:
+        HeadTable = None
+
+    deleted_det = 0
+    deleted_head = 0
+
+    has_company = "company_id" in DetTable.c
+    has_subcat = "subcategoria_id" in DetTable.c
+    has_cper = "cper" in DetTable.c
+    has_cmes = "cmes" in DetTable.c
+    nasiento_col = sub.col_destino_nasiento or "nasiento"
+    has_nasiento = nasiento_col in DetTable.c
+
+    # We build the deletion filters dynamically
+    det_del_stmt = DetTable.delete()
+    det_sel_stmt = select(DetTable.c[nasiento_col]) if (has_nasiento and HeadTable is not None) else None
+
+    # Apply where clauses for selecting/deleting detail rows
+    where_clauses = []
+    if has_company:
+        where_clauses.append(DetTable.c.company_id == company_id)
+    if has_subcat:
+        where_clauses.append(DetTable.c.subcategoria_id == subcategoria_id)
+    if has_cper and periodo != "GLOBAL":
+        where_clauses.append(DetTable.c.cper == periodo)
+    if has_cmes and mes != "00":
+        where_clauses.append(DetTable.c.cmes == mes)
+
+    if where_clauses:
+        for clause in where_clauses:
+            det_del_stmt = det_del_stmt.where(clause)
+            if det_sel_stmt is not None:
+                det_sel_stmt = det_sel_stmt.where(clause)
+
+    # Collect nasiento values to delete headers
+    asientos_to_delete = []
+    if det_sel_stmt is not None:
+        try:
+            res_asientos = db.execute(det_sel_stmt.distinct()).fetchall()
+            asientos_to_delete = [r[0] for r in res_asientos if r[0] is not None]
+        except Exception as e:
+            print(f"Error fetching seats to delete: {e}")
+
+    # Delete details
+    try:
+        res_del_det = db.execute(det_del_stmt)
+        deleted_det = res_del_det.rowcount
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error al borrar detalles de staging: {str(e)}")
+
+    # Delete headers
+    if HeadTable is not None and asientos_to_delete:
+        head_del_stmt = HeadTable.delete()
+        head_where = []
+        if "company_id" in HeadTable.c:
+            head_where.append(HeadTable.c.company_id == company_id)
+        if "cper" in HeadTable.c and periodo != "GLOBAL":
+            head_where.append(HeadTable.c.cper == periodo)
+        if "cmes" in HeadTable.c and mes != "00":
+            head_where.append(HeadTable.c.cmes == mes)
+        
+        # Match seat col in head table
+        head_nasiento_col = nasiento_col if nasiento_col in HeadTable.c else "nasiento"
+        if head_nasiento_col in HeadTable.c:
+            head_where.append(HeadTable.c[head_nasiento_col].in_(asientos_to_delete))
+
+        if head_where:
+            for hw in head_where:
+                head_del_stmt = head_del_stmt.where(hw)
+            try:
+                res_del_head = db.execute(head_del_stmt)
+                deleted_head = res_del_head.rowcount
+            except Exception as e:
+                db.rollback()
+                raise HTTPException(status_code=500, detail=f"Error al borrar cabeceras de staging: {str(e)}")
+
+    # Reset subcategory control value to None so it restarts from scratch
+    sub.last_generated_control_value = None
+
+    # Reset correlatives
+    try:
+        corrs = db.query(AsientoCorrelativo).filter(
+            AsientoCorrelativo.company_id == company_id,
+            AsientoCorrelativo.subcategoria_id == sub.id
+        ).all()
+        for corr in corrs:
+            is_target_corr = (corr.periodo == periodo and corr.mes == mes)
+            if is_target_corr:
+                corr.asiento_actual = corr.asiento_inicial - 1
+            elif corr.periodo == "GLOBAL" and corr.mes == "00":
+                # Recompute global seat based on remaining MIGRADO records in DetTable
+                if has_nasiento:
+                    stmt_max_mig = select(func.max(DetTable.c[nasiento_col])).where(
+                        DetTable.c.company_id == company_id,
+                        DetTable.c.subcategoria_id == sub.id,
+                        DetTable.c.estado == "MIGRADO"
+                    )
+                    max_mig = db.execute(stmt_max_mig).scalar()
+                    if max_mig is not None:
+                        corr.asiento_actual = int(max_mig)
+                    else:
+                        corr.asiento_actual = corr.asiento_inicial - 1
+                else:
+                    corr.asiento_actual = corr.asiento_inicial - 1
+    except Exception as ex_corr:
+        print(f"Error resetting correlativos in clear_period_staging: {ex_corr}")
+
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error al confirmar la limpieza: {str(e)}")
+
+    return {
+        "status": "SUCCESS",
+        "message": f"Limpieza completada. Borrados {deleted_det} detalles y {deleted_head} cabeceras de staging para el periodo {periodo}-{mes}.",
+        "deleted_details": deleted_det,
+        "deleted_headers": deleted_head
+    }
+
 

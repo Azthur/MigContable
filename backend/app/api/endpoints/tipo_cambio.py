@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from datetime import date, datetime
 from typing import Optional
+from pydantic import BaseModel
 import httpx
 
 from backend.app.core.database import get_dest_db
@@ -162,3 +163,55 @@ def sync_today(db: Session = Depends(get_dest_db)):
         "compra": item["compra"],
         "venta": item["venta"]
     }
+
+
+class TipoCambioManual(BaseModel):
+    fecha: str
+    compra: float
+    venta: float
+
+
+@router.post("")
+def create_or_update_manual(body: TipoCambioManual, db: Session = Depends(get_dest_db)):
+    """Crea o actualiza manualmente un tipo de cambio en la base de datos"""
+    try:
+        fecha = datetime.strptime(body.fecha, "%Y-%m-%d").date()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Formato de fecha inválido. Use YYYY-MM-DD")
+        
+    existing = db.query(TipoCambio).filter(TipoCambio.fecha == fecha).first()
+    if existing:
+        existing.compra = body.compra
+        existing.venta = body.venta
+        existing.source = "Manual"
+    else:
+        tc = TipoCambio(fecha=fecha, compra=body.compra, venta=body.venta, source="Manual")
+        db.add(tc)
+        
+    try:
+        db.commit()
+        return {"message": "Tipo de cambio registrado de manera manual"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/{fecha_str}")
+def delete_tipo_cambio(fecha_str: str, db: Session = Depends(get_dest_db)):
+    """Elimina el tipo de cambio de una fecha específica"""
+    try:
+        fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Formato de fecha inválido. Use YYYY-MM-DD")
+        
+    tc = db.query(TipoCambio).filter(TipoCambio.fecha == fecha).first()
+    if not tc:
+        raise HTTPException(status_code=404, detail="No se encontró el tipo de cambio para la fecha indicada")
+        
+    try:
+        db.delete(tc)
+        db.commit()
+        return {"message": "Tipo de cambio eliminado"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))

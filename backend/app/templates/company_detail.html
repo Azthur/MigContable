@@ -886,12 +886,13 @@
                             <table class="table-dark-custom" id="computedTable">
                                 <thead>
                                     <tr>
+                                        <th width="50" class="text-center">#</th>
                                         <th>Nueva Columna</th>
                                         <th>SI Columna</th>
                                         <th>= Valor</th>
                                         <th>Entonces</th>
                                         <th>Default</th>
-                                        <th width="40"></th>
+                                        <th width="45"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="computedBody">
@@ -1034,6 +1035,22 @@
 
     {% block extra_scripts %}
     <script>
+        // ── Global fetch wrapper: NEVER cache API responses ──────────────
+        // This prevents the browser from serving stale data when the user
+        // navigates back/forward or the page auto-refreshes.
+        (function() {
+            const _originalFetch = window.fetch;
+            window.fetch = function(input, init) {
+                init = init || {};
+                // Force no-store cache for all local API calls
+                const url = (typeof input === 'string') ? input : (input.url || '');
+                if (url.startsWith('/api/') || url.startsWith('/api')) {
+                    init.cache = 'no-store';
+                }
+                return _originalFetch.call(this, input, init);
+            };
+        })();
+
         const companyId = window.location.pathname.split('/').pop();
 
         // Load initial data
@@ -1141,12 +1158,24 @@
                     container.innerHTML = '<div class="alert alert-warning-dark">No se encontraron tablas o la base de datos está vacía.</div>';
                     return;
                 }
+                
+                // Sort by extraction_order (if undefined, default to a high value so unconfigured tables are at the bottom)
+                tables.sort((a, b) => {
+                    const orderA = a.extraction_order !== undefined ? a.extraction_order : 999999;
+                    const orderB = b.extraction_order !== undefined ? b.extraction_order : 999999;
+                    if (orderA !== orderB) {
+                        return orderA - orderB;
+                    }
+                    return a.table_name.localeCompare(b.table_name);
+                });
+
                 container.innerHTML = `
                 <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                     <table class="table-dark-custom">
                         <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 10;">
                             <tr>
                                 <th width="40" title="Arrastrar para ordenar"><i class="bi bi-arrows-expand"></i></th>
+                                <th width="60" class="text-center">Orden</th>
                                 <th width="40"><input type="checkbox" id="selectAllTables" onclick="toggleAllTables()"></th>
                                 <th>Esquema</th>
                                 <th>Tabla</th>
@@ -1156,10 +1185,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${tables.map((t, index) => `
+                            ${tables.map((t, index) => {
+                                const orderVal = t.extraction_order !== undefined ? t.extraction_order : index;
+                                return `
                                 <tr class="table-row-sortable">
                                     <td class="drag-handle text-muted" style="cursor: grab;"><i class="bi bi-grip-vertical"></i></td>
-                                    <td><input type="checkbox" class="table-checkbox" data-schema="${t.table_schema}" data-name="${t.table_name}" ${t.is_selected ? 'checked' : ''} data-order="${t.extraction_order !== undefined ? t.extraction_order : index}"></td>
+                                    <td class="text-center">
+                                        <input type="number" class="form-control form-control-sm form-control-dark text-center table-order-input" 
+                                            value="${orderVal}" style="width: 70px; margin: 0 auto; font-weight: bold; color: var(--accent);"
+                                            onchange="onOrderInputChange(this)">
+                                    </td>
+                                    <td><input type="checkbox" class="table-checkbox" data-schema="${t.table_schema}" data-name="${t.table_name}" ${t.is_selected ? 'checked' : ''} data-order="${orderVal}"></td>
                                     <td>${t.table_schema}</td>
                                     <td><strong>${t.table_name}</strong></td>
                                     <td>${t.table_type}</td>
@@ -1167,17 +1203,19 @@
                                     <td>
                                         <button class="btn-ghost btn-sm" 
                                             onclick="openTableConfig(${t.selection_id}, '${t.table_schema}', '${t.table_name}', '${t.control_column || ''}', '${t.control_column_type || ''}')"
-                                            title="Configurar Filtros e Incremental"
-                                            ${t.is_selected && t.selection_id ? '' : 'disabled'}>
+                                             title="Configurar Filtros e Incremental"
+                                             ${t.is_selected && t.selection_id ? '' : 'disabled'}>
                                             <i class="bi bi-gear"></i>
                                         </button>
                                     </td>
                                 </tr>
-                            `).join('')}
+                            `}).join('')}
                         </tbody>
                     </table>
                 </div>
-                <div class="mt-2 text-muted small">Total tablas encontradas: ${tables.length} <span class="ms-3"><i class="bi bi-info-circle"></i> Arrastre las filas para cambiar el orden de extracción.</span></div>
+                <div class="mt-2 text-muted small">Total tablas encontradas: ${tables.length} <span class="ms-3"><i class="bi bi-info-circle"></i> Arrastre las filas para cambiar el orden de extracción o use el input numérico.</span>
+                    <button class="btn btn-ghost btn-sm text-accent ms-2 py-0" onclick="sortTablesByOrderInput()"><i class="bi bi-sort-numeric-down"></i> Reordenar en pantalla</button>
+                </div>
             `;
 
                 // Inicializar Sortable.js
@@ -1193,6 +1231,8 @@
                             rows.forEach((row, index) => {
                                 const cb = row.querySelector('.table-checkbox');
                                 if (cb) cb.dataset.order = index;
+                                const orderInput = row.querySelector('.table-order-input');
+                                if (orderInput) orderInput.value = index;
                             });
                         }
                     });
@@ -1211,14 +1251,41 @@
             document.querySelectorAll('.table-checkbox').forEach(cb => cb.checked = checked);
         }
 
+        function onOrderInputChange(input) {
+            const row = input.closest('tr');
+            const cb = row.querySelector('.table-checkbox');
+            if (cb) {
+                cb.dataset.order = input.value;
+            }
+        }
+
+        function sortTablesByOrderInput() {
+            const tbody = document.querySelector('#tablesContainer tbody');
+            if (!tbody) return;
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            rows.sort((a, b) => {
+                const inputA = a.querySelector('.table-order-input');
+                const inputB = b.querySelector('.table-order-input');
+                const valA = inputA ? (parseInt(inputA.value) || 0) : 0;
+                const valB = inputB ? (parseInt(inputB.value) || 0) : 0;
+                return valA - valB;
+            });
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
         async function saveTableSelection() {
             const checkboxes = document.querySelectorAll('.table-checkbox');
-            const selections = Array.from(checkboxes).map(cb => ({
-                table_schema: cb.dataset.schema,
-                table_name: cb.dataset.name,
-                is_selected: cb.checked,
-                extraction_order: parseInt(cb.dataset.order) || 0
-            }));
+            const selections = Array.from(checkboxes).map(cb => {
+                const row = cb.closest('tr');
+                const orderInput = row.querySelector('.table-order-input');
+                const orderVal = orderInput ? (parseInt(orderInput.value) || 0) : (parseInt(cb.dataset.order) || 0);
+                return {
+                    table_schema: cb.dataset.schema,
+                    table_name: cb.dataset.name,
+                    is_selected: cb.checked,
+                    extraction_order: orderVal
+                };
+            });
             const msgDiv = document.getElementById('tablesMsg');
             msgDiv.innerHTML = '<span class="spinner-sm"></span> Guardando...';
             try {
@@ -3215,7 +3282,7 @@
 
         async function loadComputedColumns(selectionId) {
             const tbody = document.getElementById('computedBody');
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center"><div class="spinner-sm"></div> Cargando...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-sm"></div> Cargando...</td></tr>';
             try {
                 const res = await fetch(`/api/v1/mapeo/table-selections/${selectionId}/computed-columns`);
                 if (res.ok) {
@@ -3227,11 +3294,22 @@
                         rules.forEach(r => addComputedRule(r));
                     }
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-danger">Error cargando reglas</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-danger">Error cargando reglas</td></tr>';
                 }
             } catch (e) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-danger">Error: ${e.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-danger">Error: ${e.message}</td></tr>`;
             }
+        }
+
+        function updateComputedRowNumbers() {
+            const tbody = document.getElementById('computedBody');
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach((row, idx) => {
+                const indexSpan = row.querySelector('.cc-index-num');
+                if (indexSpan) {
+                    indexSpan.textContent = idx + 1;
+                }
+            });
         }
 
         function addComputedRule(data = {}) {
@@ -3251,6 +3329,7 @@
             }
 
             tr.innerHTML = `
+            <td class="text-center align-middle font-monospace" style="color: var(--accent); font-weight: bold; font-size: 0.85rem;"><span class="cc-index-num">${tbody.children.length + 1}</span></td>
             <td><input type="text" class="form-control form-control-sm form-control-dark cc-newcol" 
                 placeholder="ej: tipo_doc" value="${escapeHtml(data.new_column_name)}" style="min-width:100px;"></td>
             <td>
@@ -3274,17 +3353,19 @@
             <td class="d-flex gap-1 align-items-center">
                 <button class="btn-ghost btn-sm text-muted" onclick="moveRuleUp(this)" title="Subir prioridad"><i class="bi bi-arrow-up"></i></button>
                 <button class="btn-ghost btn-sm text-muted" onclick="moveRuleDown(this)" title="Bajar prioridad"><i class="bi bi-arrow-down"></i></button>
-                <button class="btn-ghost btn-sm text-danger" onclick="this.closest('tr').remove()" title="Eliminar regla">
+                <button class="btn-ghost btn-sm text-danger" onclick="this.closest('tr').remove(); updateComputedRowNumbers();" title="Eliminar regla">
                 <i class="bi bi-trash"></i></button>
             </td>
         `;
             tbody.appendChild(tr);
+            updateComputedRowNumbers();
         }
 
         function moveRuleUp(btn) {
             const row = btn.closest('tr');
             if (row.previousElementSibling) {
                 row.parentNode.insertBefore(row, row.previousElementSibling);
+                updateComputedRowNumbers();
             }
         }
 
@@ -3292,6 +3373,7 @@
             const row = btn.closest('tr');
             if (row.nextElementSibling) {
                 row.parentNode.insertBefore(row.nextElementSibling, row);
+                updateComputedRowNumbers();
             }
         }
 

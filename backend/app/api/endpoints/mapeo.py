@@ -733,20 +733,33 @@ def delete_subcategoria_asientos(company_id: int, subcategoria_id: int, db: Sess
         for corr in corrs:
             if DetTable is not None:
                 check_col_nasiento = sub.col_destino_nasiento or "nasiento"
-                stmt_max_mig = select(func.max(getattr(DetTable.c, check_col_nasiento))).where(
-                    DetTable.c.company_id == company_id,
-                    DetTable.c.subcategoria_id == sub.id,
-                    DetTable.c.cper == corr.periodo,
-                    DetTable.c.cmes == corr.mes,
-                    DetTable.c.estado == "MIGRADO"
-                )
-                max_mig = db.execute(stmt_max_mig).scalar()
-                if max_mig is not None:
-                    corr.asiento_actual = int(max_mig)
+                if check_col_nasiento in [c.name for c in DetTable.columns]:
+                    is_global = (corr.periodo == "GLOBAL" and corr.mes == "00") or ("cper" not in [c.name for c in DetTable.columns] or "cmes" not in [c.name for c in DetTable.columns])
+                    if is_global:
+                        stmt_max_mig = select(func.max(getattr(DetTable.c, check_col_nasiento))).where(
+                            DetTable.c.company_id == company_id,
+                            DetTable.c.subcategoria_id == sub.id,
+                            DetTable.c.estado == "MIGRADO"
+                        )
+                    else:
+                        stmt_max_mig = select(func.max(getattr(DetTable.c, check_col_nasiento))).where(
+                            DetTable.c.company_id == company_id,
+                            DetTable.c.subcategoria_id == sub.id,
+                            DetTable.c.cper == corr.periodo,
+                            DetTable.c.cmes == corr.mes,
+                            DetTable.c.estado == "MIGRADO"
+                        )
+                    max_mig = db.execute(stmt_max_mig).scalar()
+                    if max_mig is not None:
+                        corr.asiento_actual = int(max_mig)
+                    else:
+                        corr.asiento_actual = corr.asiento_inicial - 1
                 else:
-                    corr.asiento_actual = corr.asiento_inicial - 1
+                    if getattr(corr, "asiento_actual", None) is None:
+                        corr.asiento_actual = corr.asiento_inicial - 1
             else:
-                corr.asiento_actual = corr.asiento_inicial - 1
+                if getattr(corr, "asiento_actual", None) is None:
+                    corr.asiento_actual = corr.asiento_inicial - 1
     except Exception as ex_corr:
         print(f"Error resetting correlativos in delete_subcategoria_asientos: {ex_corr}")
     
@@ -1088,7 +1101,8 @@ def _generate_subcategoria_cf_diariol(
     global_lote_id: Optional[str] = None,
     counters_por_asiento: dict = None,
     generate_headers: bool = True,
-    generate_details: bool = True
+    generate_details: bool = True,
+    is_realtime: bool = False
 ):
     from backend.app.models.models import CfDiariol, CfDiario, MapeoLineaAsiento, MapeoSubcategoria, AsientoCorrelativo
     from backend.app.core.database import dest_engine
@@ -1121,7 +1135,7 @@ def _generate_subcategoria_cf_diariol(
     # Fetch actual columns of the source table to match case-insensitively
     from sqlalchemy import inspect
     try:
-        insp = inspect(dest_engine)
+        insp = inspect(db.bind if db else dest_engine)
         actual_cols = [c['name'] for c in insp.get_columns(sub.tabla_origen.lower().replace(" ", "_"))]
     except Exception as e:
         print(f"Error inspecting columns for table {sub.tabla_origen}: {e}")
@@ -1131,9 +1145,68 @@ def _generate_subcategoria_cf_diariol(
     query_str = f'SELECT * FROM "{sub.tabla_origen.lower()}"'
     where_parts = [f"company_id = {company_id}"]
     query_params = {}
+
+    # --- SQL-level optimization: filter out already processed records ---
+    has_idcontrol_in_source = "idcontrol" in cols_map
+    if has_idcontrol_in_source and DetTable is not None and "idcontrol" in [c.name for c in DetTable.columns]:
+        where_parts.append(f"""
+            ("idcontrol" IS NULL OR "idcontrol" NOT IN (
+                SELECT idcontrol FROM "{tabla_det_name}"
+                WHERE company_id = {company_id}
+                  AND subcategoria_id = {sub.id}
+                  AND estado IN ('MIGRADO', 'PENDIENTE')
+            ))
+        """)
+
+    # --- SQL-level optimization: single control column incremental filter ---
+    ctrl_col = getattr(sub, 'control_column_origen', None)
+    ctrl_val = getattr(sub, 'last_generated_control_value', None)
+    if ctrl_col and ctrl_val and "," not in ctrl_col:
+        ctrl_col_clean = ctrl_col.strip()
+        col_actual = cols_map.get(ctrl_col_clean.lower())
+        if col_actual:
+            try:
+                # If numeric, compare directly
+                float(ctrl_val)
+                where_parts.append(f'"{col_actual}" > {ctrl_val}')
+            except ValueError:
+                # If string/date, use parameter binding
+                where_parts.append(f'"{col_actual}" > :ctrl_val_sql')
+                query_params["ctrl_val_sql"] = ctrl_val
+            print(f"SQL-LEVEL INCREMENTAL OPTIMIZATION: Filtering by {col_actual} > {ctrl_val}")
+
     
     # 1. Apply subcategory-level filter_rules (configured in mapping editor)
     sub_filter_rules = sub.filter_rules or []
+    if is_realtime:
+        from datetime import datetime
+        current_year = str(datetime.now().year)
+        current_month = f"{datetime.now().month:02d}"
+        
+        custom_period_col = getattr(sub, "col_origen_periodo", None)
+        custom_mes_col = getattr(sub, "col_origen_mes", None)
+        
+        period_cols = ["cper", "cperiodo", "c_periodo", "anos", "anio", "ano", "periodo", "c_per"]
+        mes_cols = ["cmes", "c_mes", "mes", "c_mes_c"]
+        
+        new_rules = []
+        for rule in sub_filter_rules:
+            r_col = str(rule.get("column") or "").strip().lower()
+            new_rule = dict(rule)
+            
+            # Check if this rule is for the period column
+            if (custom_period_col and r_col == custom_period_col.strip().lower()) or (not custom_period_col and r_col in period_cols):
+                new_rule["value"] = current_year
+                print(f"Overriding filter rule for period column '{rule.get('column')}' from '{rule.get('value')}' to '{current_year}'")
+            
+            # Check if this rule is for the month column
+            elif (custom_mes_col and r_col == custom_mes_col.strip().lower()) or (not custom_mes_col and r_col in mes_cols):
+                new_rule["value"] = current_month
+                print(f"Overriding filter rule for month column '{rule.get('column')}' from '{rule.get('value')}' to '{current_month}'")
+                
+            new_rules.append(new_rule)
+        sub_filter_rules = new_rules
+
     for idx, rule in enumerate(sub_filter_rules):
         col = rule.get("column", "")
         op = rule.get("operator", "=").upper()
@@ -1447,26 +1520,32 @@ def _generate_subcategoria_cf_diariol(
     period_col, mes_col = _get_df_period_month_cols(df, sub)
     default_period, default_mes = _extract_period_month(sub.filter_rules, filters, sub=sub, df=df)
 
-    if period_col:
-        df['_row_periodo'] = df[period_col].astype(str).str.strip()
+    is_global_correlative = (period_col is None and mes_col is None and not default_period and not default_mes)
+
+    if is_global_correlative:
+        df['_row_periodo'] = "GLOBAL"
+        df['_row_mes'] = "00"
     else:
-        df['_row_periodo'] = default_period or ""
+        if period_col:
+            df['_row_periodo'] = df[period_col].astype(str).str.strip()
+        else:
+            df['_row_periodo'] = default_period or ""
 
-    if mes_col:
-        df['_row_mes'] = df[mes_col].astype(str).str.strip().apply(lambda x: x.zfill(2) if x.isdigit() else x)
-    else:
-        df['_row_mes'] = default_mes or ""
+        if mes_col:
+            df['_row_mes'] = df[mes_col].astype(str).str.strip().apply(lambda x: x.zfill(2) if x.isdigit() else x)
+        else:
+            df['_row_mes'] = default_mes or ""
 
-    df['_row_periodo'] = df['_row_periodo'].replace('nan', default_period or '').replace('None', default_period or '')
-    df['_row_mes'] = df['_row_mes'].replace('nan', default_mes or '').replace('None', default_mes or '')
-    df['_row_periodo'] = df['_row_periodo'].apply(lambda x: x if x else (default_period or ''))
-    df['_row_mes'] = df['_row_mes'].apply(lambda x: x if x else (default_mes or ''))
+        df['_row_periodo'] = df['_row_periodo'].replace('nan', default_period or '').replace('None', default_period or '')
+        df['_row_mes'] = df['_row_mes'].replace('nan', default_mes or '').replace('None', default_mes or '')
+        df['_row_periodo'] = df['_row_periodo'].apply(lambda x: x if x else (default_period or ''))
+        df['_row_mes'] = df['_row_mes'].apply(lambda x: x if x else (default_mes or ''))
 
-    from datetime import datetime
-    now_year = str(datetime.now().year)
-    now_month = str(datetime.now().month).zfill(2)
-    df['_row_periodo'] = df['_row_periodo'].apply(lambda x: x if x else now_year)
-    df['_row_mes'] = df['_row_mes'].apply(lambda x: x if x else now_month)
+        from datetime import datetime
+        now_year = str(datetime.now().year)
+        now_month = str(datetime.now().month).zfill(2)
+        df['_row_periodo'] = df['_row_periodo'].apply(lambda x: x if x else now_year)
+        df['_row_mes'] = df['_row_mes'].apply(lambda x: x if x else now_month)
 
     df['nasiento'] = 0
 
@@ -1492,11 +1571,15 @@ def _generate_subcategoria_cf_diariol(
                     with final_engine.connect() as f_conn:
                         remote_metadata = MetaData()
                         RemoteDetTable = Table(tabla_det_name, remote_metadata, autoload_with=final_engine)
-                        r_stmt = select(func.max(getattr(RemoteDetTable.c, check_col_nasiento))).where(
-                            RemoteDetTable.c.cper == gp_periodo_str,
-                            RemoteDetTable.c.cmes == gp_mes_str
-                        )
-                        remote_max = f_conn.execute(r_stmt).scalar() or 0
+                        if check_col_nasiento in [c.name for c in RemoteDetTable.columns]:
+                            if not is_global_correlative and "cper" in [c.name for c in RemoteDetTable.columns] and "cmes" in [c.name for c in RemoteDetTable.columns]:
+                                r_stmt = select(func.max(getattr(RemoteDetTable.c, check_col_nasiento))).where(
+                                    RemoteDetTable.c.cper == gp_periodo_str,
+                                    RemoteDetTable.c.cmes == gp_mes_str
+                                )
+                            else:
+                                r_stmt = select(func.max(getattr(RemoteDetTable.c, check_col_nasiento)))
+                            remote_max = f_conn.execute(r_stmt).scalar() or 0
                 except Exception as e:
                     print(f"Error fetching remote max nasiento for {gp_periodo_str}-{gp_mes_str}: {e}")
                     
@@ -1504,13 +1587,20 @@ def _generate_subcategoria_cf_diariol(
             if DetTable is not None:
                 check_col_nasiento = sub.col_destino_nasiento or "nasiento"
                 if check_col_nasiento in det_cols:
-                    stmt_nas = db.query(func.max(getattr(DetTable.c, check_col_nasiento))).filter(
-                        DetTable.c.company_id == company_id,
-                        DetTable.c.subcategoria_id == sub.id,
-                        DetTable.c.cper == gp_periodo_str,
-                        DetTable.c.cmes == gp_mes_str,
-                        DetTable.c.estado == "MIGRADO"
-                    )
+                    if not is_global_correlative and "cper" in det_cols and "cmes" in det_cols:
+                        stmt_nas = db.query(func.max(getattr(DetTable.c, check_col_nasiento))).filter(
+                            DetTable.c.company_id == company_id,
+                            DetTable.c.subcategoria_id == sub.id,
+                            DetTable.c.cper == gp_periodo_str,
+                            DetTable.c.cmes == gp_mes_str,
+                            DetTable.c.estado == "MIGRADO"
+                        )
+                    else:
+                        stmt_nas = db.query(func.max(getattr(DetTable.c, check_col_nasiento))).filter(
+                            DetTable.c.company_id == company_id,
+                            DetTable.c.subcategoria_id == sub.id,
+                            DetTable.c.estado == "MIGRADO"
+                        )
                     local_max = db.execute(stmt_nas).scalar() or 0
                     
             if getattr(sub, "asiento_inicial", None) is not None:
@@ -1543,7 +1633,7 @@ def _generate_subcategoria_cf_diariol(
     
     if sub.mapeo_cabecera:
         for field, formula in sub.mapeo_cabecera.items():
-            header_df[f"_head_{field}"] = evaluate_formula_on_df(header_df, formula, db, company_id, default="")
+            header_df[f"_head_{field}"] = evaluate_formula_on_df(header_df, formula, db, company_id, default="", db_engine=db.bind)
 
     diario_entries = []
     
@@ -1639,7 +1729,7 @@ def _generate_subcategoria_cf_diariol(
         # Condición de aplicación
         if getattr(linea, "condicion_aplicacion", None):
             try:
-                mask = evaluate_formula_on_df(temp_df, linea.condicion_aplicacion, db, company_id, default=False)
+                mask = evaluate_formula_on_df(temp_df, linea.condicion_aplicacion, db, company_id, default=False, db_engine=db.bind)
                 mask = pd.to_numeric(mask, errors='coerce').fillna(0).astype(bool) | (mask.astype(str).str.strip().str.upper() == 'TRUE')
                 temp_df = temp_df[mask]
             except Exception as e:
@@ -1651,7 +1741,7 @@ def _generate_subcategoria_cf_diariol(
 
         # Evaluar todas las fórmulas de detalle sobre el df de la línea
         for db_field, formula in linea.mapeo_detalle.items():
-            temp_df[f"_calc_{db_field}"] = evaluate_formula_on_df(temp_df, formula, db, company_id, default="")
+            temp_df[f"_calc_{db_field}"] = evaluate_formula_on_df(temp_df, formula, db, company_id, default="", db_engine=db.bind)
 
         # Si el nivel es CABECERA, conservamos solo una fila por nasiento
         if linea.nivel == "CABECERA":
@@ -1890,14 +1980,25 @@ def _generate_subcategoria_cf_diariol(
     error_nasientos = set(err.get("nasiento") for err in all_validation_errors if err.get("nasiento"))
     
     # Update status for Headers and Insert
+    # IMPORTANT: Filter out orphan headers (headers without any matching detail lines).
+    # This happens when ALL lineas_asiento have condicion_aplicacion that excludes certain
+    # source rows. Those rows still get headers generated, but no details.
     if generate_headers and diario_entries and HeadTable is not None:
+        if generate_details and diariol_entries:
+            nasientos_con_detalle = set(e.get("nasiento") for e in diariol_entries if e.get("nasiento") is not None)
+            orphan_count = sum(1 for e in diario_entries if e.get("nasiento") not in nasientos_con_detalle)
+            if orphan_count > 0:
+                print(f"FILTRO CABECERAS: Eliminando {orphan_count} cabeceras huérfanas (sin detalles) de {len(diario_entries)} totales")
+                diario_entries = [e for e in diario_entries if e.get("nasiento") in nasientos_con_detalle]
+        
         for entry in diario_entries:
             if entry.get("nasiento") in error_nasientos:
                 entry["estado"] = "0"
-        try:
-            db.execute(HeadTable.insert(), diario_entries)
-        except Exception as e:
-            print(f"Error insertando registros cabecera dinámicos: {e}")
+        if diario_entries:
+            try:
+                db.execute(HeadTable.insert(), diario_entries)
+            except Exception as e:
+                print(f"Error insertando registros cabecera dinámicos: {e}")
 
     # Update status for Details and Insert
     if generate_details and diariol_entries and DetTable is not None:
@@ -2073,20 +2174,33 @@ def generate_to_cf_diariol(body: dict, db: Session = Depends(get_dest_db)):
                         for corr in corrs:
                             if DetTable is not None:
                                 check_col_nasiento = sub.col_destino_nasiento or "nasiento"
-                                stmt_max_mig = select(func.max(getattr(DetTable.c, check_col_nasiento))).where(
-                                    DetTable.c.company_id == company_id,
-                                    DetTable.c.subcategoria_id == sub.id,
-                                    DetTable.c.cper == corr.periodo,
-                                    DetTable.c.cmes == corr.mes,
-                                    DetTable.c.estado == "MIGRADO"
-                                )
-                                max_mig = db.execute(stmt_max_mig).scalar()
-                                if max_mig is not None:
-                                    corr.asiento_actual = int(max_mig)
+                                if check_col_nasiento in [c.name for c in DetTable.columns]:
+                                    is_global = (corr.periodo == "GLOBAL" and corr.mes == "00") or ("cper" not in [c.name for c in DetTable.columns] or "cmes" not in [c.name for c in DetTable.columns])
+                                    if is_global:
+                                        stmt_max_mig = select(func.max(getattr(DetTable.c, check_col_nasiento))).where(
+                                            DetTable.c.company_id == company_id,
+                                            DetTable.c.subcategoria_id == sub.id,
+                                            DetTable.c.estado == "MIGRADO"
+                                        )
+                                    else:
+                                        stmt_max_mig = select(func.max(getattr(DetTable.c, check_col_nasiento))).where(
+                                            DetTable.c.company_id == company_id,
+                                            DetTable.c.subcategoria_id == sub.id,
+                                            DetTable.c.cper == corr.periodo,
+                                            DetTable.c.cmes == corr.mes,
+                                            DetTable.c.estado == "MIGRADO"
+                                        )
+                                    max_mig = db.execute(stmt_max_mig).scalar()
+                                    if max_mig is not None:
+                                        corr.asiento_actual = int(max_mig)
+                                    else:
+                                        corr.asiento_actual = corr.asiento_inicial - 1
                                 else:
-                                    corr.asiento_actual = corr.asiento_inicial - 1
+                                    if getattr(corr, "asiento_actual", None) is None:
+                                        corr.asiento_actual = corr.asiento_inicial - 1
                             else:
-                                corr.asiento_actual = corr.asiento_inicial - 1
+                                if getattr(corr, "asiento_actual", None) is None:
+                                    corr.asiento_actual = corr.asiento_inicial - 1
                     except Exception as ex_corr:
                         print(f"Error resetting correlativos in generate_to_cf_diariol: {ex_corr}")
     
@@ -2109,7 +2223,8 @@ def generate_to_cf_diariol(body: dict, db: Session = Depends(get_dest_db)):
                 gen, asis, v_errors = _generate_subcategoria_cf_diariol(
                     sub, db, company_id, filters, lote_id, global_counters,
                     generate_headers=(sub.generate_headers is not False),
-                    generate_details=(sub.generate_details is not False)
+                    generate_details=(sub.generate_details is not False),
+                    is_realtime=body.get("is_realtime", False) if isinstance(body, dict) else False
                 )
                 total_generated += gen
                 total_asientos += asis
@@ -2344,6 +2459,25 @@ def migrate_to_final(
                             failed_rows_raw.append({"seat": "Clave Incompleta", "error": "Llaves maestras (cper, cmes, ccodori o nasiento) vacías"})
                             continue
 
+                        # Skip orphan headers: headers without any detail lines should NOT be migrated.
+                        # This can happen when condicion_aplicacion on all lineas_asiento excludes certain source rows.
+                        if data['header'] and not data['details']:
+                            p, m, o, n = seat_key
+                            print(f"MIGRATE SKIP: Cabecera huérfana {p}-{m}-{o}-{n} (sin detalles), marcando como ERROR localmente")
+                            # Mark as ERROR locally so it doesn't keep trying to migrate
+                            if LocalHeadTable is not None:
+                                try:
+                                    db.execute(LocalHeadTable.update().where(
+                                        LocalHeadTable.c.company_id == company_id,
+                                        LocalHeadTable.c.subcategoria_id == sub.id,
+                                        LocalHeadTable.c.cper == p,
+                                        LocalHeadTable.c.cmes == m,
+                                        LocalHeadTable.c.ccodori == o,
+                                        getattr(LocalHeadTable.c, nasiento_col) == n
+                                    ).values(estado="SIN_DETALLE"))
+                                except Exception: pass
+                            continue
+
                         p, m, o, n = seat_key
                         try:
                             with final_db.begin_nested():
@@ -2404,7 +2538,7 @@ def migrate_to_final(
                                 migrated_lineas += len(data['details'])
 
                         except Exception as e:
-                            failed_rows_raw.append({"seat": f"{p}-{m}-{o}-{n}", "error": str(e)})
+                            failed_rows_raw.append({"seat": f"{p}-{m}-{o}-{n}", "error": str(e), "subcategoria_id": sub.id})
 
                 else:
                     # ═══ MODE B: Direct row-by-row bulk insert (single table, no accounting keys) ═══
@@ -2419,7 +2553,7 @@ def migrate_to_final(
                     active_remote_cols = remote_det_cols if remote_det_cols else remote_head_cols
 
                     if active_local is None or active_final is None:
-                        failed_rows_raw.append({"seat": "Config", "error": f"No se encontró tabla local/final para subcategoría {sub.nombre}"})
+                        failed_rows_raw.append({"seat": "Config", "error": f"No se encontró tabla local/final para subcategoría {sub.nombre}", "subcategoria_id": sub.id})
                         continue
 
                     # Determine a unique key column for overwrite (idcontrol or first available)
@@ -2474,7 +2608,7 @@ def migrate_to_final(
                             migrated_lineas += 1
 
                         except Exception as e:
-                            failed_rows_raw.append({"seat": row_label, "error": str(e)})
+                            failed_rows_raw.append({"seat": row_label, "error": str(e), "subcategoria_id": sub.id})
 
                 # Update subcategory tracking states
                 try:
@@ -2482,45 +2616,82 @@ def migrate_to_final(
                     # Resolve active table for sequence tracking (prefer LocalDetTable as it has subcategoria_id, otherwise HeadTable)
                     active_table = LocalDetTable if LocalDetTable is not None else LocalHeadTable
                     if active_table is not None:
-                        # Update AsientoCorrelativo for each distinct period and month migrated
-                        stmt_max_group = db.query(
-                            active_table.c.cper,
-                            active_table.c.cmes,
-                            func.max(getattr(active_table.c, nasiento_col))
-                        ).filter(
-                            active_table.c.company_id == company_id,
-                            active_table.c.estado == "MIGRADO"
-                        )
-                        if "subcategoria_id" in active_table.c:
-                            stmt_max_group = stmt_max_group.filter(active_table.c.subcategoria_id == sub.id)
-                        stmt_max_group = stmt_max_group.group_by(
-                            active_table.c.cper,
-                            active_table.c.cmes
-                        )
-                        
-                        max_results = db.execute(stmt_max_group).fetchall()
-                        for r_cper, r_cmes, r_max in max_results:
-                            if r_cper and r_cmes and r_max is not None:
-                                corr_rec = db.query(AsientoCorrelativo).filter(
-                                    AsientoCorrelativo.company_id == company_id,
-                                    AsientoCorrelativo.subcategoria_id == sub.id,
-                                    AsientoCorrelativo.periodo == str(r_cper),
-                                    AsientoCorrelativo.mes == str(r_cmes)
-                                ).first()
-                                if corr_rec:
-                                    corr_rec.asiento_actual = int(r_max)
-                                else:
-                                    # Fallback starting value from subcategory config
-                                    asiento_ini_val = int(sub.asiento_inicial) if getattr(sub, "asiento_inicial", None) is not None else 1
-                                    new_corr = AsientoCorrelativo(
-                                        company_id=company_id,
-                                        subcategoria_id=sub.id,
-                                        periodo=str(r_cper),
-                                        mes=str(r_cmes),
-                                        asiento_inicial=asiento_ini_val,
-                                        asiento_actual=int(r_max)
-                                    )
-                                    db.add(new_corr)
+                        if nasiento_col in active_table.c:
+                            # Update AsientoCorrelativo for each distinct period and month migrated
+                            has_period_mes = "cper" in active_table.c and "cmes" in active_table.c
+                            if has_period_mes:
+                                stmt_max_group = db.query(
+                                    active_table.c.cper,
+                                    active_table.c.cmes,
+                                    func.max(getattr(active_table.c, nasiento_col))
+                                ).filter(
+                                    active_table.c.company_id == company_id,
+                                    active_table.c.estado == "MIGRADO"
+                                )
+                                if "subcategoria_id" in active_table.c:
+                                    stmt_max_group = stmt_max_group.filter(active_table.c.subcategoria_id == sub.id)
+                                stmt_max_group = stmt_max_group.group_by(
+                                    active_table.c.cper,
+                                    active_table.c.cmes
+                                )
+                                max_results = db.execute(stmt_max_group).fetchall()
+                            else:
+                                stmt_max_global = db.query(
+                                    func.max(getattr(active_table.c, nasiento_col))
+                                ).filter(
+                                    active_table.c.company_id == company_id,
+                                    active_table.c.estado == "MIGRADO"
+                                )
+                                if "subcategoria_id" in active_table.c:
+                                    stmt_max_global = stmt_max_global.filter(active_table.c.subcategoria_id == sub.id)
+                                r_max = db.execute(stmt_max_global).scalar()
+                                max_results = [("GLOBAL", "00", r_max)] if r_max is not None else []
+                                
+                            for r_cper, r_cmes, r_max in max_results:
+                                if r_cper and r_cmes and r_max is not None:
+                                    corr_rec = db.query(AsientoCorrelativo).filter(
+                                        AsientoCorrelativo.company_id == company_id,
+                                        AsientoCorrelativo.subcategoria_id == sub.id,
+                                        AsientoCorrelativo.periodo == str(r_cper),
+                                        AsientoCorrelativo.mes == str(r_cmes)
+                                    ).first()
+                                    if corr_rec:
+                                        corr_rec.asiento_actual = int(r_max)
+                                    else:
+                                        # Fallback starting value from subcategory config
+                                        asiento_ini_val = int(sub.asiento_inicial) if getattr(sub, "asiento_inicial", None) is not None else 1
+                                        new_corr = AsientoCorrelativo(
+                                            company_id=company_id,
+                                            subcategoria_id=sub.id,
+                                            periodo=str(r_cper),
+                                            mes=str(r_cmes),
+                                            asiento_inicial=asiento_ini_val,
+                                            asiento_actual=int(r_max)
+                                        )
+                                        db.add(new_corr)
+                        else:
+                            # Mode B / No nasiento column: We update the global AsientoCorrelativo
+                            # using the count of successfully migrated rows to let the sequence continue
+                            corr_rec = db.query(AsientoCorrelativo).filter(
+                                db.bind.dialect.name != "sqlite", # just database session query
+                                AsientoCorrelativo.company_id == company_id,
+                                AsientoCorrelativo.subcategoria_id == sub.id,
+                                AsientoCorrelativo.periodo == "GLOBAL",
+                                AsientoCorrelativo.mes == "00"
+                            ).first()
+                            if corr_rec and migrated_lineas > 0:
+                                corr_rec.asiento_actual = max(corr_rec.asiento_actual, corr_rec.asiento_inicial - 1) + migrated_lineas
+                            elif not corr_rec and migrated_lineas > 0:
+                                asiento_ini_val = int(sub.asiento_inicial) if getattr(sub, "asiento_inicial", None) is not None else 1
+                                new_corr = AsientoCorrelativo(
+                                    company_id=company_id,
+                                    subcategoria_id=sub.id,
+                                    periodo="GLOBAL",
+                                    mes="00",
+                                    asiento_inicial=asiento_ini_val,
+                                    asiento_actual=asiento_ini_val - 1 + migrated_lineas
+                                )
+                                db.add(new_corr)
                 except Exception as e:
                     print(f"Error updating subcategory control fields for {sub.nombre}: {e}")
 
@@ -2583,47 +2754,201 @@ def list_cf_diariol(
     limit: int = 100,
     db: Session = Depends(get_dest_db)
 ):
-    """Lista registros de cf_diariol (staging) con filtros potentes"""
-    from backend.app.models.models import CfDiariol, MapeoSubcategoria
-    
-    query = db.query(CfDiariol, MapeoSubcategoria.nombre.label("subcategoria_nombre")).outerjoin(
-        MapeoSubcategoria, CfDiariol.subcategoria_id == MapeoSubcategoria.id
-    ).filter(CfDiariol.company_id == company_id)
-    
+    """Lista registros de la tabla de staging configurada (por defecto cf_diariol) con filtros potentes"""
+    from backend.app.models.models import MapeoSubcategoria, CfDiariol
+    from sqlalchemy import Table, MetaData, select, func, or_
+    from backend.app.core.database import dest_engine as local_engine
+    import decimal
+    import datetime as dt_module
+
+    # Si se especifica subcategoría, determinamos de qué tabla leer según su configuración
+    sub = None
+    table_name = "cf_diariol"
     if subcategoria_id:
-        query = query.filter(CfDiariol.subcategoria_id == subcategoria_id)
-    if lote_id:
-        query = query.filter(CfDiariol.lote_id == lote_id)
-    if estado:
-        query = query.filter(CfDiariol.estado == estado)
-    if periodo:
-        query = query.filter(CfDiariol.cper == periodo)
-    if mes:
-        query = query.filter(CfDiariol.cmes == mes)
-    if nasiento:
-        query = query.filter(CfDiariol.nasiento == nasiento)
+        sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == subcategoria_id).first()
+        if sub and sub.tabla_destino_detalle:
+            table_name = sub.tabla_destino_detalle
+
+    metadata_local = MetaData()
+    try:
+        local_table = Table(table_name, metadata_local, autoload_with=local_engine)
+    except Exception as e:
+        local_table = None
+
+    # Si la tabla no se puede cargar, caemos en CfDiariol (ORM) como fallback seguro
+    if local_table is None:
+        query = db.query(CfDiariol, MapeoSubcategoria.nombre.label("subcategoria_nombre")).outerjoin(
+            MapeoSubcategoria, CfDiariol.subcategoria_id == MapeoSubcategoria.id
+        ).filter(CfDiariol.company_id == company_id)
+        
+        if subcategoria_id:
+            query = query.filter(CfDiariol.subcategoria_id == subcategoria_id)
+        if lote_id:
+            query = query.filter(CfDiariol.lote_id == lote_id)
+        if estado:
+            query = query.filter(CfDiariol.estado == estado)
+        if periodo:
+            query = query.filter(CfDiariol.cper == periodo)
+        if mes:
+            query = query.filter(CfDiariol.cmes == mes)
+        if nasiento:
+            query = query.filter(CfDiariol.nasiento == nasiento)
+        if search:
+            search_like = f"%{search}%"
+            query = query.filter(
+                (CfDiariol.cglosa.ilike(search_like)) |
+                (CfDiariol.ccodcue.ilike(search_like)) |
+                (CfDiariol.cnumero.ilike(search_like)) |
+                (CfDiariol.ccodruc.ilike(search_like))
+            )
+            
+        total = query.count()
+        items = query.order_by(CfDiariol.nasiento.desc(), CfDiariol.nidlin.asc()).offset(skip).limit(limit).all()
+        
+        return {
+            "total": total,
+            "items": [{
+                **{
+                    c.name: float(getattr(r[0], c.name)) if type(getattr(r[0], c.name)).__name__ == 'Decimal'
+                    else getattr(r[0], c.name)
+                    for c in r[0].__table__.columns if c.name != "extra_data"
+                },
+                "subcategoria_nombre": r[1] or f"Subcat {r[0].subcategoria_id}"
+            } for r in items]
+        }
+
+    # Si la tabla se cargó con éxito, hacemos la consulta dinámica sobre el esquema de esa tabla
+    clauses = []
+    if "company_id" in local_table.c:
+        clauses.append(local_table.c.company_id == company_id)
+    if "subcategoria_id" in local_table.c:
+        if subcategoria_id:
+            clauses.append(local_table.c.subcategoria_id == subcategoria_id)
+    if lote_id and "lote_id" in local_table.c:
+        clauses.append(local_table.c.lote_id == lote_id)
+    if estado and "estado" in local_table.c:
+        clauses.append(local_table.c.estado == estado)
+    if periodo and "cper" in local_table.c:
+        clauses.append(local_table.c.cper == periodo)
+    if mes and "cmes" in local_table.c:
+        clauses.append(local_table.c.cmes == mes)
+    if nasiento and "nasiento" in local_table.c:
+        clauses.append(local_table.c.nasiento == nasiento)
+
     if search:
         search_like = f"%{search}%"
-        query = query.filter(
-            (CfDiariol.cglosa.ilike(search_like)) |
-            (CfDiariol.ccodcue.ilike(search_like)) |
-            (CfDiariol.cnumero.ilike(search_like)) |
-            (CfDiariol.ccodruc.ilike(search_like))
-        )
-        
-    total = query.count()
-    items = query.order_by(CfDiariol.nasiento.desc(), CfDiariol.nidlin.asc()).offset(skip).limit(limit).all()
-    
+        search_clauses = []
+        for col in local_table.columns:
+            if str(col.type).upper().startswith(("VARCHAR", "TEXT", "CHAR", "STRING")):
+                search_clauses.append(col.ilike(search_like))
+        if search_clauses:
+            clauses.append(or_(*search_clauses))
+
+    # Obtener el total
+    count_stmt = select(func.count()).select_from(local_table)
+    if clauses:
+        count_stmt = count_stmt.where(*clauses)
+    total = db.execute(count_stmt).scalar()
+
+    # Obtener registros paginados
+    select_stmt = select(local_table)
+    if clauses:
+        select_stmt = select_stmt.where(*clauses)
+
+    # Ordenar registros
+    if "nasiento" in local_table.c and "nidlin" in local_table.c:
+        select_stmt = select_stmt.order_by(local_table.c.nasiento.desc(), local_table.c.nidlin.asc())
+    elif "id" in local_table.c:
+        select_stmt = select_stmt.order_by(local_table.c.id.desc())
+    elif "created_at" in local_table.c:
+        select_stmt = select_stmt.order_by(local_table.c.created_at.desc())
+
+    select_stmt = select_stmt.offset(skip).limit(limit)
+    result_proxy = db.execute(select_stmt)
+    keys = result_proxy.keys()
+
+    items = []
+    for row in result_proxy:
+        row_dict = {}
+        for k in keys:
+            val = getattr(row, k)
+            if isinstance(val, decimal.Decimal):
+                val = float(val)
+            elif isinstance(val, (dt_module.date, dt_module.datetime)):
+                val = val.isoformat()
+            row_dict[k] = val
+
+        # Mapear campos estándar esperados por el frontend
+        mapped = {}
+        mapped["id"] = row_dict.get("id")
+        mapped["company_id"] = row_dict.get("company_id")
+        mapped["subcategoria_id"] = row_dict.get("subcategoria_id")
+        mapped["lote_id"] = row_dict.get("lote_id")
+        mapped["estado"] = row_dict.get("estado") or "PENDIENTE"
+
+        mapped["cper"] = row_dict.get("cper") or "GLOBAL"
+        mapped["cmes"] = row_dict.get("cmes") or "00"
+        mapped["nasiento"] = str(row_dict.get("nasiento")) if row_dict.get("nasiento") is not None else "-"
+        mapped["nidlin"] = str(row_dict.get("nidlin") or row_dict.get("id") or "-")
+
+        # Buscar el ID Control más idóneo según las columnas disponibles
+        idcontrol_val = "-"
+        for candidate in ["idcontrol", "ccodruc", "codaux", "rucaux", "id"]:
+            if row_dict.get(candidate) is not None:
+                idcontrol_val = str(row_dict.get(candidate)).strip()
+                break
+        mapped["idcontrol"] = idcontrol_val
+
+        # Cuenta
+        mapped["ccodcue"] = str(row_dict.get("ccodcue")).strip() if row_dict.get("ccodcue") is not None else "-"
+
+        # Debe y Haber
+        mapped["ndebe"] = float(row_dict.get("ndebe")) if row_dict.get("ndebe") is not None else 0.0
+        mapped["nhaber"] = float(row_dict.get("nhaber")) if row_dict.get("nhaber") is not None else 0.0
+
+        # Glosa descriptiva: si la tabla tiene cglosa la usamos, sino usamos crazsoc, cdirec, etc.
+        glosa_val = ""
+        for candidate in ["cglosa", "crazsoc", "cdirec", "cemail"]:
+            if row_dict.get(candidate) is not None:
+                glosa_val = str(row_dict.get(candidate)).strip()
+                break
+        if not glosa_val:
+            ruc = row_dict.get("ccodruc")
+            raz = row_dict.get("crazsoc")
+            if ruc and raz:
+                glosa_val = f"RUC: {str(ruc).strip()} | {str(raz).strip()}"
+            elif ruc:
+                glosa_val = f"RUC: {str(ruc).strip()}"
+            elif raz:
+                glosa_val = str(raz).strip()
+            else:
+                glosa_val = f"Fila #{row_dict.get('id')}"
+        mapped["cglosa"] = glosa_val
+
+        # Copiar todas las propiedades originales para el visor de detalles (modal "Ver Fila")
+        for k, v in row_dict.items():
+            if k not in mapped:
+                mapped[k] = v
+
+        # Resolver nombre de subcategoría
+        sub_nombre = "Subcategoría"
+        if sub:
+            sub_nombre = sub.nombre
+        else:
+            # Si se leyó de forma genérica pero no teníamos sub, lo resolvemos
+            try:
+                sub_res = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == row_dict.get("subcategoria_id")).first()
+                if sub_res:
+                    sub_nombre = sub_res.nombre
+            except:
+                pass
+        mapped["subcategoria_nombre"] = sub_nombre
+
+        items.append(mapped)
+
     return {
         "total": total,
-        "items": [{
-            **{
-                c.name: float(getattr(r[0], c.name)) if type(getattr(r[0], c.name)).__name__ == 'Decimal'
-                else getattr(r[0], c.name)
-                for c in r[0].__table__.columns if c.name != "extra_data"
-            },
-            "subcategoria_nombre": r[1] or f"Subcat {r[0].subcategoria_id}"
-        } for r in items]
+        "items": items
     }
 
 
@@ -2822,6 +3147,39 @@ def list_origen_preview(
             cols = [c['name'] for c in inspector.get_columns(table_name)]
             has_company = 'company_id' in cols
             
+            # Obtener orden de columnas calculadas por prioridad
+            sel_db = db.query(TableSelection).filter(
+                TableSelection.company_id == company_id,
+                TableSelection.table_name.ilike(table_name)
+            ).first()
+            
+            ordered_cols = []
+            if sel_db:
+                rules = db.query(ComputedColumnRule).filter(
+                    ComputedColumnRule.table_selection_id == sel_db.id,
+                    ComputedColumnRule.is_active == True
+                ).order_by(ComputedColumnRule.priority).all()
+                computed_names = [r.new_column_name for r in rules]
+                computed_names_lower = [n.lower() for n in computed_names]
+                
+                # Base cols: columns in database that are NOT calculated columns
+                base_cols = [col for col in cols if col.lower() not in computed_names_lower]
+                
+                # Computed cols in their sorted/priority order (only if they exist in the DB columns list)
+                cols_map = {col.lower(): col for col in cols}
+                sorted_computed_cols = []
+                for comp_col in computed_names:
+                    comp_col_lower = comp_col.lower()
+                    if comp_col_lower in cols_map:
+                        sorted_computed_cols.append(cols_map[comp_col_lower])
+                
+                ordered_cols = base_cols + sorted_computed_cols
+            else:
+                ordered_cols = cols
+
+            if not ordered_cols:
+                ordered_cols = cols
+
             where_clauses = []
             params = {"limit": limit, "skip": skip}
             
@@ -2844,8 +3202,9 @@ def list_origen_preview(
             if where_clauses:
                 where_sql = "WHERE " + " AND ".join(where_clauses)
                 
+            select_cols_str = ", ".join([f'"{col}"' for col in ordered_cols])
             total_sql = text(f'SELECT count(*) FROM "{table_name}" {where_sql}')
-            data_sql = text(f'SELECT * FROM "{table_name}" {where_sql} LIMIT :limit OFFSET :skip')
+            data_sql = text(f'SELECT {select_cols_str} FROM "{table_name}" {where_sql} LIMIT :limit OFFSET :skip')
             
             total = db.execute(total_sql, params).scalar()
             result = db.execute(data_sql, params)

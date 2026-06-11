@@ -5430,3 +5430,4945 @@ Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
 Params: ['12816']
 Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
 Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['399']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['399']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['404']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['404']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['404']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['404']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['005']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaDet] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['404']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['404']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['404']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['404']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['404']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['404']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['405']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['405']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['405']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['405']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['405']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['405']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['405']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['405']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12592']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['406']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12816']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['407']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['407']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12683']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12710']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '\xa070095710         ']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '90230580010       ']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '90230580010       ']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '90230580010       ']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '90230580010       ']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '90230580010       ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['002']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['002']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['002']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['002']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['002']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['002']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['002']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['002']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['002']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['002']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['002']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['002']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '\xa070095710         ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '\xa070095710         ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '\xa070095710         ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '\xa070095710         ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '\xa070095710         ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '\xa070095710         ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '\xa070095710         ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '\xa070095710         ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['408']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['12822']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '20614267411       ']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['458']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['460']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['458']
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['460']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['458']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['458']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['460']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['460']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['465']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['465']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['467']
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['467']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['466']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13633']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13321']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13347']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13347']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['467']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['467']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13633']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13633']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13633']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13633']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13637']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13637']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13637']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '74209438          ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['467']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['467']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['467']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['467']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13637']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13637']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13637']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13637']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13638']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13638']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13638']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['003', '2025']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13638']
+Query: SELECT * FROM [dbo].[CntFacturaCab] WHERE [Id] > ?
+Params: ['467']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['467']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['002', '2026']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13638']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['002', '2025']
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13638']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['13638']
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRRdoc] 
+Params: []
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['007', '2025']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] WHERE [codcia] = ?
+Params: ['007']
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[admcaja] 
+Params: []
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ?
+Params: ['005']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbRGdoc] WHERE [codcia] = ? AND [anos] >= ?
+Params: ['005', '2025']
+Query: SELECT * FROM [dbo].[CcbRRdoc] WHERE [CodCia] = ? AND [Anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbTabla] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaCab] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaDet] 
+Params: []
+Query: SELECT * FROM [dbo].[fac_electronica2] 
+Params: []
+Query: SELECT * FROM [dbo].[POSTARJE] 
+Params: []
+Query: SELECT * FROM [dbo].[tbl_Conciliados] 
+Params: []
+Query: SELECT * FROM [dbo].[VtaRItem] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']

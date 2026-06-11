@@ -10,5 +10,5 @@ def check_db(name, url):
     except Exception as e:
         print(f"{name} Error:", e)
 
-check_db("Source (Windows)", "postgresql://postgres:postgres@host.docker.internal:5433/migconta_db")
-check_db("Dest (Docker)", "postgresql://postgres:postgres@db:5432/migconta_db")
+check_db("Local Dest (Windows Host)", "postgresql://postgres:postgres@localhost:5434/migconta_db")
+

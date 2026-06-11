@@ -99,6 +99,7 @@
                     <select class="form-select-dark" id="taskType" onchange="handleTaskTypeChange()">
                         <option value="TC_SUNAT">Sincronizar Tipo de Cambio SUNAT</option>
                         <option value="ETL_FULL">Proceso ETL Completo (Extraer/Generar/Migrar)</option>
+                        <option value="ETL_REALTIME">ETL en Tiempo Real (Frecuencia Automática)</option>
                         <option value="MES_ROTATION">Rotación Mensual (Reiniciar Asientos a 1)</option>
                     </select>
                 </div>
@@ -231,7 +232,7 @@
                     }
                     
                     let paramsText = '';
-                    if (t.task_type === 'ETL_FULL') {
+                    if (t.task_type === 'ETL_FULL' || t.task_type === 'ETL_REALTIME') {
                         if (t.params && t.params.subcategoria_names && t.params.subcategoria_names.length > 0) {
                              paramsText = `<br><small class="text-muted" style="white-space:normal;">Subcats: ${t.params.subcategoria_names.join(', ')}</small>`;
                         } else if (t.params && t.params.subcategorias && t.params.subcategorias.length > 0) {
@@ -257,6 +258,7 @@
                         <td class="small text-muted">${lastRun}</td>
                         <td class="small text-info fw-bold">${nextRun}</td>
                         <td>
+                            <button class="btn btn-sm btn-outline-success py-0 me-1" onclick="runTask(${t.id})" title="Ejecutar Ahora"><i class="bi bi-play-fill"></i></button>
                             <button class="btn btn-sm btn-outline-secondary py-0 me-1" onclick="viewLogs(${t.id})" title="Ver Historial"><i class="bi bi-clock-history"></i></button>
                             <button class="btn btn-sm btn-outline-info py-0 me-1" onclick="editTask(${t.id})" title="Editar"><i class="bi bi-pencil"></i></button>
                             <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteTask(${t.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
@@ -291,7 +293,7 @@
         const subDiv = document.getElementById('subcatsDiv');
         const box = document.getElementById('taskSubcatCheckboxes');
         
-        if (tType === 'ETL_FULL') {
+        if (tType === 'ETL_FULL' || tType === 'ETL_REALTIME') {
             subDiv.style.display = 'block';
             if (!cId) {
                 box.innerHTML = '<div class="text-muted small">Seleccione una empresa primero...</div>';
@@ -374,7 +376,7 @@
         handleScheduleChange();
         
         // Wait for subcategories render to check them
-        if (t.task_type === 'ETL_FULL' && t.params && t.params.subcategorias) {
+        if ((t.task_type === 'ETL_FULL' || t.task_type === 'ETL_REALTIME') && t.params && t.params.subcategorias) {
             setTimeout(() => {
                 t.params.subcategorias.forEach(subId => {
                     const chk = document.getElementById('sc_' + subId);
@@ -392,13 +394,13 @@
         const taskType = document.getElementById('taskType').value;
         const companyIdRaw = document.getElementById('taskCompany').value;
         
-        if (taskType === 'ETL_FULL' && !companyIdRaw) {
+        if ((taskType === 'ETL_FULL' || taskType === 'ETL_REALTIME') && !companyIdRaw) {
             showToast('error', 'Debe seleccionar una empresa para ETL.');
             return;
         }
         
         let params = {};
-        if (taskType === 'ETL_FULL') {
+        if (taskType === 'ETL_FULL' || taskType === 'ETL_REALTIME') {
             const checkedBoxes = Array.from(document.querySelectorAll('.subcat-chk:checked'));
             if (checkedBoxes.length > 0) {
                 params.subcategorias = checkedBoxes.map(el => parseInt(el.value));
@@ -521,6 +523,25 @@
         }
     }
     
+    async function runTask(id) {
+        if (!confirm("¿Ejecutar esta automatización inmediatamente?")) return;
+        try {
+            const res = await fetch(`/api/v1/tasks/${id}/run`, {
+                method: 'POST'
+            });
+            if (res.ok) {
+                showToast('success', 'Tarea iniciada en segundo plano');
+                setTimeout(loadTasks, 1500);
+                setTimeout(loadGlobalLogs, 1500);
+            } else {
+                const err = await res.json();
+                showToast('error', `Error: ${err.detail}`);
+            }
+        } catch(e) {
+            showToast('error', 'Error de red');
+        }
+    }
+
     async function deleteTask(id) {
         if (!confirm("¿Eliminar esta automatización?")) return;
         try {

@@ -698,11 +698,11 @@ class CfDiariol(DestBase):
     nigvxacre = Column(Numeric(18, 4), default=0)
     ccodsu = Column(String(10), nullable=True)
     ffecasi = Column(String(20), nullable=True)
-    idxacre = Column(Numeric(18, 4), default=0)
+    idxacre = Column(String(50), nullable=True)
     cmonxacre = Column(String(5), nullable=True)
     nidreglin = Column(Numeric(18, 4), default=0)
     crvieap = Column(String(5), nullable=True)
-    valida_sunat = Column(String(5), nullable=True)
+    valida_sunat = Column(Numeric(18, 4), default=0)
     nflgigvrec = Column(SmallInteger, default=0)
     nflgprorrateo = Column(SmallInteger, default=0)
     cctapro = Column(String(20), nullable=True)
@@ -725,7 +725,7 @@ class CfDiariol(DestBase):
     nexptg = Column(Numeric(18, 4), default=0)
     nexptgs = Column(Numeric(18, 4), default=0)
     nexptgd = Column(Numeric(18, 4), default=0)
-    idparti = Column(Numeric(18, 4), default=0)
+    idparti = Column(String(50), nullable=True)
     ctipoparti = Column(String(5), nullable=True)
     extra_data = Column(JSON, nullable=True)
 
@@ -864,6 +864,81 @@ class EtlRealtimeLog(DestBase):
     records_generated = Column(Integer, default=0)
     records_migrated = Column(Integer, default=0)
     errors = Column(JSON, nullable=True)
+    subcategorias = Column(Text, nullable=True)
 
     company = relationship("Company")
+
+
+# ─── ETL Pipeline Config (Celery) ─────────────────────────────────────────────
+
+class EtlPipelineConfig(DestBase):
+    """Configuración maestra de pipelines ETL. Una fila = una tarea programada."""
+    __tablename__ = "etl_pipeline_config"
+
+    id = Column(Integer, primary_key=True, index=True)
+    empresa_id = Column(Integer, ForeignKey("companies.id"), nullable=False, index=True)
+    subcategoria_id = Column(Integer, ForeignKey("mapeo_subcategorias.id"), nullable=False, index=True)
+    nombre = Column(String(300), nullable=False)
+    
+    is_active = Column(Boolean, default=True)
+    schedule_type = Column(String(20), nullable=False)     # MINUTES, DAILY, WEEKLY, CRON
+    schedule_value = Column(String(100), nullable=False)   # '10', '02:00', 'mon 08:00', '*/5 * * * *'
+    
+    run_extraction = Column(Boolean, default=True)
+    run_generation = Column(Boolean, default=True)
+    run_migration = Column(Boolean, default=True)
+    
+    params = Column(JSON, default={})
+    priority = Column(Integer, default=5)
+    max_retries = Column(Integer, default=3)
+    retry_backoff = Column(Integer, default=30)
+    day_of_week = Column(String(20), nullable=True)
+    day_of_month = Column(Integer, nullable=True)
+    
+    last_run_at = Column(DateTime(timezone=True), nullable=True)
+    last_status = Column(String(20), nullable=True)
+    last_duration_s = Column(Numeric(10, 2), nullable=True)
+    last_error = Column(Text, nullable=True)
+    run_count = Column(BigInteger, default=0)
+    error_count = Column(BigInteger, default=0)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
+
+    empresa = relationship("Company")
+    subcategoria = relationship("MapeoSubcategoria")
+    ejecuciones = relationship("EtlEjecucion", back_populates="pipeline", cascade="all, delete-orphan")
+
+
+class EtlEjecucion(DestBase):
+    """Log de cada ejecución individual de un pipeline ETL."""
+    __tablename__ = "etl_ejecuciones"
+
+    id = Column(Integer, primary_key=True, index=True)
+    pipeline_id = Column(Integer, ForeignKey("etl_pipeline_config.id"), nullable=False, index=True)
+    empresa_id = Column(Integer, ForeignKey("companies.id"), nullable=False, index=True)
+    subcategoria_id = Column(Integer, nullable=False)
+    
+    celery_task_id = Column(String(255), unique=True, nullable=True, index=True)
+    
+    status = Column(String(20), nullable=False, default="QUEUED", index=True)
+    step_current = Column(String(20), nullable=True)
+    
+    records_extracted = Column(Integer, default=0)
+    records_generated = Column(Integer, default=0)
+    records_migrated = Column(Integer, default=0)
+    
+    queued_at = Column(DateTime(timezone=True), server_default=func.now())
+    started_at = Column(DateTime(timezone=True), nullable=True)
+    finished_at = Column(DateTime(timezone=True), nullable=True)
+    duration_s = Column(Numeric(10, 2), nullable=True)
+    
+    error_message = Column(Text, nullable=True)
+    error_traceback = Column(Text, nullable=True)
+    retry_count = Column(Integer, default=0)
+    
+    details = Column(JSON, default=[])
+
+    pipeline = relationship("EtlPipelineConfig", back_populates="ejecuciones")
+    empresa = relationship("Company")
 

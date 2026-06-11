@@ -17,7 +17,7 @@ def get_real_column_names(table_name: str, db_engine) -> list:
         print(f"Error fetching columns for {table_name}: {e}")
         return []
 
-def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, company_id: int, default: str = "") -> pd.Series:
+def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, company_id: int, default: str = "", db_engine=None) -> pd.Series:
     """
     Evaluates an Excel-like formula string using Python AST on a pandas DataFrame.
     Supports operations like CONCAT, LEFT, RIGHT, SI.CONJUNTO, Math ops, and BUSCARX.
@@ -60,6 +60,11 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
     col_map = {str(c).upper().strip(): c for c in df.columns}
 
     def eval_ast(node: ast.AST) -> pd.Series:
+        def _safe_str(s: pd.Series) -> pd.Series:
+            if pd.api.types.is_datetime64_any_dtype(s):
+                return s.dt.strftime('%Y-%m-%d %H:%M:%S').fillna('').astype(str)
+            return s.apply(lambda x: "" if pd.isna(x) or x is None or str(x) in ['None', 'nan', 'NaT', '<NA>', ''] or str(x).strip() in ['None', 'nan', 'NaT', '<NA>'] else str(x)).astype(str)
+
         def get_string_arg(arg_node):
             if isinstance(arg_node, ast.Constant):
                 return str(arg_node.value).strip()
@@ -81,8 +86,8 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
             left = eval_ast(node.left)
             right = eval_ast(node.comparators[0])
             op = type(node.ops[0])
-            left_str = left.astype(str).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
-            right_str = right.astype(str).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
+            left_str = _safe_str(left).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
+            right_str = _safe_str(right).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
             if op == ast.Eq: return left_str == right_str
             elif op == ast.NotEq: return left_str != right_str
             elif op == ast.Gt: return pd.to_numeric(left, errors='coerce') > pd.to_numeric(right, errors='coerce')
@@ -117,26 +122,41 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                     masks.append(cond_series)
                     choices.append(res_series)
                 if masks:
-                    default_val = default if default else ""
+                    if len(node.args) % 2 == 1:
+                        default_val = eval_ast(node.args[-1])
+                    else:
+                        default_val = default if default else ""
                     arr = np.select(masks, choices, default=default_val)
-                    return pd.Series(arr, index=df.index)
+                    res_series = pd.Series(arr, index=df.index)
+                    return res_series
                 return pd.Series([""] * len(df), index=df.index)
+
+            elif func_id in ("SI", "IF") and len(node.args) >= 2:
+                cond = eval_ast(node.args[0])
+                true_val = eval_ast(node.args[1])
+                if len(node.args) >= 3:
+                    false_val = eval_ast(node.args[2])
+                else:
+                    false_val = pd.Series([default if default else ""] * len(df), index=df.index)
+                
+                arr = np.where(cond, true_val, false_val)
+                return pd.Series(arr, index=df.index)
                 
             elif func_id == "CONCAT":
                 res = pd.Series([""] * len(df), index=df.index)
                 for arg in node.args:
                     val = eval_ast(arg)
                     if isinstance(arg, ast.Name):
-                        res = res + val.fillna('').astype(str).str.strip()
+                        res = res + _safe_str(val).str.strip()
                     else:
-                        res = res + val.fillna('').astype(str)
+                        res = res + _safe_str(val)
                 return res
 
             elif func_id == "CONCAT_EXACTO":
                 res = pd.Series([""] * len(df), index=df.index)
                 for arg in node.args:
                     val = eval_ast(arg)
-                    res = res + val.fillna('').astype(str)
+                    res = res + _safe_str(val)
                 return res
 
             elif func_id in ("CHR", "CARACTER") and len(node.args) >= 1:
@@ -148,7 +168,7 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 return pd.Series([char_val] * len(df), index=df.index)
                 
             elif func_id == "LEFT" and len(node.args) >= 2:
-                src = eval_ast(node.args[0]).fillna('').astype(str).str.strip()
+                src = _safe_str(eval_ast(node.args[0])).str.strip()
                 n_series = pd.to_numeric(eval_ast(node.args[1]), errors='coerce').fillna(0).astype(int)
                 return pd.Series(
                     [s[:max(0, n)] for s, n in zip(src, n_series)],
@@ -156,7 +176,7 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 )
                 
             elif func_id == "RIGHT" and len(node.args) >= 2:
-                src = eval_ast(node.args[0]).fillna('').astype(str).str.strip()
+                src = _safe_str(eval_ast(node.args[0])).str.strip()
                 n_series = pd.to_numeric(eval_ast(node.args[1]), errors='coerce').fillna(0).astype(int)
                 return pd.Series(
                     [s[-n:] if n > 0 else "" for s, n in zip(src, n_series)],
@@ -167,7 +187,7 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 res = pd.Series([True] * len(df), index=df.index)
                 for arg in node.args:
                     val = eval_ast(arg)
-                    mask = pd.to_numeric(val, errors='coerce').fillna(0).astype(bool) | (val.astype(str).str.strip().str.upper() == 'TRUE')
+                    mask = pd.to_numeric(val, errors='coerce').fillna(0).astype(bool) | (_safe_str(val).str.strip().str.upper() == 'TRUE')
                     res = res & mask
                 return res
 
@@ -175,7 +195,7 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 res = pd.Series([False] * len(df), index=df.index)
                 for arg in node.args:
                     val = eval_ast(arg)
-                    mask = pd.to_numeric(val, errors='coerce').fillna(0).astype(bool) | (val.astype(str).str.strip().str.upper() == 'TRUE')
+                    mask = pd.to_numeric(val, errors='coerce').fillna(0).astype(bool) | (_safe_str(val).str.strip().str.upper() == 'TRUE')
                     res = res | mask
                 return res
 
@@ -185,8 +205,8 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 lookup_keys = []
                 merge_keys = []
                 for i in range(1, len(node.args), 2):
-                    c_range = eval_ast(node.args[i]).astype(str).str.strip().str.upper()
-                    c_val = eval_ast(node.args[i+1]).astype(str).str.strip().str.upper()
+                    c_range = eval_ast(node.args[i]) # hand replaced.str.strip().str.upper()
+                    c_val = _safe_str(eval_ast(node.args[i+1])).str.strip().str.upper()
                     range_col = f'_range_{i}'
                     val_col = f'_val_{i}'
                     tmp_df[range_col] = c_range.values
@@ -255,15 +275,15 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 # ENCONTRAR(TextoBuscado, TextoDestino) → 1-based position, 0 if not found
                 search = eval_ast(node.args[0])
                 source = eval_ast(node.args[1])
-                search_str = search.astype(str).str.strip()
-                source_str = source.astype(str).str.strip()
+                search_str = _safe_str(search).str.strip()
+                source_str = _safe_str(source).str.strip()
                 # Use pandas str.find (0-based, -1 if not found), convert to 1-based
                 pos = source_str.combine(search_str, lambda s, srch: s.find(srch))
                 return pos.apply(lambda x: x + 1 if x >= 0 else 0)
 
             elif func_id == "EXTRAER" and len(node.args) >= 3:
                 # EXTRAER(Texto, PosicionInicio, NumCaracteres) → substring (1-based start)
-                src = eval_ast(node.args[0]).astype(str).str.strip()
+                src = _safe_str(eval_ast(node.args[0])).str.strip()
                 start_pos = pd.to_numeric(eval_ast(node.args[1]), errors='coerce').fillna(1).astype(int)
                 num_chars = pd.to_numeric(eval_ast(node.args[2]), errors='coerce').fillna(0).astype(int)
                 # Convert 1-based to 0-based and extract
@@ -276,7 +296,7 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 src = eval_ast(node.args[0])
                 times = pd.to_numeric(eval_ast(node.args[1]), errors='coerce').fillna(0).astype(int)
                 return pd.Series(
-                    [s * max(0, t) for s, t in zip(src.astype(str), times)],
+                    [s * max(0, t) for s, t in zip(_safe_str(src), times)],
                     index=df.index
                 )
                 
@@ -287,7 +307,7 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                     if fmt and all(c == '0' for c in fmt):
                         # Handle padding like "00", "000"
                         return pd.to_numeric(src, errors='coerce').fillna(0).astype(int).astype(str).str.zfill(len(fmt))
-                return src.astype(str)
+                return _safe_str(src)
                 
             elif func_id == "AÑO" and len(node.args) >= 1:
                 src = pd.to_datetime(eval_ast(node.args[0]), errors='coerce')
@@ -321,7 +341,7 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                         k = re.sub(r'\.0$', '', k)
                         lookup[k] = v_val
                         
-                    src_str = src.astype(str).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
+                    src_str = _safe_str(src).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
                     return src_str.map(lookup).fillna(default if default else "")
                 return pd.Series([default if default else ""] * len(df), index=df.index)
 
@@ -332,7 +352,8 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 ret_col = get_string_arg(node.args[3]).replace("'", "").replace('"', "")
                 
                 # Fetch actual columns from PG to resolve casing case-insensitively
-                real_cols = get_real_column_names(ext_table, dest_engine)
+                engine_to_use = db_engine if db_engine is not None else (db.bind if db else dest_engine)
+                real_cols = get_real_column_names(ext_table, engine_to_use)
                 if real_cols:
                     match_col_lower = match_col.lower()
                     ret_col_lower = ret_col.lower()
@@ -344,10 +365,10 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                 
                 query = f'SELECT "{real_match_col}", "{real_ret_col}" FROM "{ext_table}" WHERE "company_id" = {company_id}'
                 try:
-                    ext_df = pd.read_sql(query, dest_engine)
+                    ext_df = pd.read_sql(query, engine_to_use)
                     ext_df[real_match_col] = ext_df[real_match_col].astype(str).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
                     lookup = ext_df.set_index(real_match_col)[real_ret_col].to_dict()
-                    src_str = src.astype(str).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
+                    src_str = _safe_str(src).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
                     return src_str.map(lookup).fillna(default if default else "")
                 except Exception as e:
                     print(f"Error in BUSCARX_EXT querying {ext_table}: {e}")
@@ -376,7 +397,7 @@ def evaluate_formula_on_df(df: pd.DataFrame, formula_str: str, db: Session, comp
                         k_str = re.sub(r'\.0$', '', k_str)
                         str_lookup[k_str] = v
                     
-                    src_str = src.astype(str).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
+                    src_str = _safe_str(src).str.strip().str.upper().str.replace(r'\.0$', '', regex=True)
                     return src_str.map(str_lookup).fillna(default if default else "")
                 else:
                     print(f"Error in BUSCARX_LOCAL: Columns {match_col} or {ret_col} not in DataFrame")
