@@ -1189,6 +1189,23 @@ def _generate_subcategoria_cf_diariol(
         period_cols = ["cper", "cperiodo", "c_periodo", "anos", "anio", "ano", "periodo", "c_per"]
         mes_cols = ["cmes", "c_mes", "mes", "c_mes_c"]
         
+        # Determine all configured months from AsientoCorrelativo for the current year
+        # so we process ALL enabled periods, not just the current month.
+        configured_months = []
+        try:
+            corr_records = db.query(AsientoCorrelativo).filter(
+                AsientoCorrelativo.company_id == company_id,
+                AsientoCorrelativo.subcategoria_id == sub.id,
+                AsientoCorrelativo.periodo == current_year
+            ).all()
+            configured_months = sorted(set(c.mes for c in corr_records if c.mes and c.mes != "00"))
+        except Exception as e:
+            print(f"Error loading correlativos for realtime months: {e}")
+        
+        # Fallback: if no correlativos found, use current month only
+        if not configured_months:
+            configured_months = [current_month]
+        
         new_rules = []
         for rule in sub_filter_rules:
             r_col = str(rule.get("column") or "").strip().lower()
@@ -1199,10 +1216,11 @@ def _generate_subcategoria_cf_diariol(
                 new_rule["value"] = current_year
                 print(f"Overriding filter rule for period column '{rule.get('column')}' from '{rule.get('value')}' to '{current_year}'")
             
-            # Check if this rule is for the month column
+            # Check if this rule is for the month column — use IN with all configured months
             elif (custom_mes_col and r_col == custom_mes_col.strip().lower()) or (not custom_mes_col and r_col in mes_cols):
-                new_rule["value"] = current_month
-                print(f"Overriding filter rule for month column '{rule.get('column')}' from '{rule.get('value')}' to '{current_month}'")
+                new_rule["operator"] = "IN"
+                new_rule["value"] = ",".join(configured_months)
+                print(f"Overriding filter rule for month column '{rule.get('column')}' from '{rule.get('value')}' to IN({new_rule['value']}) — {len(configured_months)} months configured")
                 
             new_rules.append(new_rule)
         sub_filter_rules = new_rules
@@ -1414,6 +1432,44 @@ def _generate_subcategoria_cf_diariol(
             after_count = len(df)
             if before_count != after_count:
                 print(f"CONTROL INCREMENTAL: Filtradas {before_count - after_count} filas de fallback (col={actual_col}, last_val={ctrl_val})")
+            if df.empty:
+                return 0, 0, []
+
+    # ─── Pre-filtrar df según las condiciones de aplicación de las líneas ───
+    if not df.empty and lineas:
+        survives_mask = pd.Series(False, index=df.index)
+        has_any_condition = False
+        
+        for linea in lineas:
+            if not linea.mapeo_detalle:
+                continue
+            
+            # If a line does not have any condition_aplicacion, then all rows survive for this line
+            if not getattr(linea, "condicion_aplicacion", None) or str(linea.condicion_aplicacion).strip() == "":
+                survives_mask = pd.Series(True, index=df.index)
+                has_any_condition = True
+                break
+            else:
+                has_any_condition = True
+                try:
+                    # Evaluate condition_aplicacion on df
+                    mask = evaluate_formula_on_df(df, linea.condicion_aplicacion, db, company_id, default=False, db_engine=db.bind)
+                    # Convert to boolean mask safely
+                    mask = pd.to_numeric(mask, errors='coerce').fillna(0).astype(bool) | (mask.astype(str).str.strip().str.upper() == 'TRUE')
+                    survives_mask = survives_mask | mask
+                except Exception as e_cond:
+                    print(f"Error pre-evaluating line condition: {e_cond}")
+                    # In case of evaluation error, play it safe and keep the rows
+                    survives_mask = pd.Series(True, index=df.index)
+                    break
+        
+        # If there are active lines and at least one has a condition
+        if has_any_condition:
+            before_count = len(df)
+            df = df[survives_mask].copy()
+            after_count = len(df)
+            if before_count != after_count:
+                print(f"FILTRO CONDICIONES LÍNEA: Conservadas {after_count} de {before_count} filas que cumplen alguna condición de línea")
             if df.empty:
                 return 0, 0, []
 
@@ -1984,7 +2040,7 @@ def _generate_subcategoria_cf_diariol(
     # This happens when ALL lineas_asiento have condicion_aplicacion that excludes certain
     # source rows. Those rows still get headers generated, but no details.
     if generate_headers and diario_entries and HeadTable is not None:
-        if generate_details and diariol_entries:
+        if generate_details:
             nasientos_con_detalle = set(e.get("nasiento") for e in diariol_entries if e.get("nasiento") is not None)
             orphan_count = sum(1 for e in diario_entries if e.get("nasiento") not in nasientos_con_detalle)
             if orphan_count > 0:
@@ -2055,7 +2111,7 @@ def _generate_subcategoria_cf_diariol(
     except Exception as e:
         print(f"Error actualizando control incremental o asiento inicial: {e}")
 
-    return rows_inserted, len(header_df) if generate_headers else 0, all_validation_errors
+    return rows_inserted, len(diario_entries) if generate_headers else 0, all_validation_errors
 
 
 @router.post("/generate-to-cf-diariol")
@@ -2141,7 +2197,7 @@ def generate_to_cf_diariol(body: dict, db: Session = Depends(get_dest_db)):
                     if (sub.generate_details is not False) and DetTable is not None:
                         stmt_del_l = DetTable.delete().where(
                             DetTable.c.company_id == company_id,
-                            DetTable.c.estado.in_(["0", "1", "PENDIENTE"]),
+                            DetTable.c.estado.in_(["0", "1", "PENDIENTE", "ERROR"]),
                             DetTable.c.subcategoria_id == sub.id
                         )
                         db.execute(stmt_del_l)
@@ -2150,12 +2206,19 @@ def generate_to_cf_diariol(body: dict, db: Session = Depends(get_dest_db)):
                         try: HeadTable = Table(tabla_head_name, metadata, autoload_with=engine)
                         except: HeadTable = None
                         
-                        if HeadTable is not None and asientos_to_delete:
+                        if HeadTable is not None:
                             check_col_head = sub.col_destino_nasiento or "nasiento"
-                            if check_col_head in [c.name for c in HeadTable.columns]:
+                            if "subcategoria_id" in [c.name for c in HeadTable.columns]:
                                 stmt_del_c = HeadTable.delete().where(
                                     HeadTable.c.company_id == company_id,
-                                    HeadTable.c.estado.in_(["0", "1", "PENDIENTE"]),
+                                    HeadTable.c.estado.in_(["0", "1", "PENDIENTE", "SIN_DETALLE", "ERROR"]),
+                                    HeadTable.c.subcategoria_id == sub.id
+                                )
+                                db.execute(stmt_del_c)
+                            elif check_col_head in [c.name for c in HeadTable.columns] and asientos_to_delete:
+                                stmt_del_c = HeadTable.delete().where(
+                                    HeadTable.c.company_id == company_id,
+                                    HeadTable.c.estado.in_(["0", "1", "PENDIENTE", "SIN_DETALLE", "ERROR"]),
                                     getattr(HeadTable.c, check_col_head).in_(asientos_to_delete)
                                 )
                                 db.execute(stmt_del_c)
@@ -2479,6 +2542,29 @@ def migrate_to_final(
                             continue
 
                         p, m, o, n = seat_key
+                        
+                        # Validate that details have a matching header (prevent ForeignKeyViolation)
+                        if not data['header'] and data['details']:
+                            header_exists = False
+                            if FinalHeadTable is not None:
+                                try:
+                                    from sqlalchemy import select
+                                    stmt_check = select(FinalHeadTable.c[nasiento_col]).where(
+                                        FinalHeadTable.c.cper == p,
+                                        FinalHeadTable.c.cmes == m,
+                                        FinalHeadTable.c.ccodori == o,
+                                        getattr(FinalHeadTable.c, nasiento_col) == n
+                                    )
+                                    header_exists = final_db.execute(stmt_check).first() is not None
+                                except Exception as e_check:
+                                    print(f"Error checking header existence in target for {p}-{m}-{o}-{n}: {e_check}")
+                            
+                            if not header_exists:
+                                error_msg = f"Asiento huérfano: No posee cabecera en staging ni en la base de datos destino de Contasis."
+                                print(f"MIGRATE SKIP: {error_msg} Key: {p}-{m}-{o}-{n}")
+                                failed_rows_raw.append({"seat": f"{p}-{m}-{o}-{n}", "error": error_msg, "subcategoria_id": sub.id})
+                                continue
+
                         try:
                             with final_db.begin_nested():
                                 if allow_overwrite:

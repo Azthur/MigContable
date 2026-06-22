@@ -56,8 +56,128 @@ def list_pipelines(
     
     result = []
     for c in configs:
-        # Get next run from Celery or a simple logic if not available
+        import datetime
+        
+        # Calculate next run time
         next_run = None
+        if c.is_active:
+            now = datetime.datetime.now(datetime.timezone.utc)
+            if c.schedule_type == "MINUTES":
+                try:
+                    minutes = int(c.schedule_value)
+                except:
+                    minutes = 60
+                
+                # Para evitar que cambie cada vez que se recarga la página,
+                # usamos last_run_at o, si es nulo, created_at como punto de referencia.
+                start_ref = c.last_run_at or c.created_at
+                if start_ref:
+                    if start_ref.tzinfo is None:
+                        start_ref = start_ref.replace(tzinfo=datetime.timezone.utc)
+                    
+                    elapsed = (now - start_ref).total_seconds() / 60.0
+                    if elapsed < 0:
+                        next_run = start_ref
+                    elif elapsed >= minutes:
+                        # Si ya pasó el tiempo, Celery lo ejecutará en el siguiente tick (casi de inmediato)
+                        # Mostrar una fecha ligeramente en el pasado o "now" fuerza a la UI a mostrar que ya toca
+                        next_run = now
+                    else:
+                        intervals = int(elapsed // minutes) + 1
+                        next_run = start_ref + datetime.timedelta(minutes=intervals * minutes)
+                else:
+                    next_run = now
+            
+            elif c.schedule_type == "DAILY":
+                try:
+                    hour, minute = map(int, c.schedule_value.split(":"))
+                except:
+                    hour, minute = 0, 0
+                
+                today_run = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+                
+                # Check if it already ran today
+                already_ran = False
+                if c.last_run_at:
+                    last_run = c.last_run_at
+                    if last_run.tzinfo is None:
+                        last_run = last_run.replace(tzinfo=datetime.timezone.utc)
+                    if last_run.date() >= now.date():
+                        already_ran = True
+                
+                if today_run > now and not already_ran:
+                    next_run = today_run
+                else:
+                    next_run = today_run + datetime.timedelta(days=1)
+            
+            elif c.schedule_type == "WEEKLY":
+                try:
+                    hour, minute = map(int, c.schedule_value.split(":"))
+                except:
+                    hour, minute = 0, 0
+                
+                day_map = {
+                    "mon": 0, "lunes": 0, "lun": 0, "0": 0,
+                    "tue": 1, "martes": 1, "mar": 1, "1": 1,
+                    "wed": 2, "miercoles": 2, "mié": 2, "mie": 2, "2": 2,
+                    "thu": 3, "jueves": 3, "jue": 3, "3": 3,
+                    "fri": 4, "viernes": 4, "vie": 4, "4": 4,
+                    "sat": 5, "sabado": 5, "sáb": 5, "sab": 5, "5": 5,
+                    "sun": 6, "domingo": 6, "dom": 6, "6": 6
+                }
+                target_wd = day_map.get(str(c.day_of_week or "mon").lower().strip(), 0)
+                
+                days_diff = (target_wd - now.weekday()) % 7
+                target_date = now + datetime.timedelta(days=days_diff)
+                target_run = target_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+                
+                already_ran = False
+                if c.last_run_at:
+                    last_run = c.last_run_at
+                    if last_run.tzinfo is None:
+                        last_run = last_run.replace(tzinfo=datetime.timezone.utc)
+                    if last_run.date() >= target_run.date():
+                        already_ran = True
+                
+                if target_run > now and not already_ran:
+                    next_run = target_run
+                else:
+                    next_run = target_run + datetime.timedelta(days=7)
+            
+            elif c.schedule_type == "MONTHLY":
+                try:
+                    hour, minute = map(int, c.schedule_value.split(":"))
+                except:
+                    hour, minute = 0, 0
+                
+                target_dom = c.day_of_month or 1
+                try:
+                    target_run = now.replace(day=target_dom, hour=hour, minute=minute, second=0, microsecond=0)
+                except ValueError:
+                    target_run = now.replace(day=28, hour=hour, minute=minute, second=0, microsecond=0)
+                
+                already_ran = False
+                if c.last_run_at:
+                    last_run = c.last_run_at
+                    if last_run.tzinfo is None:
+                        last_run = last_run.replace(tzinfo=datetime.timezone.utc)
+                    if last_run.date() >= target_run.date():
+                        already_ran = True
+                
+                if target_run > now and not already_ran:
+                    next_run = target_run
+                else:
+                    if now.month == 12:
+                        next_month = now.replace(year=now.year + 1, month=1)
+                    else:
+                        next_month = now.replace(month=now.month + 1)
+                    try:
+                        next_run = next_month.replace(day=target_dom, hour=hour, minute=minute, second=0, microsecond=0)
+                    except ValueError:
+                        next_run = next_month.replace(day=28, hour=hour, minute=minute, second=0, microsecond=0)
+            
+            elif c.schedule_type == "CRON":
+                next_run = now + datetime.timedelta(hours=1)
         
         # Subcategory list for compatibility
         subcat_ids = [c.subcategoria_id] if c.subcategoria_id else []

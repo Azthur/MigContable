@@ -7,7 +7,7 @@ from celery import Task
 from backend.app.celery_app import celery
 from backend.app.celery_tasks import company_semaphore
 from backend.app.core.database import DestSessionLocal
-from datetime import datetime
+from datetime import datetime, timezone
 import traceback
 
 
@@ -27,10 +27,10 @@ class ETLTask(Task):
                 ejecucion.status = "ERROR"
                 ejecucion.error_message = str(exc)[:2000]
                 ejecucion.error_traceback = str(einfo)[:5000]
-                ejecucion.finished_at = datetime.now()
+                ejecucion.finished_at = datetime.now(timezone.utc)
                 if ejecucion.started_at:
                     ejecucion.duration_s = (
-                        datetime.now() - ejecucion.started_at
+                        datetime.now(timezone.utc) - ejecucion.started_at
                     ).total_seconds()
             
             config = db.query(EtlPipelineConfig).filter(
@@ -81,6 +81,7 @@ def run_etl_pipeline(self, pipeline_id: int):
     db = DestSessionLocal()
     ejecucion = None
     config = None
+    empresa_id = None
     
     try:
         from backend.app.models.models import EtlPipelineConfig, EtlEjecucion
@@ -111,17 +112,33 @@ def run_etl_pipeline(self, pipeline_id: int):
                 max_retries=10,  # Más retries para saturación (no es error real)
             )
         
-        # ─── 3. Crear registro de ejecución ───
-        ejecucion = EtlEjecucion(
-            pipeline_id=pipeline_id,
-            empresa_id=empresa_id,
-            subcategoria_id=subcategoria_id,
-            celery_task_id=self.request.id,
-            status="RUNNING",
-            started_at=datetime.now(),
-        )
-        db.add(ejecucion)
-        config.last_run_at = datetime.now()
+        # ─── 3. Crear o recuperar registro de ejecución ───
+        # Si es un reintento, reutilizamos el registro existente para evitar UniqueViolation
+        ejecucion = db.query(EtlEjecucion).filter(
+            EtlEjecucion.celery_task_id == self.request.id
+        ).first()
+        
+        if ejecucion:
+            ejecucion.status = "RUNNING"
+            ejecucion.started_at = datetime.now(timezone.utc)
+            ejecucion.finished_at = None
+            ejecucion.duration_s = None
+            ejecucion.error_message = None
+            ejecucion.error_traceback = None
+            ejecucion.retry_count = self.request.retries
+        else:
+            ejecucion = EtlEjecucion(
+                pipeline_id=pipeline_id,
+                empresa_id=empresa_id,
+                subcategoria_id=subcategoria_id,
+                celery_task_id=self.request.id,
+                status="RUNNING",
+                started_at=datetime.now(timezone.utc),
+                retry_count=self.request.retries,
+            )
+            db.add(ejecucion)
+            
+        config.last_run_at = datetime.now(timezone.utc)
         config.last_status = "RUNNING"
         db.commit()
         db.refresh(ejecucion)
@@ -129,9 +146,19 @@ def run_etl_pipeline(self, pipeline_id: int):
         # ─── 4. Ejecutar pipeline (3 etapas) ───
         results = _execute_pipeline(config, ejecucion, db)
         
-        # ─── 5. Marcar éxito ───
-        ejecucion.status = "SUCCESS"
-        ejecucion.finished_at = datetime.now()
+        # ─── 5. Marcar éxito o advertencia ───
+        has_validation_errors = False
+        for d in results.get("details", []):
+            if isinstance(d, dict):
+                if d.get("step") == "GENERATION" and d.get("errors"):
+                    has_validation_errors = True
+                if d.get("step") == "MIGRATION" and d.get("status") == "WARNING":
+                    has_validation_errors = True
+
+        status_flag = "WARNING" if has_validation_errors else "SUCCESS"
+
+        ejecucion.status = status_flag
+        ejecucion.finished_at = datetime.now(timezone.utc)
         ejecucion.duration_s = (
             ejecucion.finished_at - ejecucion.started_at
         ).total_seconds()
@@ -140,7 +167,7 @@ def run_etl_pipeline(self, pipeline_id: int):
         ejecucion.records_migrated = results.get("migrated", 0)
         ejecucion.details = results.get("details", [])
         
-        config.last_status = "SUCCESS"
+        config.last_status = status_flag
         config.last_duration_s = ejecucion.duration_s
         config.last_error = None
         config.run_count = (config.run_count or 0) + 1
@@ -148,7 +175,7 @@ def run_etl_pipeline(self, pipeline_id: int):
         db.commit()
         
         return {
-            "status": "SUCCESS",
+            "status": status_flag,
             "pipeline_id": pipeline_id,
             "empresa_id": empresa_id,
             "subcategoria_id": subcategoria_id,
@@ -162,40 +189,68 @@ def run_etl_pipeline(self, pipeline_id: int):
         raise  # Deja que on_failure maneje esto
         
     except Exception as exc:
-        # Registrar error en DB
-        if ejecucion:
-            ejecucion.status = "ERROR"
-            ejecucion.error_message = str(exc)[:2000]
-            ejecucion.error_traceback = traceback.format_exc()[:5000]
-            ejecucion.finished_at = datetime.now()
-            if ejecucion.started_at:
-                ejecucion.duration_s = (
-                    datetime.now() - ejecucion.started_at
-                ).total_seconds()
+        # Extract retry configuration before closing the session to prevent DetachedInstanceError
+        retry_backoff = 30
+        max_retries = 3
         if config:
-            config.last_status = "ERROR"
-            config.last_error = str(exc)[:2000]
-            config.error_count = (config.error_count or 0) + 1
-        
+            try:
+                retry_backoff = config.retry_backoff or 30
+                max_retries = config.max_retries or 3
+            except Exception:
+                pass
+
+        # Close the broken session
         try:
-            db.commit()
+            db.close()
         except Exception:
-            db.rollback()
+            pass
+            
+        # Create a fresh new session to log the error
+        db_log = DestSessionLocal()
+        try:
+            from backend.app.models.models import EtlPipelineConfig, EtlEjecucion
+            # Reload config and execution using the new session
+            config_log = db_log.query(EtlPipelineConfig).get(pipeline_id)
+            ejecucion_log = db_log.query(EtlEjecucion).filter(
+                EtlEjecucion.celery_task_id == self.request.id
+            ).first()
+            
+            if ejecucion_log:
+                ejecucion_log.status = "ERROR"
+                ejecucion_log.error_message = str(exc)[:2000]
+                ejecucion_log.error_traceback = traceback.format_exc()[:5000]
+                ejecucion_log.finished_at = datetime.now(timezone.utc)
+                if ejecucion_log.started_at:
+                    ejecucion_log.duration_s = (
+                        datetime.now(timezone.utc) - ejecucion_log.started_at
+                    ).total_seconds()
+            
+            if config_log:
+                config_log.last_status = "ERROR"
+                config_log.last_error = str(exc)[:2000]
+                config_log.error_count = (config_log.error_count or 0) + 1
+                
+            db_log.commit()
+        except Exception as e_inner:
+            print("Error writing error log:", e_inner)
+            db_log.rollback()
+        finally:
+            db_log.close()
         
         # Retry con backoff exponencial: 30s, 120s, 300s
-        retry_backoff = config.retry_backoff if config else 30
-        max_retries = config.max_retries if config else 3
-        
         raise self.retry(
-            exc=exc,
+            exc=Exception(str(exc)),
             countdown=retry_backoff * (2 ** self.request.retries),
             max_retries=max_retries,
         )
     finally:
         # Liberar semáforo SIEMPRE
-        if config:
-            company_semaphore.release(config.empresa_id, self.request.id)
-        db.close()
+        if empresa_id is not None:
+            company_semaphore.release(empresa_id, self.request.id)
+        try:
+            db.close()
+        except Exception:
+            pass
 
 
 def _execute_pipeline(config, ejecucion, db):

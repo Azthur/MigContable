@@ -77,8 +77,8 @@ def on_startup():
         except Exception as e_ddl:
             print(f"Error adding column to etl_realtime_logs table: {e_ddl}")
 
-    # from backend.app.core.scheduler import start_scheduler
-    # start_scheduler()
+    from backend.app.core.scheduler import start_scheduler
+    start_scheduler()
 
 @app.on_event("shutdown")
 def on_shutdown():

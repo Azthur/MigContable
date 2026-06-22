@@ -150,6 +150,14 @@ def execute_scheduled_task(task_id: int):
 
     except Exception as e:
         print(f"Error executing task {task_id}: {e}")
+        if log:
+            try:
+                log.status = "ERROR"
+                log.message = f"Error de ejecución: {str(e)[:250]}"
+                log.finished_at = datetime.now()
+                db.commit()
+            except Exception as commit_ex:
+                print(f"Could not write error status to task log: {commit_ex}")
     finally:
         db.close()
 

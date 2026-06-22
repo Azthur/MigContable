@@ -1,965 +1,4 @@
-{% extends "base.html" %}
 
-{% block title %}ETL en Tiempo Real - SistemaMigConta{% endblock %}
-{% block page_title %}ETL y Asientos en Tiempo Real{% endblock %}
-{% block breadcrumb %}Inicio › ETL Realtime{% endblock %}
-
-{% block extra_head %}
-<style>
-    .glass-panel {
-        background: rgba(22, 27, 34, 0.4);
-        backdrop-filter: blur(12px);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .glass-panel:hover {
-        border-color: rgba(88, 166, 255, 0.4);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-    }
-    .stat-card {
-        border-left: 4px solid var(--accent);
-        border-radius: 8px;
-        background: rgba(22, 27, 34, 0.6);
-        padding: 16px 20px;
-    }
-    .stat-card.success {
-        border-left-color: var(--accent-green);
-    }
-    .stat-card.warning {
-        border-left-color: var(--accent-yellow);
-    }
-    .stat-card.danger {
-        border-left-color: var(--accent-red);
-    }
-    .log-details-pre {
-        background: #0d1117;
-        color: #8b949e;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        padding: 12px;
-        font-family: 'Courier New', Courier, monospace;
-        font-size: 0.8rem;
-        max-height: 250px;
-        overflow-y: auto;
-    }
-    .animate-pulse-slow {
-        animation: pulse-slow 2s infinite ease-in-out;
-    }
-    @keyframes pulse-slow {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.4; }
-    }
-    .table-container {
-        max-height: 400px;
-        overflow-y: auto;
-    }
-    .progress {
-        border-radius: 3px;
-    }
-    .progress-bar {
-        border-radius: 3px;
-        transition: width 0.6s ease-in-out;
-    }
-    .table-dark-custom tbody tr:hover {
-        background: rgba(88, 166, 255, 0.06);
-    }
-    .summary-grid .badge {
-        min-width: 40px;
-        text-align: center;
-    }
-    /* Custom premium tabs */
-    .nav-tabs-custom {
-        border-bottom: 2px solid rgba(88, 166, 255, 0.1) !important;
-        gap: 4px;
-    }
-    .nav-tabs-custom .nav-link {
-        color: var(--text-secondary) !important;
-        background: transparent !important;
-        border: none !important;
-        border-bottom: 3px solid transparent !important;
-        padding: 12px 24px !important;
-        font-weight: 600 !important;
-        font-size: 0.95rem !important;
-        transition: all 0.2s ease-in-out !important;
-        border-radius: 6px 6px 0 0 !important;
-    }
-    .nav-tabs-custom .nav-link:hover {
-        color: var(--text-primary) !important;
-        background: rgba(255, 255, 255, 0.03) !important;
-    }
-    .nav-tabs-custom .nav-link.active {
-        color: var(--accent) !important;
-        background: rgba(88, 166, 255, 0.06) !important;
-        border-bottom: 3px solid var(--accent) !important;
-    }
-</style>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{% endblock %}
-
-{% block content %}<!-- Tabbed Navigation Bar -->
-<ul class="nav nav-tabs nav-tabs-custom mb-4" id="realtimeEtlTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#tab-summary" type="button" role="tab" aria-controls="tab-summary" aria-selected="true">
-            <i class="bi bi-pie-chart-fill me-2"></i>Resumen de Staging
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="visor-tab" data-bs-toggle="tab" data-bs-target="#tab-visor" type="button" role="tab" aria-controls="tab-visor" aria-selected="false">
-            <i class="bi bi-search me-2"></i>Visor de Datos
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="config-tab" data-bs-toggle="tab" data-bs-target="#tab-config" type="button" role="tab" aria-controls="tab-config" aria-selected="false">
-            <i class="bi bi-gear-fill me-2"></i>Configuración y Frecuencias
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#tab-logs" type="button" role="tab" aria-controls="tab-logs" aria-selected="false">
-            <i class="bi bi-journal-text me-2"></i>Auditoría y Logs
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="migrated-tab" data-bs-toggle="tab" data-bs-target="#tab-migrated" type="button" role="tab" aria-controls="tab-migrated" aria-selected="false" onclick="loadMigratedRows(0)">
-            <i class="bi bi-cloud-check-fill me-2"></i>Control de Migrados
-        </button>
-    </li>
-</ul>
-
-<div class="tab-content" id="realtimeEtlTabsContent">
-    <!-- Tab 1: Resumen de Staging -->
-    <div class="tab-pane fade show active" id="tab-summary" role="tabpanel" aria-labelledby="summary-tab">
-        <div class="row g-4 mb-4">
-            <div class="col-12">
-                <div class="glass-panel p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h5 class="m-0 text-primary"><i class="bi bi-pie-chart-fill me-2"></i>Resumen por Subcategoría (Staging)</h5>
-                            <p class="text-secondary small mb-0 mt-1">Estado de migración agrupado por cada subcategoría configurada. Seleccione empresa para ver los conteos.</p>
-                        </div>
-                        <div class="d-flex gap-2 align-items-center">
-                            <select class="form-select-dark form-select-sm" id="summaryCompany" onchange="loadStagingSummary()" style="min-width: 200px;">
-                                <option value="">-- Seleccionar Empresa --</option>
-                            </select>
-                            <button class="btn-ghost btn-sm" onclick="loadStagingSummary()">
-                                <i class="bi bi-arrow-clockwise"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                        <table class="table-dark-custom mb-0">
-                            <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;">
-                                <tr>
-                                    <th>Subcategoría</th>
-                                    <th class="text-center">Total Registros</th>
-                                    <th class="text-center"><i class="bi bi-clock text-warning me-1"></i>Pendientes</th>
-                                    <th class="text-center"><i class="bi bi-check-circle text-success me-1"></i>Migrados</th>
-                                    <th class="text-center"><i class="bi bi-exclamation-triangle text-danger me-1"></i>Errores</th>
-                                    <th class="text-center">Progreso</th>
-                                    <th class="text-end">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody id="summaryTableBody">
-                                <tr><td colspan="7" class="text-center text-secondary py-4">Seleccione una empresa para ver el resumen de staging.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Global Charts Row -->
-        <div class="row g-4 mt-2 d-none" id="summaryChartsRow">
-            <div class="col-md-4">
-                <div class="glass-panel p-4 h-100 d-flex flex-column" style="background: rgba(22, 27, 34, 0.5); border: 1px solid var(--border-color);">
-                    <h6 class="text-primary mb-3"><i class="bi bi-pie-chart-fill me-2"></i>Distribución Global de Staging</h6>
-                    <div class="flex-grow-1 d-flex align-items-center justify-content-center" style="position: relative; min-height: 250px;">
-                        <canvas id="globalSummaryPieChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-8">
-                <div class="glass-panel p-4 h-100 d-flex flex-column" style="background: rgba(22, 27, 34, 0.5); border: 1px solid var(--border-color);">
-                    <h6 class="text-primary mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Estado por Subcategoría</h6>
-                    <div class="flex-grow-1" style="position: relative; min-height: 250px;">
-                        <canvas id="subcatBarChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tab 2: Visor de Datos -->
-    <div class="tab-pane fade" id="tab-visor" role="tabpanel" aria-labelledby="visor-tab">
-        <div class="row g-4 mb-4">
-            <div class="col-12">
-                <div class="glass-panel p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div>
-                            <h5 class="m-0 text-primary"><i class="bi bi-table me-2"></i>Visor de Datos y Auditoría</h5>
-                            <p class="text-secondary small mb-0 mt-1">Busque, filtre y analice los datos extraídos en la base intermedia, así como los asientos generados en staging.</p>
-                        </div>
-                        <div>
-                            <button class="btn-ghost btn-sm" onclick="activeVisorTab === 'staging' ? loadStagingRows(0) : loadRawRows(0)">
-                                <i class="bi bi-arrow-clockwise"></i> Actualizar Visor
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Navigation Tabs -->
-                    <ul class="nav nav-tabs border-secondary mb-3" id="visorTabs" role="tablist" style="border-bottom: 1px solid rgba(255,255,255,0.1) !important;">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active text-light border-0 bg-transparent py-2 px-3 position-relative" id="tabStaging" type="button" role="tab" onclick="switchVisorTab('staging')" style="font-weight: 500; font-size: 0.85rem;">
-                                <i class="bi bi-journal-text me-2"></i>Asientos Staging / Contasis
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link text-secondary border-0 bg-transparent py-2 px-3 position-relative" id="tabRaw" type="button" role="tab" onclick="switchVisorTab('raw')" style="font-weight: 500; font-size: 0.85rem;">
-                                <i class="bi bi-database-down me-2"></i>Tablas Extraídas (Base Intermedia)
-                            </button>
-                        </li>
-                    </ul>
-
-                    <!-- Filters Bar -->
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-3" id="visorCompanyFilterContainer">
-                            <label class="form-label-dark small text-secondary">Empresa</label>
-                            <select class="form-select-dark form-select-sm" id="visorCompany" onchange="onVisorCompanyChange()" required>
-                                <option value="">-- Seleccionar Empresa --</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Staging specific filters -->
-                        <div class="col-md-9" id="visorStagingFilters">
-                            <div class="row g-2">
-                                <div class="col-md-3">
-                                    <label class="form-label-dark small text-secondary">Subcategoría</label>
-                                    <select class="form-select-dark form-select-sm" id="visorSubcategory" onchange="loadStagingRows(0)" disabled>
-                                        <option value="">-- Todas --</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label-dark small text-secondary">Año</label>
-                                    <input type="number" class="form-control-dark form-control-sm" id="visorPeriodo" placeholder="Año" onchange="loadStagingRows(0)">
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label-dark small text-secondary">Mes</label>
-                                    <select class="form-select-dark form-select-sm" id="visorMes" onchange="loadStagingRows(0)">
-                                        <option value="">-- Todos --</option>
-                                        <option value="01">01 - Ene</option>
-                                        <option value="02">02 - Feb</option>
-                                        <option value="03">03 - Mar</option>
-                                        <option value="04">04 - Abr</option>
-                                        <option value="05">05 - May</option>
-                                        <option value="06">06 - Jun</option>
-                                        <option value="07">07 - Jul</option>
-                                        <option value="08">08 - Ago</option>
-                                        <option value="09">09 - Set</option>
-                                        <option value="10">10 - Oct</option>
-                                        <option value="11">11 - Nov</option>
-                                        <option value="12">12 - Dic</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label-dark small text-secondary">Estado</label>
-                                    <select class="form-select-dark form-select-sm" id="visorEstado" onchange="loadStagingRows(0)">
-                                        <option value="">-- Todos --</option>
-                                        <option value="PENDIENTE">PENDIENTE</option>
-                                        <option value="MIGRADO">MIGRADO</option>
-                                        <option value="ERROR">ERROR</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label-dark small text-secondary">Buscar (Glosa/Cuenta/Doc/RUC)</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control-dark form-control-sm" id="visorSearch" placeholder="Glosa, cuenta, ruc..." onkeyup="if(event.key === 'Enter') loadStagingRows(0)">
-                                        <button class="btn btn-accent btn-sm px-2 py-0" onclick="loadStagingRows(0)"><i class="bi bi-search"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Raw specific filters -->
-                        <div class="col-md-9 d-none" id="visorRawFilters">
-                            <div class="row g-2">
-                                <div class="col-md-6">
-                                    <label class="form-label-dark small text-secondary">Tabla Extraída (Base Intermedia)</label>
-                                    <select class="form-select-dark form-select-sm" id="visorRawTable" onchange="loadRawRows()" disabled>
-                                        <option value="">-- Seleccionar Tabla --</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Staging Tab -->
-                    <div id="panelStagingContainer">
-                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                            <table class="table-dark-custom mb-0" id="stagingTable">
-                                <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;" id="visorStagingTableHeader">
-                                    <tr>
-                                        <th class="text-center">Acción</th>
-                                        <th class="text-center">Estado</th>
-                                        <th>Per/Mes</th>
-                                        <th>Subcategoría</th>
-                                        <th>Asiento</th>
-                                        <th>Lín</th>
-                                        <th>ID Control</th>
-                                        <th>Glosa</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="visorTableBody">
-                                    <tr><td colspan="8" class="text-center text-secondary py-4">Seleccione una empresa para cargar los datos de staging.</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Pagination for Staging -->
-                        <div class="d-flex justify-content-between align-items-center mt-3 text-secondary small">
-                            <div>
-                                Mostrando del <span id="visorRangeStart">0</span> al <span id="visorRangeEnd">0</span> de <span id="visorTotalCount">0</span> registros
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-ghost btn-sm" id="btnVisorPrev" onclick="changeVisorPage(-1)" disabled>
-                                    <i class="bi bi-chevron-left"></i> Anterior
-                                </button>
-                                <button class="btn btn-ghost btn-sm" id="btnVisorNext" onclick="changeVisorPage(1)" disabled>
-                                    <i class="bi bi-chevron-right"></i> Siguiente
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Raw Table Container -->
-                    <div id="panelRawContainer" class="d-none">
-                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                            <table class="table-dark-custom mb-0">
-                                <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;" id="visorRawTableHeader">
-                                    <tr>
-                                        <th>Columna 1</th>
-                                        <th>Columna 2</th>
-                                        <th>Columna 3</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="visorRawTableBody">
-                                    <tr><td colspan="3" class="text-center text-secondary py-4">Seleccione una tabla para cargar los datos extraídos.</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Pagination for Raw -->
-                        <div class="d-flex justify-content-between align-items-center mt-3 text-secondary small d-none" id="visorRawPaginationContainer">
-                            <div>
-                                Mostrando del <span id="visorRawRangeStart">0</span> al <span id="visorRawRangeEnd">0</span> de <span id="visorRawTotalCount">0</span> registros
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-ghost btn-sm" id="btnVisorRawPrev" onclick="changeRawPage(-1)" disabled>
-                                    <i class="bi bi-chevron-left"></i> Anterior
-                                </button>
-                                <button class="btn btn-ghost btn-sm" id="btnVisorRawNext" onclick="changeRawPage(1)" disabled>
-                                    <i class="bi bi-chevron-right"></i> Siguiente
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tab 3: Configuración y Frecuencias -->
-    <div class="tab-pane fade" id="tab-config" role="tabpanel" aria-labelledby="config-tab">
-        <div class="row g-4 mb-4">
-            <!-- Top: Frecuencia Automática -->
-            <div class="col-12">
-                <div class="glass-panel p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="m-0 text-primary"><i class="bi bi-alarm-fill me-2"></i>Frecuencia Automática</h5>
-                        <button class="btn btn-accent btn-sm px-3 py-1.5" onclick="openScheduleModal()">
-                            <i class="bi bi-plus-lg me-1"></i> Programar Tarea
-                        </button>
-                    </div>
-                    <p class="text-secondary small">Configure intervalos o ejecuciones programadas diarias/semanales del ETL en tiempo real por empresa y subcategoría.</p>
-                    
-                    <!-- Filtro de Frecuencia Automática -->
-                    <div class="row g-2 mb-3 align-items-end">
-                        <div class="col-md-5">
-                            <label class="form-label-dark small text-secondary">Filtrar por Empresa</label>
-                            <select class="form-select-dark form-select-sm w-100" id="filterSchedCompany" onchange="onFilterSchedCompanyChange()">
-                                <option value="">-- Todas las Empresas --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-5">
-                            <label class="form-label-dark small text-secondary">Filtrar por Subcategoría</label>
-                            <select class="form-select-dark form-select-sm w-100" id="filterSchedSubcategory" onchange="renderSchedules()" disabled>
-                                <option value="">-- Todas las Subcategorías --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2 text-end">
-                            <button class="btn btn-ghost btn-sm w-100" onclick="clearSchedFilters()" title="Limpiar Filtros">
-                                <i class="bi bi-x-circle me-1"></i>Limpiar
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="table-responsive mt-3" style="max-height: 400px; overflow-y: auto;">
-                        <table class="table-dark-custom">
-                            <thead>
-                                <tr>
-                                    <th>Empresa</th>
-                                    <th>Subcategoría</th>
-                                    <th>Frecuencia</th>
-                                    <th>Info</th>
-                                    <th>Última Ejecución</th>
-                                    <th>Próxima Ejecución</th>
-                                    <th>Estado</th>
-                                    <th class="text-end">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody id="schedulesTableBody">
-                                <tr><td colspan="8" class="text-center text-secondary py-3">Cargando programaciones...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bottom: Control de Correlativos y Periodos -->
-            <div class="col-12">
-                <div class="glass-panel p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h5 class="m-0 text-primary"><i class="bi bi-hash me-2"></i>Control de Correlativos</h5>
-                        </div>
-                        <button class="btn btn-accent btn-sm" onclick="openCorrelativoModal()">
-                            <i class="bi bi-plus-lg me-1"></i> Registrar Correlativo
-                        </button>
-                    </div>
-                    <p class="text-secondary small">Configure el número de asiento inicial, correlativo actual y las columnas origen de periodo/mes de cada subcategoría.</p>
-                    
-                    <div class="row g-2 mb-3 align-items-end">
-                        <div class="col-md-3">
-                            <label class="form-label-dark small text-secondary">Filtrar por Empresa</label>
-                            <select class="form-select-dark form-select-sm w-100" id="correlativoFilterCompany" onchange="onCorrelativoFilterCompanyChange()">
-                                <option value="">-- Seleccionar Empresa --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label-dark small text-secondary">Filtrar por Subcategoría</label>
-                            <select class="form-select-dark form-select-sm w-100" id="correlativoFilterSubcategory" onchange="loadCorrelativos()" disabled>
-                                <option value="">-- Todas las Subcategorías --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label-dark small text-secondary">Buscar Subcategoría</label>
-                            <input type="text" class="form-control-dark form-control-sm w-100" id="correlativoSearch" placeholder="Buscar subcategoría..." onkeyup="filterCorrelativosUI()">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label-dark small text-secondary">Ordenar por</label>
-                            <select class="form-select-dark form-select-sm w-100" id="correlativoSort" onchange="loadCorrelativos()">
-                                <option value="subcat_asc">Subcategoría A-Z</option>
-                                <option value="subcat_desc">Subcategoría Z-A</option>
-                                <option value="period_desc">Año: Reciente primero</option>
-                                <option value="period_asc">Año: Antiguo primero</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
-                        <table class="table-dark-custom mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Subcategoría / Mes</th>
-                                    <th class="text-center">Periodo</th>
-                                    <th class="text-center">Mes</th>
-                                    <th class="text-center">Asiento Inicial</th>
-                                    <th class="text-center">Último Asiento</th>
-                                    <th class="text-end">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="correlativosTableBody">
-                                <tr><td colspan="6" class="text-center text-secondary py-4">Seleccione una empresa para cargar los correlativos.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tab 4: Auditoría y Logs -->
-    <div class="tab-pane fade" id="tab-logs" role="tabpanel" aria-labelledby="logs-tab">
-        <div class="row g-4 mb-4">
-            <div class="col-12">
-                <div class="glass-panel p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h5 class="m-0 text-primary"><i class="bi bi-bug-fill me-2"></i>Auditoría y Errores en Tiempo Real</h5>
-                            <p class="text-secondary small mb-0 mt-1">Verifique en tiempo real qué registros pasaron correctamente y cuáles fueron bloqueados.</p>
-                        </div>
-                        <div class="d-flex gap-2 flex-wrap">
-                            <select class="form-select-dark form-select-sm" id="logFilterCompany" onchange="onLogCompanyChange()" style="min-width: 180px;">
-                                <option value="">-- Todas las Empresas --</option>
-                            </select>
-                            <select class="form-select-dark form-select-sm" id="logFilterSubcategoria" onchange="loadRealtimeLogs()" style="min-width: 220px;">
-                                <option value="">-- Todas las Subcategorías --</option>
-                            </select>
-                            <select class="form-select-dark form-select-sm" id="logFilterStatus" onchange="loadRealtimeLogs()">
-                                <option value="">-- Todos los Estados --</option>
-                                <option value="SUCCESS">✅ Éxitos</option>
-                                <option value="WARNING">⚠️ Advertencias/Errores de Validación</option>
-                                <option value="ERROR">❌ Errores Críticos de Sistema</option>
-                            </select>
-                            <button class="btn-ghost btn-sm" onclick="loadRealtimeLogs()">
-                                <i class="bi bi-arrow-clockwise"></i> Actualizar
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="table-responsive table-container">
-                        <table class="table-dark-custom" id="realtimeLogsTable">
-                            <thead>
-                                <tr>
-                                    <th>Empresa</th>
-                                    <th>Fecha Ejecución</th>
-                                    <th>Subcategoría</th>
-                                    <th>Estado</th>
-                                    <th>Extraídos</th>
-                                    <th>Generados</th>
-                                    <th>Migrados</th>
-                                    <th>Mensaje / Resumen</th>
-                                    <th class="text-end">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody id="realtimeLogsBody">
-                                <tr><td colspan="9" class="text-center text-secondary py-4"><span class="spinner-sm"></span> Cargando auditoría de ejecución...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Tab 5: Control de Migrados -->
-    <div class="tab-pane fade" id="tab-migrated" role="tabpanel" aria-labelledby="migrated-tab">
-        <div class="row g-4 mb-4">
-            <div class="col-12">
-                <div class="glass-panel p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div>
-                            <h5 class="m-0 text-primary"><i class="bi bi-cloud-check-fill me-2"></i>Control de Migrados y Reinicio Local</h5>
-                            <p class="text-secondary small mb-0 mt-1">Monitoree los registros ya migrados en staging local. Use la opción de reiniciar para devolverlos a estado pendiente ('1'). **No afectará a Contasis Final.**</p>
-                        </div>
-                        <div>
-                            <button class="btn-ghost btn-sm" onclick="loadMigratedRows(0)">
-                                <i class="bi bi-arrow-clockwise"></i> Actualizar
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Filters Bar -->
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-3">
-                            <label class="form-label-dark small text-secondary">Empresa</label>
-                            <select class="form-select-dark form-select-sm" id="migratedCompany" onchange="onMigratedCompanyChange()" required>
-                                <option value="">-- Seleccionar Empresa --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label-dark small text-secondary">Subcategoría</label>
-                            <select class="form-select-dark form-select-sm" id="migratedSubcategory" onchange="loadMigratedRows(0)" disabled>
-                                <option value="">-- Todas --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label-dark small text-secondary">Año</label>
-                            <input type="number" class="form-control-dark form-control-sm" id="migratedPeriodo" placeholder="Año" onchange="loadMigratedRows(0)">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label-dark small text-secondary">Buscar (Glosa/Cuenta/Doc/RUC)</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control-dark form-control-sm" id="migratedSearch" placeholder="Buscar glosa, cuenta..." onkeyup="if(event.key === 'Enter') loadMigratedRows(0)">
-                                <button class="btn btn-accent btn-sm px-2 py-0" onclick="loadMigratedRows(0)"><i class="bi bi-search"></i></button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Table Container -->
-                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                        <table class="table-dark-custom mb-0" id="migratedTable">
-                            <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;" id="migratedTableHeader">
-                                <tr>
-                                    <th class="text-center">Acción</th>
-                                    <th>Per/Mes</th>
-                                    <th>Subcategoría</th>
-                                    <th>Asiento</th>
-                                    <th>Lín</th>
-                                    <th>ID Control</th>
-                                    <th>Glosa</th>
-                                </tr>
-                            </thead>
-                            <tbody id="migratedTableBody">
-                                <tr><td colspan="7" class="text-center text-secondary py-4">Seleccione una empresa para cargar los datos migrados.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    <div class="d-flex justify-content-between align-items-center mt-3 text-secondary small">
-                        <div>
-                            Mostrando del <span id="migratedRangeStart">0</span> al <span id="migratedRangeEnd">0</span> de <span id="migratedTotalCount">0</span> registros
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-ghost btn-sm" id="btnMigratedPrev" onclick="changeMigratedPage(-1)" disabled>
-                                <i class="bi bi-chevron-left"></i> Anterior
-                            </button>
-                            <button class="btn btn-ghost btn-sm" id="btnMigratedNext" onclick="changeMigratedPage(1)" disabled>
-                                <i class="bi bi-chevron-right"></i> Siguiente
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL: Programar Frecuencia Automática -->
-<div class="modal fade modal-dark" id="scheduleModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header border-bottom-0">
-                <h5 class="modal-title" id="scheduleModalTitle"><i class="bi bi-alarm-fill text-primary me-2"></i>Programar Ejecución Automática</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="scheduleForm">
-                    <input type="hidden" id="editScheduleId">
-                    <div class="mb-3">
-                        <label class="form-label-dark small">Empresa</label>
-                        <select class="form-select-dark" id="schedCompany" onchange="onSchedCompanyChange()" required>
-                            <option value="">-- Seleccionar Empresa --</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label-dark small">Subcategoría</label>
-                        <select class="form-select-dark" id="schedSubcategory">
-                            <option value="">-- Todas las Subcategorías (Recomendado) --</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label-dark small">Frecuencia</label>
-                        <select class="form-select-dark" id="schedFrequency" onchange="toggleSchedInputs()" required>
-                            <option value="MINUTES">Cada X Minutos</option>
-                            <option value="DAILY">Diario (Hora específica)</option>
-                            <option value="WEEKLY">Semanal (Día y hora específica)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3" id="divMinutes" style="display: none;">
-                        <label class="form-label-dark small">Intervalo en Minutos</label>
-                        <select class="form-select-dark" id="schedMinutesVal">
-                            <option value="5">Cada 5 Minutos</option>
-                            <option value="10">Cada 10 Minutos</option>
-                            <option value="15">Cada 15 Minutos</option>
-                            <option value="30">Cada 30 Minutos</option>
-                            <option value="60">Cada Hora</option>
-                        </select>
-                    </div>
-                    
-                    <div class="row g-2 mb-3" id="divTime" style="display: none;">
-                        <div class="col-12" id="divDayOfWeek" style="display: none;">
-                            <label class="form-label-dark small">Día de la Semana</label>
-                            <select class="form-select-dark" id="schedDayOfWeek">
-                                <option value="mon">Lunes</option>
-                                <option value="tue">Martes</option>
-                                <option value="wed">Miércoles</option>
-                                <option value="thu">Jueves</option>
-                                <option value="fri">Viernes</option>
-                                <option value="sat">Sábado</option>
-                                <option value="sun">Domingo</option>
-                            </select>
-                        </div>
-                        <div class="col-12 mt-2">
-                            <label class="form-label-dark small">Hora de Ejecución</label>
-                            <input type="time" class="form-control-dark" id="schedTimeVal" value="08:00">
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer border-top-0">
-                <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn-accent" onclick="saveSchedule()">Guardar Programación</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL: Ver Detalles del Log (Historial Completo de Filas y Tablas) -->
-<div class="modal fade modal-dark" id="logDetailsModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header border-bottom-0">
-                <h5 class="modal-title"><i class="bi bi-journal-text text-primary me-2"></i>Historial de Ejecución y Auditoría Completa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3 row text-secondary small">
-                    <div class="col-md-4"><strong>Empresa:</strong> <span id="detailCompany" class="text-light"></span></div>
-                    <div class="col-md-4"><strong>Fecha:</strong> <span id="detailDate" class="text-light"></span></div>
-                    <div class="col-md-4"><strong>Estado:</strong> <span id="detailStatus"></span></div>
-                    <div class="col-12 mt-2"><strong>Resumen general:</strong> <div id="detailMessage" class="text-light mt-1"></div></div>
-                </div>
-
-                <div class="mt-4 border-top border-secondary pt-3">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
-                        <h6 class="text-light fw-semibold d-flex align-items-center mb-0">
-                            <i class="bi bi-list-check me-2 text-primary"></i> Filas y Tablas Procesadas (<span id="detailLogCount">0</span>)
-                        </h6>
-                        <div class="d-flex gap-2">
-                            <input type="text" class="form-control-dark form-control-sm w-auto" id="modalSearchInput" placeholder="Buscar..." oninput="filterModalTable()">
-                            <select class="form-select-dark form-select-sm w-auto" id="modalStatusFilter" onchange="filterModalTable()">
-                                <option value="">-- Todos los Estados --</option>
-                                <option value="SUCCESS">✅ Éxitos</option>
-                                <option value="ERROR">❌ Fallas</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                        <table class="table-dark-custom mb-0" id="detailErrorsTable">
-                            <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 1;">
-                                <tr>
-                                    <th>Paso</th>
-                                    <th>Subcategoría</th>
-                                    <th>Referencia / Asiento</th>
-                                    <th>Tabla / Campo</th>
-                                    <th>Estado</th>
-                                    <th>Detalles / Error</th>
-                                    <th class="text-end">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody id="detailErrorsBody">
-                                <tr><td colspan="7" class="text-center text-muted">Ningún registro procesado.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer border-top-0">
-                <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL: Ver Fila Completa de Staging -->
-<div class="modal fade modal-dark" id="stagingRowModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header border-bottom-0">
-                <h5 class="modal-title"><i class="bi bi-eye-fill text-info me-2"></i>Detalle Completo de Fila en Staging</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Status Banner / Explicación del Estado del Asiento -->
-                <div id="stagingRowStatusInfo" class="mb-3"></div>
-
-                <div class="table-responsive" style="max-height: 550px;">
-                    <table class="table-dark-custom">
-                        <thead>
-                            <tr>
-                                <th style="width: 35%;">Campo / Columna</th>
-                                <th>Valor Mapeado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="stagingRowModalBody">
-                            <!-- Populated dynamically in JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer border-top-0">
-                <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL: Registrar/Editar Correlativo y Columnas de Periodo/Mes -->
-<div class="modal fade modal-dark" id="correlativoModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header border-bottom-0">
-                <h5 class="modal-title" id="correlativoModalTitle"><i class="bi bi-hash text-primary me-2"></i>Registrar Correlativo por Periodo/Mes</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="correlativoForm">
-                    <input type="hidden" id="editCorrelativoId">
-                    <div class="mb-3" id="divCorrCompany">
-                        <label class="form-label-dark">Empresa</label>
-                        <select class="form-select-dark" id="corrCompany" onchange="onCorrCompanyChange()" required>
-                            <option value="">-- Seleccionar Empresa --</option>
-                        </select>
-                    </div>
-                    <div class="mb-3" id="divCorrSubcategory">
-                        <label class="form-label-dark">Subcategoría</label>
-                        <select class="form-select-dark" id="corrSubcategory" onchange="onCorrSubcatChange()" required disabled>
-                            <option value="">-- Seleccionar Subcategoría --</option>
-                        </select>
-                    </div>
-                    <div class="row">
-                        <div class="col-6 mb-3" id="divCorrPeriodo">
-                            <label class="form-label-dark">Periodo (Año)</label>
-                            <input type="text" class="form-control-dark" id="corrPeriodo" placeholder="Ej: 2026" required>
-                        </div>
-                        <div class="col-6 mb-3" id="divCorrMes">
-                            <label class="form-label-dark">Mes</label>
-                            <select class="form-select-dark" id="corrMes" required>
-                                <option value="">-- Seleccionar --</option>
-                                <option value="01">01 - Ene</option>
-                                <option value="02">02 - Feb</option>
-                                <option value="03">03 - Mar</option>
-                                <option value="04">04 - Abr</option>
-                                <option value="05">05 - May</option>
-                                <option value="06">06 - Jun</option>
-                                <option value="07">07 - Jul</option>
-                                <option value="08">08 - Ago</option>
-                                <option value="09">09 - Set</option>
-                                <option value="10">10 - Oct</option>
-                                <option value="11">11 - Nov</option>
-                                <option value="12">12 - Dic</option>
-                        </div>
-                    </div>
-                    <div class="mb-3 form-check" id="divCorrBulk" style="padding-left: 1.8em;">
-                        <input type="checkbox" class="form-check-input" id="corrBulkYear" onchange="toggleCorrBulk(this)">
-                        <label class="form-check-label text-muted small" for="corrBulkYear">
-                            <strong>Registrar Año Completo (12 meses)</strong><br>
-                            <span style="font-size:0.75rem;">Creará/sincronizará la configuración para todos los meses (01 a 12) del año.</span>
-                        </label>
-                    </div>
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label class="form-label-dark">Columna Periodo (Origen)</label>
-                            <input type="text" class="form-control-dark" id="corrColPeriodo" placeholder="Ej: anos" list="corrPeriodColsList">
-                            <datalist id="corrPeriodColsList"></datalist>
-                        </div>
-                        <div class="col-6 mb-3">
-                            <label class="form-label-dark">Columna Mes (Origen)</label>
-                            <input type="text" class="form-control-dark" id="corrColMes" placeholder="Ej: c_mes" list="corrMesColsList">
-                            <datalist id="corrMesColsList"></datalist>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label class="form-label-dark">Asiento Inicial</label>
-                            <input type="number" class="form-control-dark" id="corrAsientoInicial" value="1" min="1" required>
-                        </div>
-                        <div class="col-6 mb-3">
-                            <label class="form-label-dark">Último Asiento (Asiento Actual)</label>
-                            <input type="number" class="form-control-dark" id="corrAsientoActual" value="0" min="0" required>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer border-top-0">
-                <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn-accent" onclick="saveCorrelativo()">Guardar Correlativo</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL: Ver Fila en Horizontal (Base Intermedia) -->
-<div class="modal fade modal-dark" id="rawRowDetailModal" tabindex="-1">
-    <div class="modal-dialog modal-fullscreen-md-down modal-xl">
-        <div class="modal-content">
-            <div class="modal-header border-bottom-0">
-                <h5 class="modal-title"><i class="bi bi-database text-info me-2"></i>Fila Original en Base Intermedia - <code id="rawRowDetailTable" class="text-info"></code></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-2 text-secondary small">
-                    Muestra todos los campos del registro extraído de la base de datos de origen y almacenados en la tabla intermedia.
-                    <span class="text-light fw-semibold ms-2">ID Control:</span> <span id="rawRowDetailIdControl" class="badge bg-secondary font-monospace"></span>
-                </div>
-                
-                <div class="table-responsive mt-3 rounded border border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
-                    <table class="table-dark-custom mb-0 table-striped">
-                        <thead style="background: rgba(255,255,255,0.02);" id="rawRowDetailHeader">
-                            <!-- Headers dynamically populated -->
-                        </thead>
-                        <tbody id="rawRowDetailBody">
-                            <!-- Row values dynamically populated -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer border-top-0">
-                <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL: Reextraer y Reprocesar -->
-<div class="modal fade modal-dark" id="reextractModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header border-bottom-0">
-                <h5 class="modal-title"><i class="bi bi-arrow-repeat text-warning me-2"></i>Reextraer y Reprocesar (Pendientes / Errores)</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-warning border-0 bg-warning-subtle text-warning py-2 px-3 mb-3 small" style="background: rgba(255,193,7,0.06) !important; border: 1px solid rgba(255,193,7,0.15) !important;">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    Esta ventana muestra el enlace entre los <strong>Asientos en Staging</strong> y los <strong>Registros en la Base Intermedia</strong>.
-                    Al confirmar, se volverán a realizar los 3 pasos (Re-extraer de SQL Server, Regenerar Staging y Migrar a Contasis) solo para estos registros.
-                </div>
-
-                <div id="reextractLoading" class="text-center py-5">
-                    <span class="spinner-border text-primary" role="status"></span>
-                    <p class="text-secondary mt-2">Cargando registros pendientes y sus relaciones...</p>
-                </div>
-
-                <div id="reextractContent" class="d-none">
-                    <div class="row mb-3 pb-2 border-bottom border-secondary" style="border-bottom-color: rgba(255,255,255,0.05) !important;">
-                        <div class="col-6">
-                            <span class="text-secondary small">Subcategoría:</span> <strong id="reextractSubcatName" class="text-light"></strong>
-                        </div>
-                        <div class="col-6 text-end">
-                            <span class="text-secondary small">Tabla Origen:</span> <code id="reextractSourceTable" class="text-info"></code>
-                        </div>
-                    </div>
-
-                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                        <table class="table-dark-custom mb-0" style="font-size: 0.8rem;">
-                            <thead>
-                                <tr>
-                                    <th style="width: 45%;">Asiento Staging / Contasis</th>
-                                    <th class="text-center" style="width: 10%;">Enlace (idcontrol)</th>
-                                    <th style="width: 45%;">Tabla Extraída (Base Intermedia)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="reextractTableBody">
-                                <!-- Populated dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer border-top-0">
-                <button type="button" class="btn-ghost" data-bs-dismiss="modal" id="btnCancelReextract">Cancelar</button>
-                <button type="button" class="btn-accent" id="btnConfirmReextract" onclick="executeReextractReprocess()">Iniciar Reextracción y Reprocesamiento</button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
     // ── Global fetch wrapper: NEVER cache API responses ──────────────
     (function() {
         const _originalFetch = window.fetch;
@@ -978,59 +17,6 @@
         'Authorization': `Bearer ${localStorage.getItem('migconta_token')}`
     };
 
-    let progressInterval = null;
-
-    function showProgressModal(title, text) {
-        if (progressInterval) {
-            clearInterval(progressInterval);
-            progressInterval = null;
-        }
-        
-        let percent = 5;
-        
-        Swal.fire({
-            title: title || 'Procesando...',
-            html: `
-                <div class="text-start mb-3 text-secondary small">
-                    ${text || 'Por favor, espere mientras se realiza la operación. No cierre ni recargue la página.'}
-                </div>
-                <div class="progress" style="height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden;">
-                    <div id="swal-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: ${percent}%; background: linear-gradient(90deg, #bc8cff, #8a2be2) !important; transition: width 0.4s ease;"></div>
-                </div>
-                <div class="d-flex justify-content-between mt-2 text-secondary small" style="font-size: 0.75rem;">
-                    <span>Estado: <strong class="text-info animate-pulse-slow">Ejecutando proceso...</strong></span>
-                    <span>Progreso: <strong id="swal-progress-percent" class="text-light">${percent}%</strong></span>
-                </div>
-            `,
-            showConfirmButton: false,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            background: '#161b22',
-            color: '#fff',
-            didOpen: () => {
-                // NOTE: Do NOT call Swal.showLoading() here — it hides the custom HTML
-                // and replaces it with a generic spinner, making the modal appear dark/empty.
-                const bar = document.getElementById('swal-progress-bar');
-                const percentText = document.getElementById('swal-progress-percent');
-                
-                progressInterval = setInterval(() => {
-                    if (percent < 95) {
-                        const increment = Math.max(1, Math.floor((95 - percent) / 8));
-                        percent += increment;
-                        if (bar) bar.style.width = percent + '%';
-                        if (percentText) percentText.textContent = percent + '%';
-                    }
-                }, 500);
-            },
-            willClose: () => {
-                if (progressInterval) {
-                    clearInterval(progressInterval);
-                    progressInterval = null;
-                }
-            }
-        });
-    }
-
     let allCompanies = [];
     let scheduleModalObj = null;
     let logDetailsModalObj = null;
@@ -1044,10 +30,6 @@
 
     // Startup
     $(document).ready(function() {
-        if ($.fn.dataTable) {
-            $.fn.dataTable.ext.errMode = 'none';
-        }
-
         scheduleModalObj = new bootstrap.Modal(document.getElementById('scheduleModal'));
         logDetailsModalObj = new bootstrap.Modal(document.getElementById('logDetailsModal'));
         stagingRowModalObj = new bootstrap.Modal(document.getElementById('stagingRowModal'));
@@ -1106,8 +88,6 @@
         
         if (!compId) {
             tbody.innerHTML = '<tr><td colspan="7" class="text-center text-secondary py-4">Seleccione una empresa para ver el resumen de staging.</td></tr>';
-            const chartsRow = document.getElementById('summaryChartsRow');
-            if (chartsRow) chartsRow.classList.add('d-none');
             return;
         }
 
@@ -1121,8 +101,6 @@
             
             if (data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center text-secondary py-4">No hay datos de staging para esta empresa.</td></tr>';
-                const chartsRow = document.getElementById('summaryChartsRow');
-                if (chartsRow) chartsRow.classList.add('d-none');
                 return;
             }
 
@@ -1163,11 +141,11 @@
                         </td>
                         <td class="text-end">
                             <button class="btn btn-outline-primary btn-sm px-2 py-0" style="font-size:0.75rem;" 
-                                onclick="event.stopPropagation(); reprocessSubcategory(${compId}, ${s.subcategoria_id}, '${(s.subcategoria_nombre || '').replace(/'/g, "\\'")}', this)">
+                                onclick="event.stopPropagation(); reprocessSubcategory(${compId}, ${s.subcategoria_id}, '${s.subcategoria_nombre}', this)">
                                 <i class="bi bi-arrow-clockwise me-1"></i> Reprocesar
                             </button>
                             <button class="btn btn-outline-warning btn-sm px-2 py-0 ms-1" style="font-size:0.75rem;" 
-                                onclick="event.stopPropagation(); openReextractModal(${compId}, ${s.subcategoria_id}, '${(s.subcategoria_nombre || '').replace(/'/g, "\\'")}', null)">
+                                onclick="event.stopPropagation(); openReextractModal(${compId}, ${s.subcategoria_id}, '${s.subcategoria_nombre.replace(/'/g, "\\'")}', null)">
                                 <i class="bi bi-arrow-repeat me-1"></i> Reextraer
                             </button>
                         </td>
@@ -1188,7 +166,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        ${s.periodos && s.periodos.length > 0 ? s.periodos.map(p => {
+                                        ${(s.periodos || []).map(p => {
                                             const subPct = p.total > 0 ? Math.round((p.migrado / p.total) * 100) : 0;
                                             let subProgColor = 'bg-warning';
                                             if (subPct >= 100) subProgColor = 'bg-success';
@@ -1222,7 +200,7 @@
                                                     </td>
                                                 </tr>
                                             `;
-                                        }).join('') : `<tr><td colspan="7" class="text-center text-secondary py-2">No hay registros generados en staging para esta subcategoría.</td></tr>`}
+                                        }).join('')}
                                     </tbody>
                                 </table>
                             </div>
@@ -1230,178 +208,10 @@
                     </tr>
                 `;
             });
-
-            // Show charts row and render them
-            const chartsRow = document.getElementById('summaryChartsRow');
-            if (chartsRow) chartsRow.classList.remove('d-none');
-            renderSummaryCharts(data);
-
         } catch (err) {
             console.error("Error loading staging summary:", err);
             tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Error al cargar resumen.</td></tr>';
-            const chartsRow = document.getElementById('summaryChartsRow');
-            if (chartsRow) chartsRow.classList.add('d-none');
         }
-    }
-
-    function renderSummaryCharts(data) {
-        // Destroy existing chart instances
-        if (globalPieChartInstance) {
-            globalPieChartInstance.destroy();
-            globalPieChartInstance = null;
-        }
-        if (subcatBarChartInstance) {
-            subcatBarChartInstance.destroy();
-            subcatBarChartInstance = null;
-        }
-
-        // Calculate global sums
-        let totalPendientes = 0;
-        let totalMigrados = 0;
-        let totalErrores = 0;
-
-        const subcatLabels = [];
-        const dataPendientes = [];
-        const dataMigrados = [];
-        const dataErrores = [];
-
-        data.forEach(s => {
-            totalPendientes += s.pendiente || 0;
-            totalMigrados += s.migrado || 0;
-            totalErrores += s.error || 0;
-
-            // Shorten subcategory names for visual spacing on bar chart
-            let shortName = s.subcategoria_nombre || '';
-            if (shortName.length > 25) {
-                shortName = shortName.substring(0, 22) + '...';
-            }
-            subcatLabels.push(shortName);
-            dataPendientes.push(s.pendiente || 0);
-            dataMigrados.push(s.migrado || 0);
-            dataErrores.push(s.error || 0);
-        });
-
-        // 1. Render Pie/Doughnut Chart
-        const pieCtx = document.getElementById('globalSummaryPieChart').getContext('2d');
-        globalPieChartInstance = new Chart(pieCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Migrados', 'Pendientes', 'Errores'],
-                datasets: [{
-                    data: [totalMigrados, totalPendientes, totalErrores],
-                    backgroundColor: [
-                        'rgba(46, 160, 67, 0.85)',   // Premium success green
-                        'rgba(210, 153, 34, 0.85)',   // Premium warning gold
-                        'rgba(248, 81, 73, 0.85)'     // Premium danger red
-                    ],
-                    borderColor: [
-                        '#2ea043',
-                        '#d29922',
-                        '#f85149'
-                    ],
-                    borderWidth: 1.5,
-                    hoverOffset: 10
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: '#8b949e',
-                            font: { family: 'Outfit, Inter, system-ui, sans-serif', size: 11 },
-                            padding: 15
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: '#161b22',
-                        titleColor: '#ff7b72',
-                        bodyColor: '#fff',
-                        borderColor: 'rgba(88, 166, 255, 0.2)',
-                        borderWidth: 1
-                    }
-                },
-                cutout: '65%'
-            }
-        });
-
-        // 2. Render Stacked Horizontal Bar Chart
-        const barCtx = document.getElementById('subcatBarChart').getContext('2d');
-        subcatBarChartInstance = new Chart(barCtx, {
-            type: 'bar',
-            data: {
-                labels: subcatLabels,
-                datasets: [
-                    {
-                        label: 'Migrados',
-                        data: dataMigrados,
-                        backgroundColor: 'rgba(46, 160, 67, 0.7)',
-                        borderColor: '#2ea043',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Pendientes',
-                        data: dataPendientes,
-                        backgroundColor: 'rgba(210, 153, 34, 0.7)',
-                        borderColor: '#d29922',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Errores',
-                        data: dataErrores,
-                        backgroundColor: 'rgba(248, 81, 73, 0.7)',
-                        borderColor: '#f85149',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: '#8b949e',
-                            font: { family: 'Outfit, Inter, system-ui, sans-serif', size: 11 }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: '#161b22',
-                        borderColor: 'rgba(88, 166, 255, 0.2)',
-                        borderWidth: 1,
-                        mode: 'index',
-                        intersect: false
-                    }
-                },
-                scales: {
-                    x: {
-                        stacked: true,
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.05)',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            color: '#8b949e',
-                            font: { size: 10 }
-                        }
-                    },
-                    y: {
-                        stacked: true,
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            color: '#8b949e',
-                            font: { size: 10 }
-                        }
-                    }
-                }
-            }
-        });
     }
 
     // Toggle subcategory detailed periods
@@ -1437,58 +247,33 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
-        setTimeout(async () => {
-            showProgressModal('Reprocesando...', `Se están regenerando y migrando los registros para: <strong>${subcatName}</strong>.`);
+        try {
+            const res = await fetch('/api/v1/etl/reprocess-row', {
+                method: 'POST',
+                headers: authHeaders,
+                body: JSON.stringify({
+                    company_id: companyId,
+                    step: 'MIGRATION',
+                    table: 'cf_diariol',
+                    reference: '',
+                    subcategoria_id: subcatId
+                })
+            });
 
-            try {
-                const res = await fetch('/api/v1/etl/reprocess-row', {
-                    method: 'POST',
-                    headers: authHeaders,
-                    body: JSON.stringify({
-                        company_id: companyId,
-                        step: 'MIGRATION',
-                        table: 'cf_diariol',
-                        reference: '',
-                        subcategoria_id: subcatId
-                    })
-                });
-
-                const data = await res.json();
-                if (res.ok && data.status === 'SUCCESS') {
-                    Swal.fire({
-                        title: '¡Completado!',
-                        html: `<div class="text-start small">${data.message || `${subcatName} reprocesada correctamente.`}</div>`,
-                        icon: 'success',
-                        background: '#161b22',
-                        color: '#fff',
-                        confirmButtonColor: '#bc8cff'
-                    });
-                    loadStagingSummary();
-                    loadRealtimeLogs();
-                } else {
-                    Swal.fire({
-                        title: 'Error',
-                        html: `<div class="text-start small text-danger">${data.detail || 'Fallo al reprocesar subcategoría.'}</div>`,
-                        icon: 'error',
-                        background: '#161b22',
-                        color: '#fff',
-                        confirmButtonColor: '#bc8cff'
-                    });
-                }
-            } catch (err) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Error de red al intentar reprocesar la subcategoría.',
-                    icon: 'error',
-                    background: '#161b22',
-                    color: '#fff',
-                    confirmButtonColor: '#bc8cff'
-                });
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalHtml;
+            const data = await res.json();
+            if (res.ok && data.status === 'SUCCESS') {
+                showToast('success', data.message || `${subcatName} reprocesada correctamente`);
+                loadStagingSummary();
+                loadRealtimeLogs();
+            } else {
+                showToast('error', data.detail || 'Fallo al reprocesar subcategoría');
             }
-        }, 150);
+        } catch (err) {
+            showToast('error', 'Error de red');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
     }
 
     async function clearAndReprocessPeriod(companyId, subcatId, subcatName, periodo, mes, btn) {
@@ -1503,7 +288,7 @@
                     </ul>
                     <div class="alert alert-warning py-2 px-3 mb-0" style="font-size: 0.85rem; background: rgba(255,193,7,0.1); border: 1px solid rgba(255,193,7,0.2); color: #ffc107;">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        Esta acción <strong>NO</strong> borrará datos del sistema final Contasis (debe eliminarlos manualmente en Contasis si lo desea). Solo limpiará la base intermedia para permitir volver a procesar y migrar.
+                        Esta action <strong>NO</strong> borrará datos del sistema final Contasis (debe eliminarlos manualmente en Contasis si lo desea). Solo limpiará la base intermedia para permitir volver a procesar y migrar.
                     </div>
                 </div>
             `,
@@ -1523,59 +308,34 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
-        setTimeout(async () => {
-            showProgressModal('Reiniciando Periodo...', `Reiniciando staging para la subcategoría: <strong>${subcatName}</strong> y periodo: <strong>${periodo}-${mes}</strong>.`);
+        try {
+            const res = await fetch('/api/v1/etl/clear-period-staging', {
+                method: 'POST',
+                headers: authHeaders,
+                body: JSON.stringify({
+                    company_id: companyId,
+                    subcategoria_id: subcatId,
+                    periodo: periodo,
+                    mes: mes
+                })
+            });
 
-            try {
-                const res = await fetch('/api/v1/etl/clear-period-staging', {
-                    method: 'POST',
-                    headers: authHeaders,
-                    body: JSON.stringify({
-                        company_id: companyId,
-                        subcategoria_id: subcatId,
-                        periodo: periodo,
-                        mes: mes
-                    })
-                });
-
-                const data = await res.json();
-                if (res.ok && data.status === 'SUCCESS') {
-                    Swal.fire({
-                        title: '¡Reiniciado!',
-                        html: `<div class="text-start small">${data.message || `Periodo ${periodo}-${mes} reiniciado correctamente.`}</div>`,
-                        icon: 'success',
-                        background: '#161b22',
-                        color: '#fff',
-                        confirmButtonColor: '#bc8cff'
-                    });
-                    loadStagingSummary();
-                    if (typeof loadRealtimeLogs === 'function') {
-                        loadRealtimeLogs();
-                    }
-                } else {
-                    Swal.fire({
-                        title: 'Error',
-                        html: `<div class="text-start small text-danger">${data.detail || 'Fallo al reiniciar el periodo.'}</div>`,
-                        icon: 'error',
-                        background: '#161b22',
-                        color: '#fff',
-                        confirmButtonColor: '#bc8cff'
-                    });
+            const data = await res.json();
+            if (res.ok && data.status === 'SUCCESS') {
+                showToast('success', data.message || `Periodo ${periodo}-${mes} reiniciado correctamente`);
+                loadStagingSummary();
+                if (typeof loadRealtimeLogs === 'function') {
+                    loadRealtimeLogs();
                 }
-            } catch (err) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Error de red al intentar reiniciar el periodo.',
-                    icon: 'error',
-                    background: '#161b22',
-                    color: '#fff',
-                    confirmButtonColor: '#bc8cff'
-                });
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalHtml;
+            } else {
+                showToast('error', data.detail || 'Fallo al reiniciar el periodo');
             }
-        }, 150);
+        } catch (err) {
+            showToast('error', 'Error de red');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
     }
 
     // Load Scheduled Tasks of type ETL_REALTIME
@@ -1969,53 +729,15 @@
     // ─── Audit Real-time Logs List & Details ───
     let currentLogsList = [];
 
-    async function onLogCompanyChange() {
-        const compId = document.getElementById('logFilterCompany') ? document.getElementById('logFilterCompany').value : '';
-        const subcatSel = document.getElementById('logFilterSubcategoria');
-        if (!subcatSel) { loadRealtimeLogs(); return; }
-        
-        subcatSel.innerHTML = '<option value="">-- Todas las Subcategorías --</option>';
-        subcatSel.disabled = true;
-        
-        if (compId) {
-            try {
-                const res = await fetch(`/api/v1/mapeo/categorias?company_id=${compId}`, { headers: authHeaders });
-                if (res.ok) {
-                    const cats = await res.json();
-                    (cats || []).forEach(cat => {
-                        if (cat && cat.subcategorias && cat.subcategorias.length) {
-                            cat.subcategorias.forEach(sub => {
-                                if (sub && sub.is_active) {
-                                    const opt = document.createElement('option');
-                                    opt.value = sub.id;
-                                    opt.textContent = `${sub.nombre || ''}`;
-                                    subcatSel.appendChild(opt);
-                                }
-                            });
-                        }
-                    });
-                    if (subcatSel.options.length > 1) subcatSel.disabled = false;
-                }
-            } catch (e) {
-                console.error("Error cargando subcategorías para filtro de logs:", e);
-            }
-        }
-        loadRealtimeLogs();
-    }
-
     async function loadRealtimeLogs() {
         const statusFilter = document.getElementById('logFilterStatus').value;
         const companyFilter = document.getElementById('logFilterCompany') ? document.getElementById('logFilterCompany').value : '';
-        const subcatFilter = document.getElementById('logFilterSubcategoria') ? document.getElementById('logFilterSubcategoria').value : '';
         let url = '/api/v1/etl/realtime-logs?limit=50';
         if (statusFilter) {
             url += `&status=${statusFilter}`;
         }
         if (companyFilter) {
             url += `&company_id=${companyFilter}`;
-        }
-        if (subcatFilter) {
-            url += `&subcategoria_id=${subcatFilter}`;
         }
         
         try {
@@ -2219,8 +941,6 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
 
-        showProgressModal('Reprocesando Registro...', `Reprocesando y migrando el registro con referencia: <strong>${reference || 'N/A'}</strong>.`);
-
         const payload = {
             company_id: companyId,
             step: step,
@@ -2239,14 +959,7 @@
             const data = await res.json();
             
             if (res.ok && data.status === 'SUCCESS') {
-                Swal.fire({
-                    title: '¡Completado!',
-                    html: `<div class="text-start small">${data.message || 'Registro reprocesado correctamente.'}</div>`,
-                    icon: 'success',
-                    background: '#161b22',
-                    color: '#fff',
-                    confirmButtonColor: '#bc8cff'
-                });
+                showToast('success', data.message || 'Reprocesado correctamente');
                 
                 // Update local model array so changes are visible instantly
                 modalErrorsData.forEach(e => {
@@ -2259,26 +972,12 @@
                 renderModalTable();
                 loadRealtimeLogs(); // Refresh background counts
             } else {
-                Swal.fire({
-                    title: 'Error',
-                    html: `<div class="text-start small text-danger">${data.detail || 'Fallo al reprocesar fila.'}</div>`,
-                    icon: 'error',
-                    background: '#161b22',
-                    color: '#fff',
-                    confirmButtonColor: '#bc8cff'
-                });
+                showToast('error', data.detail || 'Fallo al reprocesar fila');
                 btn.disabled = false;
                 btn.innerHTML = originalHtml;
             }
         } catch (err) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Error de red al intentar reprocesar el registro.',
-                icon: 'error',
-                background: '#161b22',
-                color: '#fff',
-                confirmButtonColor: '#bc8cff'
-            });
+            showToast('error', 'Error de red');
             btn.disabled = false;
             btn.innerHTML = originalHtml;
         }
@@ -2286,11 +985,6 @@
 
     // ─── Visor de Asientos en Staging JS ───
     let activeVisorTab = 'staging';
-    let rawDataTableInstance = null;
-    let stagingDataTableInstance = null;
-    let migratedDataTableInstance = null;
-    let globalPieChartInstance = null;
-    let subcatBarChartInstance = null;
 
     function switchVisorTab(tab) {
         activeVisorTab = tab;
@@ -2300,7 +994,6 @@
         const filtersRaw = document.getElementById('visorRawFilters');
         const panelStaging = document.getElementById('panelStagingContainer');
         const panelRaw = document.getElementById('panelRawContainer');
-        const companyFilter = document.getElementById('visorCompanyFilterContainer');
 
         if (tab === 'staging') {
             tabStaging.classList.add('active');
@@ -2310,8 +1003,6 @@
             tabRaw.classList.remove('text-light');
             tabRaw.classList.add('text-secondary');
 
-            companyFilter.classList.remove('d-none');
-            filtersStaging.className = "col-md-9";
             filtersStaging.classList.remove('d-none');
             filtersRaw.classList.add('d-none');
             panelStaging.classList.remove('d-none');
@@ -2326,8 +1017,6 @@
             tabStaging.classList.remove('text-light');
             tabStaging.classList.add('text-secondary');
 
-            companyFilter.classList.add('d-none');
-            filtersRaw.className = "col-md-12";
             filtersRaw.classList.remove('d-none');
             filtersStaging.classList.add('d-none');
             panelRaw.classList.remove('d-none');
@@ -2338,12 +1027,15 @@
     }
 
     async function loadRawTablesList() {
+        const compId = document.getElementById('visorCompany').value;
         const select = document.getElementById('visorRawTable');
+        if (!compId) return;
+
         select.innerHTML = '<option value="">-- Seleccionar Tabla --</option>';
         select.disabled = true;
 
         try {
-            const res = await fetch(`/api/v1/etl/raw-tables`, { headers: authHeaders });
+            const res = await fetch(`/api/v1/etl/raw-tables/${compId}`, { headers: authHeaders });
             if (res.ok) {
                 const tables = await res.json();
                 tables.forEach(t => {
@@ -2359,28 +1051,34 @@
         }
     }
 
-    async function loadRawRows() {
+    let rawSkip = 0;
+    const rawLimit = 50;
+
+    async function loadRawRows(skip = 0) {
+        rawSkip = skip;
+        const compId = document.getElementById('visorCompany').value;
         const tableDest = document.getElementById('visorRawTable').value;
+        if (!compId) return;
+
         const header = document.getElementById('visorRawTableHeader');
         const tbody = document.getElementById('visorRawTableBody');
-
-        if (rawDataTableInstance) {
-            rawDataTableInstance.destroy();
-            rawDataTableInstance = null;
-            header.innerHTML = '';
-            tbody.innerHTML = '';
-        }
 
         if (!tableDest) {
             header.innerHTML = '<tr><th>Columna 1</th><th>Columna 2</th><th>Columna 3</th></tr>';
             tbody.innerHTML = '<tr><td colspan="3" class="text-center text-secondary py-4">Seleccione una tabla para cargar los datos extraídos.</td></tr>';
-            document.getElementById('visorRawPaginationContainer').classList.add('d-none');
+            document.getElementById('visorRawRangeStart').textContent = '0';
+            document.getElementById('visorRawRangeEnd').textContent = '0';
+            document.getElementById('visorRawTotalCount').textContent = '0';
+            document.getElementById('btnVisorRawPrev').disabled = true;
+            document.getElementById('btnVisorRawNext').disabled = true;
             return;
         }
 
         tbody.innerHTML = `<tr><td colspan="10" class="text-center text-secondary py-4"><span class="spinner-sm"></span> Cargando datos extraídos de la tabla '${tableDest}'...</td></tr>`;
 
-        const url = `/api/v1/etl/raw-table-data/${tableDest}?skip=0&limit=1000000`;
+        const search = document.getElementById('visorRawSearch').value;
+        let url = `/api/v1/etl/raw-table-data/${compId}/${tableDest}?skip=${rawSkip}&limit=${rawLimit}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
 
         try {
             const res = await fetch(url, { headers: authHeaders });
@@ -2392,21 +1090,26 @@
 
             const data = await res.json();
             const cols = data.columns || [];
-            const rows = data.items || [];
 
             header.innerHTML = '';
             const trHead = document.createElement('tr');
             cols.forEach(c => {
                 const th = document.createElement('th');
-                th.textContent = c.toUpperCase();
+                th.textContent = c;
                 trHead.appendChild(th);
             });
             header.appendChild(trHead);
 
             tbody.innerHTML = '';
+            const rows = data.items || [];
 
             if (rows.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="${cols.length || 1}" class="text-center text-secondary py-4">No se encontraron registros.</td></tr>`;
+                document.getElementById('visorRawRangeStart').textContent = '0';
+                document.getElementById('visorRawRangeEnd').textContent = '0';
+                document.getElementById('visorRawTotalCount').textContent = '0';
+                document.getElementById('btnVisorRawPrev').disabled = true;
+                document.getElementById('btnVisorRawNext').disabled = true;
                 return;
             }
 
@@ -2431,26 +1134,24 @@
                 tbody.appendChild(tr);
             });
 
-            document.getElementById('visorRawPaginationContainer').classList.add('d-none');
+            const start = rawSkip + 1;
+            const end = rawSkip + rows.length;
+            document.getElementById('visorRawRangeStart').textContent = start;
+            document.getElementById('visorRawRangeEnd').textContent = end;
+            document.getElementById('visorRawTotalCount').textContent = data.total;
 
-            const tableEl = document.querySelector('#panelRawContainer table');
-            rawDataTableInstance = $(tableEl).DataTable({
-                deferRender: true,
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-                },
-                dom: '<"d-flex justify-content-between align-items-center mb-3"Bf>rt<"d-flex justify-content-between align-items-center mt-3"ip>',
-                buttons: [
-                    { extend: 'copy', className: 'btn btn-sm btn-outline-secondary' },
-                    { extend: 'excel', className: 'btn btn-sm btn-outline-success', title: `Base_Intermedia_${tableDest}` }
-                ],
-                pageLength: 15,
-                destroy: true
-            });
-
+            document.getElementById('btnVisorRawPrev').disabled = (rawSkip === 0);
+            document.getElementById('btnVisorRawNext').disabled = (end >= data.total);
         } catch (err) {
             console.error("Error loading raw rows:", err);
             tbody.innerHTML = `<tr><td colspan="10" class="text-center text-danger py-4">Error de red al conectar con el servidor.</td></tr>`;
+        }
+    }
+
+    function changeRawPage(direction) {
+        const newSkip = rawSkip + (direction * rawLimit);
+        if (newSkip >= 0) {
+            loadRawRows(newSkip);
         }
     }
 
@@ -2460,12 +1161,19 @@
         subcatSel.innerHTML = '<option value="">-- Todas --</option>';
         subcatSel.disabled = true;
 
+        // Limpiar controles de tablas raw
+        document.getElementById('visorRawTable').innerHTML = '<option value="">-- Seleccionar Tabla --</option>';
+        document.getElementById('visorRawTable').disabled = true;
+        document.getElementById('visorRawTableHeader').innerHTML = '<tr><th>Columna 1</th><th>Columna 2</th><th>Columna 3</th></tr>';
+        document.getElementById('visorRawTableBody').innerHTML = '<tr><td colspan="3" class="text-center text-secondary py-4">Seleccione una tabla para cargar los datos extraídos.</td></tr>';
+        document.getElementById('visorRawRangeStart').textContent = '0';
+        document.getElementById('visorRawRangeEnd').textContent = '0';
+        document.getElementById('visorRawTotalCount').textContent = '0';
+        document.getElementById('btnVisorRawPrev').disabled = true;
+        document.getElementById('btnVisorRawNext').disabled = true;
+        
         if (!compId) {
-            if (stagingDataTableInstance) {
-                stagingDataTableInstance.destroy();
-                stagingDataTableInstance = null;
-            }
-            document.getElementById('visorTableBody').innerHTML = '<tr><td colspan="8" class="text-center text-secondary py-4">Seleccione una empresa para cargar los datos de staging.</td></tr>';
+            document.getElementById('visorTableBody').innerHTML = '<tr><td colspan="10" class="text-center text-secondary py-4">Seleccione una empresa para cargar los datos de staging.</td></tr>';
             document.getElementById('visorRangeStart').textContent = '0';
             document.getElementById('visorRangeEnd').textContent = '0';
             document.getElementById('visorTotalCount').textContent = '0';
@@ -2495,6 +1203,8 @@
         } catch (e) {
             console.error("Error loading subcategories for visor:", e);
         }
+
+        await loadRawTablesList();
         
         if (activeVisorTab === 'staging') {
             loadStagingRows(0);
@@ -2508,21 +1218,11 @@
 
     async function loadStagingRows(skip = 0) {
         visorSkip = skip;
-
-        if (stagingDataTableInstance) {
-            stagingDataTableInstance.destroy();
-            stagingDataTableInstance = null;
-        }
-
         const compId = document.getElementById('visorCompany').value;
+        if (!compId) return;
+
         const tbody = document.getElementById('visorTableBody');
-
-        if (!compId) {
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-secondary py-4">Seleccione una empresa para cargar los datos de staging.</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-secondary py-4"><span class="spinner-sm"></span> Cargando asientos de staging...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="text-center text-secondary py-4"><span class="spinner-sm"></span> Cargando asientos de staging...</td></tr>';
 
         const subcatId = document.getElementById('visorSubcategory').value;
         const periodo = document.getElementById('visorPeriodo').value;
@@ -2541,11 +1241,11 @@
             const res = await fetch(url, { headers: authHeaders });
             const data = res.ok ? await res.json() : { total: 0, items: [] };
             
+            tbody.innerHTML = '';
             currentVisorItems = data.items || [];
             
-            renderStagingOrMigratedTable('visorStagingTableHeader', 'visorTableBody', currentVisorItems, true, compId);
-
             if (data.items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" class="text-center text-secondary py-4">No se encontraron asientos en staging con los filtros seleccionados.</td></tr>';
                 document.getElementById('visorRangeStart').textContent = '0';
                 document.getElementById('visorRangeEnd').textContent = '0';
                 document.getElementById('visorTotalCount').textContent = '0';
@@ -2553,6 +1253,50 @@
                 document.getElementById('btnVisorNext').disabled = true;
                 return;
             }
+
+            data.items.forEach(r => {
+                let stateBadge = '';
+                if (r.estado === 'MIGRADO') {
+                    stateBadge = '<span class="badge bg-success-subtle text-success"><i class="bi bi-check-circle me-1"></i>MIGRADO</span>';
+                } else if (r.estado === 'PENDIENTE' || r.estado === '1') {
+                    stateBadge = '<span class="badge bg-warning-subtle text-warning"><i class="bi bi-clock me-1"></i>PENDIENTE</span>';
+                } else {
+                    stateBadge = `<span class="badge bg-danger-subtle text-danger"><i class="bi bi-exclamation-triangle me-1"></i>${r.estado || 'PENDIENTE'}</span>`;
+                }
+
+                const actionsHtml = `
+                    <div class="d-flex gap-1 justify-content-end">
+                        <button class="btn btn-outline-info btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="viewStagingRowDetail(${r.id})">
+                            <i class="bi bi-eye"></i> Ver Fila
+                        </button>
+                        <button class="btn btn-outline-info btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="viewRawRowDetail(${compId}, ${r.subcategoria_id}, '${r.idcontrol}')" ${r.idcontrol ? '' : 'disabled'} title="Ver fila original en base intermedia">
+                            <i class="bi bi-database"></i> Origen
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="reprocessVisorRow(${compId}, ${r.subcategoria_id}, '${r.nasiento}', this)">
+                            <i class="bi bi-arrow-clockwise"></i> Reprocesar
+                        </button>
+                        <button class="btn btn-outline-warning btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="openReextractModal(${compId}, ${r.subcategoria_id}, '${r.subcategoria_nombre.replace(/'/g, "\\'")}', '${r.nasiento}')">
+                            <i class="bi bi-arrow-repeat"></i> Reextraer
+                        </button>
+                    </div>
+                `;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="font-monospace text-secondary" style="font-size:0.75rem;">${r.cper}-${r.cmes}</td>
+                        <td class="small" title="${r.subcategoria_nombre}">${r.subcategoria_nombre}</td>
+                        <td class="fw-semibold text-light font-monospace">${r.nasiento}</td>
+                        <td class="text-secondary font-monospace" style="font-size:0.75rem;">${r.nidlin}</td>
+                        <td class="font-monospace text-secondary" style="font-size:0.75rem;">${r.idcontrol || '-'}</td>
+                        <td class="font-monospace text-info" style="font-size:0.75rem;">${r.ccodcue}</td>
+                        <td class="text-end font-monospace text-success">${r.ndebe > 0 ? r.ndebe.toFixed(2) : '-'}</td>
+                        <td class="text-end font-monospace text-danger">${r.nhaber > 0 ? r.nhaber.toFixed(2) : '-'}</td>
+                        <td class="text-truncate text-secondary small" style="max-width: 250px;" title="${r.cglosa || ''}">${r.cglosa || ''}</td>
+                        <td>${stateBadge}</td>
+                        <td class="text-end">${actionsHtml}</td>
+                    </tr>
+                `;
+            });
 
             const start = visorSkip + 1;
             const end = visorSkip + data.items.length;
@@ -2565,7 +1309,7 @@
 
         } catch (err) {
             console.error("Error loading visor staging rows:", err);
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger py-4">Error al cargar datos del servidor.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center text-danger py-4">Error al cargar datos del servidor.</td></tr>';
         }
     }
 
@@ -2580,8 +1324,6 @@
         const originalHtml = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-
-        showProgressModal('Reprocesando Asiento...', `Reprocesando y migrando el Asiento: <strong>${nasiento}</strong>.`);
 
         const payload = {
             company_id: companyId,
@@ -2601,44 +1343,23 @@
             const data = await res.json();
             
             if (res.ok && data.status === 'SUCCESS') {
-                Swal.fire({
-                    title: '¡Completado!',
-                    html: `<div class="text-start small">${data.message || `Asiento ${nasiento} remigrado correctamente.`}</div>`,
-                    icon: 'success',
-                    background: '#161b22',
-                    color: '#fff',
-                    confirmButtonColor: '#bc8cff'
-                });
+                showToast('success', data.message || `Asiento ${nasiento} remigrado correctamente`);
                 loadStagingRows(visorSkip); // Reload current page
                 loadRealtimeLogs(); // Refresh background counts
             } else {
-                Swal.fire({
-                    title: 'Error',
-                    html: `<div class="text-start small text-danger">${data.detail || 'Fallo al reprocesar asiento.'}</div>`,
-                    icon: 'error',
-                    background: '#161b22',
-                    color: '#fff',
-                    confirmButtonColor: '#bc8cff'
-                });
+                showToast('error', data.detail || 'Fallo al reprocesar asiento');
                 btn.disabled = false;
                 btn.innerHTML = originalHtml;
             }
         } catch (err) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Error de red al intentar reprocesar el asiento.',
-                icon: 'error',
-                background: '#161b22',
-                color: '#fff',
-                confirmButtonColor: '#bc8cff'
-            });
+            showToast('error', 'Error de red');
             btn.disabled = false;
             btn.innerHTML = originalHtml;
         }
     }
 
     function viewStagingRowDetail(rowId) {
-        const r = currentVisorItems.find(item => item.id === rowId) || currentMigratedItems.find(item => item.id === rowId);
+        const r = currentVisorItems.find(item => item.id === rowId);
         if (!r) return;
         
         // Buscar errores/advertencias de validación en currentLogsList correspondientes a este registro
@@ -2800,238 +1521,6 @@
         }
     }
 
-    // Helper functions to dynamically render all columns of CfDiariol / staging rows
-    function renderStagingOrMigratedTable(theadId, tbodyId, items, isStaging, compId) {
-        const thead = document.getElementById(theadId);
-        const tbody = document.getElementById(tbodyId);
-
-        if (isStaging) {
-            if (stagingDataTableInstance) {
-                stagingDataTableInstance.destroy();
-                stagingDataTableInstance = null;
-            }
-        } else {
-            if (migratedDataTableInstance) {
-                migratedDataTableInstance.destroy();
-                migratedDataTableInstance = null;
-            }
-        }
-
-        thead.innerHTML = '';
-        tbody.innerHTML = '';
-
-        if (!items || items.length === 0) {
-            const colCount = isStaging ? 8 : 7;
-            tbody.innerHTML = `<tr><td colspan="${colCount}" class="text-center text-secondary py-4">No se encontraron registros.</td></tr>`;
-            return;
-        }
-
-        const excludeKeys = ['id', 'company_id', 'subcategoria_id', 'lote_id', 'estado', 'created_at', 'subcategoria_nombre', 'cper', 'cmes', 'nasiento', 'nidlin', 'idcontrol', 'cglosa'];
-        
-        const dynamicKeys = [];
-        items.forEach(item => {
-            Object.keys(item).forEach(k => {
-                if (!excludeKeys.includes(k) && !dynamicKeys.includes(k)) {
-                    dynamicKeys.push(k);
-                }
-            });
-        });
-        dynamicKeys.sort();
-
-        let headHtml = '<tr>';
-        headHtml += '<th class="text-center">Acción</th>';
-        if (isStaging) {
-            headHtml += '<th class="text-center">Estado</th>';
-        }
-        headHtml += '<th>Per/Mes</th>';
-        headHtml += '<th>Subcategoría</th>';
-        headHtml += '<th>Asiento</th>';
-        headHtml += '<th>Lín</th>';
-        headHtml += '<th>ID Control</th>';
-        
-        dynamicKeys.forEach(k => {
-            let label = k;
-            if (k === 'ccodruc') label = 'RUC';
-            else if (k === 'ccoddoc') label = 'Doc';
-            else if (k === 'ccodmon') label = 'Mon';
-            else if (k === 'ntc') label = 'TC';
-            else if (k === 'ccodcue') label = 'Cuenta';
-            else if (k === 'ndebe') label = 'Debe';
-            else if (k === 'nhaber') label = 'Haber';
-
-            if (k.startsWith('n') && k !== 'nasiento' && k !== 'nidlin') {
-                headHtml += `<th class="text-end">${label}</th>`;
-            } else if (k === 'ccoddoc' || k === 'ccodmon') {
-                headHtml += `<th class="text-center">${label}</th>`;
-            } else {
-                headHtml += `<th>${label}</th>`;
-            }
-        });
-
-        headHtml += '<th>Glosa</th>';
-        headHtml += '</tr>';
-        thead.innerHTML = headHtml;
-
-        items.forEach(r => {
-            let rowHtml = '<tr>';
-            
-            // 1. Column - Acción
-            let actionsHtml = '';
-            if (isStaging) {
-                actionsHtml = `
-                    <div class="d-flex gap-1 justify-content-center">
-                        <button class="btn btn-outline-info btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="viewStagingRowDetail(${r.id})">
-                            <i class="bi bi-eye"></i>
-                        </button>
-                        <button class="btn btn-outline-info btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="viewRawRowDetailByStagingId(${r.id})" ${r.idcontrol ? '' : 'disabled'} title="Ver fila original en base intermedia">
-                            <i class="bi bi-database"></i>
-                        </button>
-                        <button class="btn btn-outline-primary btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="reprocessVisorRow(${compId}, ${r.subcategoria_id}, '${r.nasiento}', this)" title="Reprocesar asiento">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </button>
-                        <button class="btn btn-outline-warning btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="openReextractModal(${compId}, ${r.subcategoria_id}, '${(r.subcategoria_nombre || '').replace(/'/g, "\\'")}', '${r.nasiento}')" title="Reextraer y reprocesar">
-                            <i class="bi bi-arrow-repeat"></i>
-                        </button>
-                    </div>
-                `;
-            } else {
-                actionsHtml = `
-                    <div class="d-flex gap-1 justify-content-center">
-                        <button class="btn btn-outline-info btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="viewStagingRowDetail(${r.id})">
-                            <i class="bi bi-eye"></i>
-                        </button>
-                        <button class="btn btn-outline-info btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="viewRawRowDetailByMigratedId(${r.id})" ${r.idcontrol ? '' : 'disabled'} title="Ver fila original en base intermedia">
-                            <i class="bi bi-database"></i>
-                        </button>
-                        <button class="btn btn-outline-danger btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="resetMigratedRow(${compId}, ${r.subcategoria_id}, '${r.idcontrol}', '${r.nasiento}')" title="Reiniciar asiento">
-                            <i class="bi bi-arrow-counterclockwise"></i>
-                        </button>
-                    </div>
-                `;
-            }
-            rowHtml += `<td class="text-center">${actionsHtml}</td>`;
-
-            // 2. Column - Estado (only if staging)
-            if (isStaging) {
-                let stateBadge = '';
-                if (r.estado === 'MIGRADO') {
-                    stateBadge = '<span class="badge bg-success-subtle text-success" style="font-size: 0.7rem; padding: 2px 6px;"><i class="bi bi-check-circle me-1"></i>MIGRADO</span>';
-                } else if (r.estado === 'PENDIENTE' || r.estado === '1') {
-                    stateBadge = '<span class="badge bg-warning-subtle text-warning" style="font-size: 0.7rem; padding: 2px 6px;"><i class="bi bi-clock me-1"></i>PENDIENTE</span>';
-                } else {
-                    stateBadge = `<span class="badge bg-danger-subtle text-danger" style="font-size: 0.7rem; padding: 2px 6px;"><i class="bi bi-exclamation-triangle me-1"></i>${r.estado || 'PENDIENTE'}</span>`;
-                }
-                rowHtml += `<td class="text-center">${stateBadge}</td>`;
-            }
-
-            // 3. Regular columns
-            rowHtml += `<td class="font-monospace text-secondary" style="font-size:0.75rem;">${r.cper}-${r.cmes}</td>`;
-            rowHtml += `<td class="small" title="${r.subcategoria_nombre}">${r.subcategoria_nombre}</td>`;
-            rowHtml += `<td class="fw-semibold text-light font-monospace">${r.nasiento}</td>`;
-            rowHtml += `<td class="text-secondary font-monospace" style="font-size:0.75rem;">${r.nidlin}</td>`;
-            rowHtml += `<td class="font-monospace text-secondary" style="font-size:0.75rem;">${r.idcontrol || '-'}</td>`;
-
-            dynamicKeys.forEach(k => {
-                const val = r[k];
-                let valDisplay = '';
-                let cellClass = '';
-
-                if (val === null || val === undefined) {
-                    valDisplay = '-';
-                    cellClass = 'text-secondary font-monospace';
-                } else if (typeof val === 'number') {
-                    if (k === 'ntc') {
-                        valDisplay = Number(val).toFixed(3);
-                        cellClass = 'text-secondary text-end font-monospace';
-                    } else if (k === 'ndebe' || k === 'nhaber' || k === 'ndeber' || k === 'nhaberr' || k.startsWith('nbase') || k.startsWith('nigv') || k === 'ntot') {
-                        if (val > 0) {
-                            valDisplay = Number(val).toFixed(2);
-                            cellClass = k === 'ndebe' ? 'text-end font-monospace text-success' : (k === 'nhaber' ? 'text-end font-monospace text-danger' : 'text-end font-monospace text-light');
-                        } else {
-                            valDisplay = '-';
-                            cellClass = 'text-secondary text-end font-monospace';
-                        }
-                    } else {
-                        valDisplay = val.toString();
-                        cellClass = 'text-end font-monospace';
-                    }
-                } else {
-                    valDisplay = val.toString();
-                    if (k === 'ccodruc' || k === 'ccodcue') {
-                        cellClass = 'font-monospace text-secondary';
-                    } else if (k === 'ccoddoc' || k === 'ccodmon') {
-                        cellClass = 'font-monospace text-center';
-                    } else {
-                        cellClass = 'text-light';
-                    }
-                }
-                rowHtml += `<td class="${cellClass}" style="font-size:0.75rem;">${valDisplay}</td>`;
-            });
-
-            rowHtml += `<td class="text-truncate text-secondary small" style="max-width: 200px;" title="${r.cglosa || ''}">${r.cglosa || ''}</td>`;
-            rowHtml += '</tr>';
-
-            tbody.innerHTML += rowHtml;
-        });
-
-        // Initialize DataTable on the newly populated table
-        setTimeout(() => {
-            if (isStaging) {
-                stagingDataTableInstance = $('#stagingTable').DataTable({
-                    paging: false,
-                    searching: false,
-                    info: false,
-                    ordering: true,
-                    columnDefs: [
-                        { targets: [0, 1], orderable: false } // Disable ordering on Acción & Estado
-                    ],
-                    dom: '<"d-flex justify-content-end mb-2"B>rt',
-                    buttons: [
-                        { extend: 'copy', className: 'btn btn-sm btn-outline-secondary' },
-                        { extend: 'excel', className: 'btn btn-sm btn-outline-success', title: 'Staging_Asientos' }
-                    ],
-                    destroy: true
-                });
-            } else {
-                migratedDataTableInstance = $('#migratedTable').DataTable({
-                    paging: false,
-                    searching: false,
-                    info: false,
-                    ordering: true,
-                    columnDefs: [
-                        { targets: [0], orderable: false } // Disable ordering on Acción
-                    ],
-                    dom: '<"d-flex justify-content-end mb-2"B>rt',
-                    buttons: [
-                        { extend: 'copy', className: 'btn btn-sm btn-outline-secondary' },
-                        { extend: 'excel', className: 'btn btn-sm btn-outline-success', title: 'Migrados_Asientos' }
-                    ],
-                    destroy: true
-                });
-            }
-        }, 50);
-    }
-
-    async function viewRawRowDetailByStagingId(id) {
-        const r = currentVisorItems.find(item => item.id === id);
-        if (!r) {
-            showToast('error', 'No se encontró el registro local.');
-            return;
-        }
-        const compId = r.company_id || document.getElementById('visorCompany').value;
-        viewRawRowDetail(compId, r.subcategoria_id, r.idcontrol);
-    }
-
-    async function viewRawRowDetailByMigratedId(id) {
-        const r = currentMigratedItems.find(item => item.id === id);
-        if (!r) {
-            showToast('error', 'No se encontró el registro local.');
-            return;
-        }
-        const compId = r.company_id || document.getElementById('migratedCompany').value;
-        viewRawRowDetail(compId, r.subcategoria_id, r.idcontrol);
-    }
-
     // ─── Control de Migrados JS Functions ───
     let migratedSkip = 0;
     const migratedLimit = 50;
@@ -3073,11 +1562,6 @@
 
     async function loadMigratedRows(skip = 0) {
         migratedSkip = skip;
-
-        if (migratedDataTableInstance) {
-            migratedDataTableInstance.destroy();
-            migratedDataTableInstance = null;
-        }
         
         let compId = document.getElementById('migratedCompany').value;
         if (!compId) {
@@ -3093,7 +1577,7 @@
         const tbody = document.getElementById('migratedTableBody');
         
         if (!compId) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-secondary py-4">Seleccione una empresa para cargar los datos migrados.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center text-secondary py-4">Seleccione una empresa para cargar los datos migrados.</td></tr>';
             document.getElementById('migratedRangeStart').textContent = '0';
             document.getElementById('migratedRangeEnd').textContent = '0';
             document.getElementById('migratedTotalCount').textContent = '0';
@@ -3102,7 +1586,7 @@
             return;
         }
 
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-secondary py-4"><span class="spinner-sm"></span> Cargando datos migrados...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center text-secondary py-4"><span class="spinner-sm"></span> Cargando datos migrados...</td></tr>';
 
         const subcatId = document.getElementById('migratedSubcategory').value;
         const periodo = document.getElementById('migratedPeriodo').value;
@@ -3117,11 +1601,11 @@
             const res = await fetch(url, { headers: authHeaders });
             const data = res.ok ? await res.json() : { total: 0, items: [] };
 
+            tbody.innerHTML = '';
             currentMigratedItems = data.items || [];
 
-            renderStagingOrMigratedTable('migratedTableHeader', 'migratedTableBody', currentMigratedItems, false, compId);
-
             if (data.items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="text-center text-secondary py-4">No se encontraron registros migrados con los filtros seleccionados.</td></tr>';
                 document.getElementById('migratedRangeStart').textContent = '0';
                 document.getElementById('migratedRangeEnd').textContent = '0';
                 document.getElementById('migratedTotalCount').textContent = '0';
@@ -3129,6 +1613,34 @@
                 document.getElementById('btnMigratedNext').disabled = true;
                 return;
             }
+
+            data.items.forEach(r => {
+                const actionsHtml = `
+                    <div class="d-flex gap-1 justify-content-end">
+                        <button class="btn btn-outline-info btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="viewStagingRowDetail(${r.id})">
+                            <i class="bi bi-eye"></i> Ver
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm px-2 py-0" style="font-size:0.7rem;" onclick="resetMigratedRow(${compId}, ${r.subcategoria_id}, '${r.idcontrol}', '${r.nasiento}')">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reiniciar
+                        </button>
+                    </div>
+                `;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="font-monospace text-secondary" style="font-size:0.75rem;">${r.cper}-${r.cmes}</td>
+                        <td class="small" title="${r.subcategoria_nombre}">${r.subcategoria_nombre}</td>
+                        <td class="fw-semibold text-light font-monospace">${r.nasiento}</td>
+                        <td class="text-secondary font-monospace" style="font-size:0.75rem;">${r.nidlin}</td>
+                        <td class="font-monospace text-secondary" style="font-size:0.75rem;">${r.idcontrol || '-'}</td>
+                        <td class="font-monospace text-info" style="font-size:0.75rem;">${r.ccodcue}</td>
+                        <td class="text-end font-monospace text-success">${r.ndebe > 0 ? r.ndebe.toFixed(2) : '-'}</td>
+                        <td class="text-end font-monospace text-danger">${r.nhaber > 0 ? r.nhaber.toFixed(2) : '-'}</td>
+                        <td class="text-truncate text-secondary small" style="max-width: 250px;" title="${r.cglosa || ''}">${r.cglosa || ''}</td>
+                        <td class="text-end">${actionsHtml}</td>
+                    </tr>
+                `;
+            });
 
             const start = migratedSkip + 1;
             const end = migratedSkip + data.items.length;
@@ -3141,7 +1653,7 @@
 
         } catch (err) {
             console.error("Error al cargar registros migrados:", err);
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Error al cargar la información.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center text-danger py-4">Error al cargar la información.</td></tr>';
         }
     }
 
@@ -3911,112 +2423,95 @@
         btnCancel.disabled = true;
         btnConfirm.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando 3 pasos...';
 
-        // Close Bootstrap modal FIRST to prevent double overlay (dark screen)
-        reextractModalObj.hide();
+        try {
+            const res = await fetch('/api/v1/etl/reextract-reprocess', {
+                method: 'POST',
+                headers: authHeaders,
+                body: JSON.stringify({
+                    company_id: currentReextractParams.companyId,
+                    subcategoria_id: currentReextractParams.subcatId,
+                    nasiento: currentReextractParams.nasiento
+                })
+            });
 
-        // Wait 300ms for Bootstrap modal transition to finish completely before opening SweetAlert
-        setTimeout(async () => {
-            showProgressModal('Reextrayendo y Reprocesando...', 'Ejecutando el flujo de 3 pasos (Re-extraer de SQL Server, Generar en Staging y Migrar a Contasis).');
-
-            try {
-                const res = await fetch('/api/v1/etl/reextract-reprocess', {
-                    method: 'POST',
-                    headers: authHeaders,
-                    body: JSON.stringify({
-                        company_id: currentReextractParams.companyId,
-                        subcategoria_id: currentReextractParams.subcatId,
-                        nasiento: currentReextractParams.nasiento
-                    })
+            const data = await res.json();
+            if (res.ok && data.status === 'SUCCESS') {
+                const det = data.details || {};
+                await Swal.fire({
+                    title: '¡Proceso Completado!',
+                    html: `
+                        <div class="text-start small">
+                            <p class="mb-2 text-success"><i class="bi bi-check-circle-fill me-2"></i>Se ejecutó el flujo correctamente:</p>
+                            <ul>
+                                <li><strong>Extraídos (SQL Server):</strong> ${det.reextracted || 0} filas</li>
+                                <li><strong>Generados (Staging):</strong> ${det.generated || 0} filas</li>
+                                <li><strong>Migrados (Contasis):</strong> ${det.migrated || 0} filas</li>
+                            </ul>
+                            <div class="text-muted text-end mt-2 font-monospace" style="font-size:0.7rem;">Lote: ${det.lote_id || '-'}</div>
+                        </div>
+                    `,
+                    icon: 'success',
+                    background: '#161b22',
+                    color: '#fff',
+                    confirmButtonColor: '#bc8cff'
                 });
 
-                const data = await res.json();
-                if (res.ok && data.status === 'SUCCESS') {
-                    const det = data.details || {};
-                    Swal.fire({
-                        title: '¡Proceso Completado!',
-                        html: `
-                            <div class="text-start small">
-                                <p class="mb-2 text-success"><i class="bi bi-check-circle-fill me-2"></i>Se ejecutó el flujo correctamente:</p>
-                                <ul>
-                                    <li><strong>Extraídos (SQL Server):</strong> ${det.reextracted || 0} filas</li>
-                                    <li><strong>Generados (Staging):</strong> ${det.generated || 0} filas</li>
-                                    <li><strong>Migrados (Contasis):</strong> ${det.migrated || 0} filas</li>
-                                </ul>
-                                <div class="text-muted text-end mt-2 font-monospace" style="font-size:0.7rem;">Lote: ${det.lote_id || '-'}</div>
-                            </div>
-                        `,
-                        icon: 'success',
-                        background: '#161b22',
-                        color: '#fff',
-                        confirmButtonColor: '#bc8cff'
-                    });
-
-                    reextractModalObj.hide();
-                    
-                    // Refresh UI
-                    if (typeof loadStagingSummary === 'function') loadStagingSummary();
-                    if (typeof loadRealtimeLogs === 'function') loadRealtimeLogs();
-                    if (activeVisorTab === 'staging') {
-                        if (typeof loadStagingRows === 'function') loadStagingRows(visorSkip);
-                    }
-                } else {
-                    let errorMsg = 'Fallo en la reextracción y reprocesamiento.';
-                    let detailsHtml = '';
-                    let reextracted = 0;
-                    let generated = 0;
-                    if (data && data.detail) {
-                        if (typeof data.detail === 'object') {
-                            errorMsg = data.detail.message || errorMsg;
-                            reextracted = data.detail.reextracted || 0;
-                            generated = data.detail.generated || 0;
-                            if (data.detail.failed_rows && data.detail.failed_rows.length > 0) {
-                                detailsHtml = '<div class="text-start mt-3 p-2 rounded" style="max-height: 200px; overflow-y: auto; background: rgba(255, 0, 0, 0.05); border: 1px solid rgba(255, 0, 0, 0.15);"><small class="text-danger fw-semibold d-block mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>Detalles de error por asiento:</small><ul class="ps-3 mb-0 text-secondary" style="font-size:0.75rem; line-height: 1.4;">';
-                                data.detail.failed_rows.forEach(item => {
-                                    const seat = item.seat || 'Desconocido';
-                                    const err = item.error || 'Error desconocido';
-                                    detailsHtml += `<li class="mb-1"><strong class="text-light">Asiento ${seat}:</strong> <span class="text-danger">${err}</span></li>`;
-                                });
-                                detailsHtml += '</ul></div>';
-                            }
-                        } else {
-                            errorMsg = data.detail;
-                        }
-                    }
-                    
-                    Swal.fire({
-                        title: 'Error en Reprocesamiento',
-                        html: `
-                            <div class="text-start small">
-                                <p class="mb-2 text-danger fw-semibold">${errorMsg}</p>
-                                <ul class="mb-3 text-secondary ps-3" style="font-size:0.8rem; line-height: 1.4;">
-                                    <li><strong>Extraídos (SQL Server):</strong> ${reextracted} filas</li>
-                                    <li><strong>Generados (Staging):</strong> ${generated} filas</li>
-                                    <li><strong>Migrados (Contasis):</strong> 0 (Fallo)</li>
-                                </ul>
-                                ${detailsHtml}
-                            </div>
-                        `,
-                        icon: 'error',
-                        background: '#161b22',
-                        color: '#fff',
-                        confirmButtonColor: '#ff7b72'
-                    });
+                reextractModalObj.hide();
+                
+                // Refresh UI
+                if (typeof loadStagingSummary === 'function') loadStagingSummary();
+                if (typeof loadRealtimeLogs === 'function') loadRealtimeLogs();
+                if (activeVisorTab === 'staging') {
+                    if (typeof loadStagingRows === 'function') loadStagingRows(visorSkip);
                 }
-            } catch (err) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Error de red al procesar la reextracción.',
+            } else {
+                let errorMsg = 'Fallo en la reextracción y reprocesamiento.';
+                let detailsHtml = '';
+                let reextracted = 0;
+                let generated = 0;
+                if (data && data.detail) {
+                    if (typeof data.detail === 'object') {
+                        errorMsg = data.detail.message || errorMsg;
+                        reextracted = data.detail.reextracted || 0;
+                        generated = data.detail.generated || 0;
+                        if (data.detail.failed_rows && data.detail.failed_rows.length > 0) {
+                            detailsHtml = '<div class="text-start mt-3 p-2 rounded" style="max-height: 200px; overflow-y: auto; background: rgba(255, 0, 0, 0.05); border: 1px solid rgba(255, 0, 0, 0.15);"><small class="text-danger fw-semibold d-block mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>Detalles de error por asiento:</small><ul class="ps-3 mb-0 text-secondary" style="font-size:0.75rem; line-height: 1.4;">';
+                            data.detail.failed_rows.forEach(item => {
+                                const seat = item.seat || 'Desconocido';
+                                const err = item.error || 'Error desconocido';
+                                detailsHtml += `<li class="mb-1"><strong class="text-light">Asiento ${seat}:</strong> <span class="text-danger">${err}</span></li>`;
+                            });
+                            detailsHtml += '</ul></div>';
+                        }
+                    } else {
+                        errorMsg = data.detail;
+                    }
+                }
+                
+                await Swal.fire({
+                    title: 'Error en Reprocesamiento',
+                    html: `
+                        <div class="text-start small">
+                            <p class="mb-2 text-danger fw-semibold">${errorMsg}</p>
+                            <ul class="mb-3 text-secondary ps-3" style="font-size:0.8rem; line-height: 1.4;">
+                                <li><strong>Extraídos (SQL Server):</strong> ${reextracted} filas</li>
+                                <li><strong>Generados (Staging):</strong> ${generated} filas</li>
+                                <li><strong>Migrados (Contasis):</strong> 0 (Fallo)</li>
+                            </ul>
+                            ${detailsHtml}
+                        </div>
+                    `,
                     icon: 'error',
                     background: '#161b22',
                     color: '#fff',
                     confirmButtonColor: '#ff7b72'
                 });
-            } finally {
-                btnConfirm.disabled = false;
-                btnCancel.disabled = false;
-                btnConfirm.innerHTML = originalHtml;
             }
-        }, 300);
+        } catch (err) {
+            showToast('error', 'Error de red al procesar.');
+        } finally {
+            btnConfirm.disabled = false;
+            btnCancel.disabled = false;
+            btnConfirm.innerHTML = originalHtml;
+        }
     }
-</script>
-{% endblock %}

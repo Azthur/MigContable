@@ -7,7 +7,7 @@ Se ejecuta como proceso independiente via 'celery -A backend.app.celery_app beat
 from celery import Celery
 from celery.beat import Scheduler, ScheduleEntry
 from celery.schedules import crontab, schedule as interval_schedule
-from datetime import timedelta
+from datetime import timedelta, timezone
 from backend.app.core.database import DestSessionLocal
 import logging
 
@@ -74,7 +74,7 @@ class DatabaseScheduler(Scheduler):
     UPDATE_INTERVAL = timedelta(seconds=60)
     
     def __init__(self, *args, **kwargs):
-        self._last_sync = None
+        self._db_last_sync = None
         super().__init__(*args, **kwargs)
     
     def setup_schedule(self):
@@ -93,12 +93,17 @@ class DatabaseScheduler(Scheduler):
             ).all()
             
             new_entries = {}
+            db_last_run_times = {}
             for cfg in configs:
                 task_name = f"pipeline_{cfg.id}"
                 celery_schedule = parse_schedule(
                     cfg.schedule_type, cfg.schedule_value
                 )
                 
+                last_run = cfg.last_run_at or cfg.created_at
+                if last_run and last_run.tzinfo is None:
+                    last_run = last_run.replace(tzinfo=timezone.utc)
+
                 entry = ScheduleEntry(
                     name=task_name,
                     task="backend.app.celery_tasks.etl_worker.run_etl_pipeline",
@@ -107,8 +112,10 @@ class DatabaseScheduler(Scheduler):
                     kwargs={},
                     options={"queue": "etl", "priority": cfg.priority or 5},
                     app=self.app,
+                    last_run_at=last_run,
                 )
                 new_entries[task_name] = entry
+                db_last_run_times[task_name] = cfg.last_run_at
 
             # 2. Tareas legadas (TC_SUNAT, MES_ROTATION)
             legacy_tasks = db.query(ScheduledTask).filter(
@@ -124,6 +131,10 @@ class DatabaseScheduler(Scheduler):
                     day_of_month=lt.day_of_month
                 )
                 
+                last_run = lt.last_run or lt.created_at
+                if last_run and last_run.tzinfo is None:
+                    last_run = last_run.replace(tzinfo=timezone.utc)
+
                 entry = ScheduleEntry(
                     name=task_name,
                     task="backend.app.celery_tasks.etl_worker.run_legacy_task",
@@ -132,11 +143,46 @@ class DatabaseScheduler(Scheduler):
                     kwargs={},
                     options={"queue": "etl"},
                     app=self.app,
+                    last_run_at=last_run,
                 )
                 new_entries[task_name] = entry
+                db_last_run_times[task_name] = lt.last_run
             
-            # Reemplazar schedule completo
-            self.merge_inplace(new_entries)
+            # Reemplazar/Sincronizar schedule completo
+            schedule = self.schedule
+            # 1. Eliminar tareas que ya no están activas en base de datos
+            for key in list(schedule.keys()):
+                if key not in new_entries:
+                    schedule.pop(key, None)
+            # 2. Agregar nuevas o actualizar existentes, sincronizando last_run_at
+            for key, entry in new_entries.items():
+                if key not in schedule:
+                    schedule[key] = entry
+                else:
+                    existing = schedule[key]
+                    old_last_run_at = existing.last_run_at
+                    
+                    existing.update(entry)
+                    
+                    # Restaurar last_run_at interno de Celery Beat para que no se resetee
+                    if old_last_run_at is not None:
+                        existing.last_run_at = old_last_run_at
+                        
+                    # Sincronizar last_run_at de la DB si es más reciente (y no nulo en base de datos)
+                    db_last_at = db_last_run_times.get(key)
+                    if db_last_at:
+                        db_last = db_last_at
+                        if db_last.tzinfo is None:
+                            db_last = db_last.replace(tzinfo=timezone.utc)
+                        
+                        if existing.last_run_at:
+                            ex_last = existing.last_run_at
+                            if ex_last.tzinfo is None:
+                                ex_last = ex_last.replace(tzinfo=timezone.utc)
+                            if db_last > ex_last:
+                                existing.last_run_at = db_last
+                        else:
+                            existing.last_run_at = db_last
             logger.info(
                 f"Beat sincronizado: {len(configs)} pipelines y {len(legacy_tasks)} tareas legadas activas"
             )
@@ -152,9 +198,9 @@ class DatabaseScheduler(Scheduler):
         from datetime import datetime
         now = datetime.now()
         
-        if (self._last_sync is None or 
-            now - self._last_sync > self.UPDATE_INTERVAL):
+        if (self._db_last_sync is None or 
+            now - self._db_last_sync > self.UPDATE_INTERVAL):
             self.update_schedule_from_db()
-            self._last_sync = now
+            self._db_last_sync = now
         
         return super().tick()

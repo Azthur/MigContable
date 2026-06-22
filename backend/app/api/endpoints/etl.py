@@ -1704,33 +1704,128 @@ def delete_correlativo(id: int, db: Session = Depends(get_dest_db)):
 @router.get("/realtime-logs")
 def list_realtime_logs(
     company_id: Optional[int] = None,
+    subcategoria_id: Optional[int] = None,
     status: Optional[str] = None,
     skip: int = 0,
     limit: int = 50,
     db: Session = Depends(get_dest_db)
 ):
-    query = db.query(EtlRealtimeLog)
+    from backend.app.models.models import EtlEjecucion
+    
+    query = db.query(EtlEjecucion)
     if company_id:
-        query = query.filter(EtlRealtimeLog.company_id == company_id)
+        query = query.filter(EtlEjecucion.empresa_id == company_id)
+    if subcategoria_id:
+        query = query.filter(EtlEjecucion.subcategoria_id == subcategoria_id)
     if status:
-        query = query.filter(EtlRealtimeLog.status == status)
+        query = query.filter(EtlEjecucion.status == status)
         
-    logs = query.order_by(EtlRealtimeLog.run_date.desc()).offset(skip).limit(limit).all()
+    logs = query.order_by(EtlEjecucion.queued_at.desc()).offset(skip).limit(limit).all()
     
     result = []
-    for l in logs:
+    for e in logs:
+        subcategoria_nombre = e.pipeline.subcategoria.nombre if (e.pipeline and e.pipeline.subcategoria) else f"Subcategoría {e.subcategoria_id}"
+        
+        # Build errors list dynamically
+        errors_list = []
+        if e.details:
+            for d in e.details:
+                if isinstance(d, dict):
+                    step = d.get("step")
+                    if step == "EXTRACTION":
+                        errors_list.append({
+                            "step": "ETL",
+                            "table": d.get("table", "Fuente"),
+                            "reference": "Paso Extracción",
+                            "status": "SUCCESS" if d.get("status") == "OK" else "ERROR",
+                            "column": None,
+                            "error": f"Extraídos {d.get('records', 0)} registros.",
+                            "subcategoria_id": e.subcategoria_id,
+                            "subcategoria_nombre": subcategoria_nombre
+                        })
+                    elif step == "GENERATION":
+                        if d.get("errors"):
+                            for err in d["errors"]:
+                                errors_list.append({
+                                    "step": "VALIDATION",
+                                    "table": err.get("table", "cf_diariol"),
+                                    "reference": f"Asiento {err.get('nasiento')} (Lín {err.get('nidlin')})",
+                                    "status": "ERROR",
+                                    "column": err.get("field"),
+                                    "error": err.get("error"),
+                                    "subcategoria_id": e.subcategoria_id,
+                                    "subcategoria_nombre": subcategoria_nombre
+                                })
+                        else:
+                            errors_list.append({
+                                "step": "GENERATION",
+                                "table": "Staging",
+                                "reference": f"Lote {d.get('lote_id', '-')}",
+                                "status": "SUCCESS",
+                                "column": None,
+                                "error": f"Generados {d.get('generated', 0)} asientos/líneas.",
+                                "subcategoria_id": e.subcategoria_id,
+                                "subcategoria_nombre": subcategoria_nombre
+                            })
+                    elif step == "MIGRATION":
+                        if d.get("status") == "WARNING":
+                            errors_list.append({
+                                "step": "MIGRATION",
+                                "table": "Contasis Final",
+                                "reference": "Proceso de Migración",
+                                "status": "WARNING",
+                                "column": None,
+                                "error": d.get("reason") or "Advertencia en la migración",
+                                "subcategoria_id": e.subcategoria_id,
+                                "subcategoria_nombre": subcategoria_nombre
+                            })
+                        else:
+                            errors_list.append({
+                                "step": "MIGRATION",
+                                "table": "Contasis Final",
+                                "reference": "Proceso de Migración",
+                                "status": "SUCCESS",
+                                "column": None,
+                                "error": f"Migrados {d.get('migrated', 0)} registros a base destino Contasis.",
+                                "subcategoria_id": e.subcategoria_id,
+                                "subcategoria_nombre": subcategoria_nombre
+                            })
+                        
+        if e.status == "ERROR" or e.error_message:
+            errors_list.append({
+                "step": e.step_current or "SYSTEM",
+                "table": "General",
+                "reference": "Ciclo Principal",
+                "status": "ERROR",
+                "column": None,
+                "error": e.error_message or "Fallo general del proceso",
+                "subcategoria_id": e.subcategoria_id,
+                "subcategoria_nombre": subcategoria_nombre
+            })
+            
+        message = e.error_message
+        if not message:
+            if e.status == "SUCCESS":
+                message = f"Ejecución exitosa: Extracción ({e.records_extracted or 0}), Generación ({e.records_generated or 0}), Migración ({e.records_migrated or 0})"
+            elif e.status == "WARNING":
+                message = f"Ejecución con advertencias: Extracción ({e.records_extracted or 0}), Generación ({e.records_generated or 0}), Migración ({e.records_migrated or 0})"
+            elif e.status == "RUNNING":
+                message = f"Ejecutando etapa: {e.step_current or 'INICIO'}"
+            else:
+                message = f"Estado: {e.status}"
+                
         result.append({
-            "id": l.id,
-            "company_id": l.company_id,
-            "company_name": l.company.name if l.company else f"Empresa {l.company_id}",
-            "run_date": str(l.run_date) if l.run_date else None,
-            "status": l.status,
-            "message": l.message,
-            "records_extracted": l.records_extracted,
-            "records_generated": l.records_generated,
-            "records_migrated": l.records_migrated,
-            "errors": l.errors,
-            "subcategorias": l.subcategorias or "Todas"
+            "id": e.id,
+            "company_id": e.empresa_id,
+            "company_name": e.empresa.name if e.empresa else f"Empresa {e.empresa_id}",
+            "run_date": str(e.started_at or e.queued_at) if (e.started_at or e.queued_at) else None,
+            "status": e.status,
+            "message": message,
+            "records_extracted": e.records_extracted or 0,
+            "records_generated": e.records_generated or 0,
+            "records_migrated": e.records_migrated or 0,
+            "errors": errors_list,
+            "subcategorias": subcategoria_nombre
         })
     return result
 
@@ -1809,8 +1904,9 @@ def staging_summary(
             print(f"Error executing staging query for subcat {sub.id} on table {tabla_name}: {e}")
             continue
 
+        # Permite mostrar la subcategoría en el resumen aunque no tenga registros en staging
         if not rows:
-            continue
+            rows = []
 
         sub_summary = {
             "subcategoria_id": sub.id,
@@ -2098,20 +2194,31 @@ def reprocess_row(body: dict, db: Session = Depends(get_dest_db)):
         )
 
 
+@router.get("/raw-tables")
 @router.get("/raw-tables/{company_id}")
-def list_raw_tables(company_id: int, db: Session = Depends(get_dest_db)):
-    """Lista las tablas intermedias seleccionadas para una empresa"""
-    selections = db.query(TableSelection).filter(
-        TableSelection.company_id == company_id,
-        TableSelection.is_selected == True
-    ).order_by(TableSelection.extraction_order).all()
-    return [{"id": s.id, "table_name": s.table_name, "table_dest": s.table_name.lower().replace(" ", "_")} for s in selections]
+def list_raw_tables(company_id: Optional[int] = None, db: Session = Depends(get_dest_db)):
+    """Lista las tablas intermedias seleccionadas para una empresa o todas si no se especifica"""
+    query = db.query(TableSelection).filter(TableSelection.is_selected == True)
+    if company_id is not None:
+        query = query.filter(TableSelection.company_id == company_id)
+    selections = query.order_by(TableSelection.extraction_order).all()
+    
+    seen = set()
+    unique_selections = []
+    for s in selections:
+        name_lower = s.table_name.lower().replace(" ", "_")
+        if name_lower not in seen:
+            seen.add(name_lower)
+            unique_selections.append(s)
+            
+    return [{"id": s.id, "table_name": s.table_name, "table_dest": s.table_name.lower().replace(" ", "_")} for s in unique_selections]
 
 
+@router.get("/raw-table-data/{table_dest}")
 @router.get("/raw-table-data/{company_id}/{table_dest}")
 def get_raw_table_data(
-    company_id: int,
     table_dest: str,
+    company_id: Optional[int] = None,
     skip: int = 0,
     limit: int = 100,
     search: Optional[str] = None,
@@ -2136,7 +2243,7 @@ def get_raw_table_data(
     columns = [c['name'] for c in insp.get_columns(clean_table)]
     
     # Construir query con filtros
-    if "company_id" in columns:
+    if company_id is not None and "company_id" in columns:
         query_str = f'SELECT * FROM "{clean_table}" WHERE company_id = :cid'
         query_params = {"cid": company_id}
     else:
@@ -2346,5 +2453,589 @@ def clear_period_staging(body: dict, db: Session = Depends(get_dest_db)):
         "deleted_details": deleted_det,
         "deleted_headers": deleted_head
     }
+
+
+# ─── REEXTRAER Y REPROCESAR (PREVIEW & EXECUTION) ──────────────────────────────
+
+@router.get("/reextract-preview")
+def reextract_preview(
+    company_id: int,
+    subcategoria_id: int,
+    nasiento: Optional[str] = None,
+    db: Session = Depends(get_dest_db)
+):
+    """
+    Obtiene la relación entre los asientos de staging en estado pendiente/error 
+    y sus registros correspondientes en la tabla intermedia (base de datos extraída).
+    """
+    from sqlalchemy import Table, MetaData, select
+    import numpy as np
+    from decimal import Decimal
+    from datetime import datetime as _dt, date as _date
+
+    # 1. Obtener la subcategoría
+    sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == subcategoria_id).first()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Subcategoría no encontrada")
+
+    tabla_det_name = sub.tabla_destino_detalle or "cf_diariol"
+    metadata = MetaData()
+    engine = db.get_bind()
+
+    # 2. Cargar tabla de staging (detalle)
+    try:
+        DetTable = Table(tabla_det_name, metadata, autoload_with=engine)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"No se pudo cargar la tabla de detalle '{tabla_det_name}': {str(e)}")
+
+    has_company = "company_id" in DetTable.c
+    has_subcat = "subcategoria_id" in DetTable.c
+    has_estado = "estado" in DetTable.c
+    has_idcontrol = "idcontrol" in DetTable.c
+    nasiento_col = sub.col_destino_nasiento or "nasiento"
+    has_nasiento = nasiento_col in DetTable.c
+
+    if not has_idcontrol:
+        raise HTTPException(status_code=400, detail="La tabla de staging no posee columna 'idcontrol'.")
+
+    # 3. Consultar registros en staging que no estén migrados
+    stmt = select(DetTable)
+    if has_company:
+        stmt = stmt.where(DetTable.c.company_id == company_id)
+    if has_subcat:
+        stmt = stmt.where(DetTable.c.subcategoria_id == subcategoria_id)
+    if has_estado:
+        stmt = stmt.where(DetTable.c.estado != "MIGRADO")
+    if nasiento and has_nasiento:
+        try:
+            stmt = stmt.where(getattr(DetTable.c, nasiento_col) == int(nasiento))
+        except ValueError:
+            stmt = stmt.where(getattr(DetTable.c, nasiento_col) == nasiento)
+
+    rows = db.execute(stmt).fetchall()
+    keys = list(DetTable.columns.keys())
+
+    # Agrupar por idcontrol
+    staging_by_idcontrol = {}
+    for row in rows:
+        row_dict = dict(zip(keys, row))
+        idc = row_dict.get("idcontrol")
+        if not idc:
+            continue
+        
+        # Limpieza de nans
+        def _clean_val(v):
+            if v is None: return None
+            if isinstance(v, Decimal): return float(v)
+            if isinstance(v, (_dt, _date)): return str(v)
+            if isinstance(v, bytes): return v.decode("utf-8", errors="replace")
+            if isinstance(v, float) and np.isnan(v): return None
+            return v
+        
+        row_cleaned = {k: _clean_val(v) for k, v in row_dict.items() if k not in ("company_id", "subcategoria_id")}
+        
+        if idc not in staging_by_idcontrol:
+            staging_by_idcontrol[idc] = {
+                "idcontrol": idc,
+                "nasiento": row_dict.get(nasiento_col),
+                "cper": row_dict.get("cper"),
+                "cmes": row_dict.get("cmes"),
+                "staging_status": row_dict.get("estado"),
+                "staging_rows": []
+            }
+        staging_by_idcontrol[idc]["staging_rows"].append(row_cleaned)
+
+    # 4. Consultar registros correspondientes en la tabla intermedia (base de datos extraída)
+    raw_table_name = sub.tabla_origen.lower().replace(" ", "_")
+    try:
+        RawTable = Table(raw_table_name, metadata, autoload_with=engine)
+        has_raw_idcontrol = "idcontrol" in RawTable.c
+        has_raw_company = "company_id" in RawTable.c
+    except Exception:
+        RawTable = None
+        has_raw_idcontrol = False
+        has_raw_company = False
+
+    result_items = []
+    
+    # Formatear raw row helper
+    def _format_raw(row_dict):
+        cols = {str(k).lower(): str(k) for k in row_dict.keys()}
+        doc_type = row_dict.get(cols.get("coddoc")) or row_dict.get(cols.get("ccoddoc")) or ""
+        serie = row_dict.get(cols.get("cserie")) or row_dict.get(cols.get("serie")) or ""
+        numero = row_dict.get(cols.get("cnumero")) or row_dict.get(cols.get("nrodoc")) or row_dict.get(cols.get("numero")) or ""
+        fecha = row_dict.get(cols.get("ffechadoc")) or row_dict.get(cols.get("fchdoc")) or row_dict.get(cols.get("fecha")) or ""
+        ruc = row_dict.get(cols.get("ccodruc")) or row_dict.get(cols.get("ruc")) or ""
+        total = row_dict.get(cols.get("ntot")) or row_dict.get(cols.get("total")) or row_dict.get(cols.get("impnet")) or ""
+        
+        parts = []
+        if doc_type: parts.append(f"Doc: {doc_type}")
+        if serie or numero: parts.append(f"Num: {serie}-{numero}")
+        if fecha: parts.append(f"Fecha: {fecha}")
+        if ruc: parts.append(f"RUC: {ruc}")
+        if total: parts.append(f"Monto: {total}")
+        return " | ".join(parts) if parts else "Sin campos de referencia"
+
+    for idc, item in staging_by_idcontrol.items():
+        raw_exists = False
+        raw_info = None
+        raw_row_data = {}
+
+        if RawTable is not None and has_raw_idcontrol:
+            raw_stmt = select(RawTable).where(RawTable.c.idcontrol == idc)
+            if has_raw_company:
+                raw_stmt = raw_stmt.where(RawTable.c.company_id == company_id)
+            
+            raw_row = db.execute(raw_stmt).first()
+            if raw_row:
+                raw_exists = True
+                raw_row_dict = dict(zip(RawTable.columns.keys(), raw_row))
+                
+                def _clean_val(v):
+                    if v is None: return None
+                    if isinstance(v, Decimal): return float(v)
+                    if isinstance(v, (_dt, _date)): return str(v)
+                    if isinstance(v, bytes): return v.decode("utf-8", errors="replace")
+                    if isinstance(v, float) and np.isnan(v): return None
+                    return v
+
+                raw_row_data = {k: _clean_val(v) for k, v in raw_row_dict.items() if k not in ("company_id",)}
+                raw_info = _format_raw(raw_row_dict)
+
+        item["raw_exists"] = raw_exists
+        item["raw_info"] = raw_info
+        item["raw_row"] = raw_row_data
+        result_items.append(item)
+
+    # Ordenar por asiento para facilitar la lectura
+    result_items.sort(key=lambda x: str(x.get("nasiento") or ""))
+
+    return {
+        "subcategory_name": sub.nombre,
+        "source_table": sub.tabla_origen,
+        "dest_table": tabla_det_name,
+        "items": result_items
+    }
+
+
+@router.post("/reextract-reprocess")
+def reextract_reprocess(body: dict, db: Session = Depends(get_dest_db)):
+    """
+    Ejecuta el pipeline completo de 3 pasos para un conjunto específico de idcontrols:
+    1. Re-extrae de origen (SQL Server) filtrando por los campos clave.
+    2. Genera los asientos de staging (cf_diariol).
+    3. Migra a Contasis final.
+    """
+    company_id = body.get("company_id")
+    subcategoria_id = body.get("subcategoria_id")
+    nasiento = body.get("nasiento")
+    idcontrols = body.get("idcontrols")
+
+    if not company_id or not subcategoria_id:
+        raise HTTPException(status_code=400, detail="Falta company_id o subcategoria_id")
+
+    # 1. Obtener subcategoría y control
+    sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == subcategoria_id).first()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Subcategoría no encontrada")
+
+    # 2. Si no se especifican idcontrols, buscarlos en staging (los que tengan estado != 'MIGRADO')
+    from sqlalchemy import Table, MetaData, select, text
+    metadata = MetaData()
+    engine = db.get_bind()
+    tabla_det_name = sub.tabla_destino_detalle or "cf_diariol"
+    tabla_head_name = sub.tabla_destino_cabecera or "cf_diario"
+
+    try:
+        DetTable = Table(tabla_det_name, metadata, autoload_with=engine)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"No se pudo cargar tabla de detalle staging: {e}")
+
+    try:
+        HeadTable = Table(tabla_head_name, metadata, autoload_with=engine)
+    except:
+        HeadTable = None
+
+    if not idcontrols:
+        stmt = select(DetTable.c.idcontrol).where(
+            DetTable.c.company_id == company_id,
+            DetTable.c.subcategoria_id == subcategoria_id,
+            DetTable.c.estado != "MIGRADO"
+        )
+        if nasiento:
+            nasiento_col = sub.col_destino_nasiento or "nasiento"
+            try:
+                stmt = stmt.where(getattr(DetTable.c, nasiento_col) == int(nasiento))
+            except ValueError:
+                stmt = stmt.where(getattr(DetTable.c, nasiento_col) == nasiento)
+        
+        rows = db.execute(stmt).fetchall()
+        idcontrols = list(set([r[0] for r in rows if r[0]]))
+
+    if not idcontrols:
+        return {"status": "SUCCESS", "message": "No se encontraron registros pendientes o con error para reprocesar."}
+
+    # ─── Paso 1: Re-extraer de SQL Server ───
+    # Buscar TableSelection para esta tabla origen
+    raw_table_name = sub.tabla_origen.lower().replace(" ", "_")
+    sel = db.query(TableSelection).filter(
+        TableSelection.company_id == company_id,
+        (TableSelection.table_name.ilike(sub.tabla_origen) | TableSelection.table_name.ilike(raw_table_name))
+    ).first()
+
+    if not sel:
+        raise HTTPException(status_code=400, detail=f"No se encontró TableSelection para la tabla '{sub.tabla_origen}'")
+
+    source_conn = db.query(SourceConnection).filter(SourceConnection.company_id == company_id).first()
+    dest_conn = db.query(DestinationConnection).filter(DestinationConnection.company_id == company_id).first()
+    if not source_conn or not dest_conn:
+        raise HTTPException(status_code=400, detail="Conexiones origen/destino no configuradas")
+
+    ctrl_cols = [c.strip() for c in (sel.control_column or "CodCia,coddoc,nrodoc").split(",") if c.strip()]
+    
+    # Agrupar y re-extraer de origen en lotes
+    import pandas as pd
+    import uuid
+    from backend.app.core.database import dest_engine as dst_engine
+    
+    src_data = {
+        "host": source_conn.host, "port": source_conn.port,
+        "database_name": source_conn.database_name,
+        "username": source_conn.username, "password": source_conn.password,
+        "driver": source_conn.driver, "db_type": source_conn.db_type
+    }
+    src_engine = ConnectionManager.get_source_engine(src_data)
+    
+    schema = sel.table_schema or "dbo"
+    
+    # Chunking idcontrols to prevent SQL Server parameters limit or long query strings
+    chunk_size = 50
+    df_list = []
+    
+    for k in range(0, len(idcontrols), chunk_size):
+        chunk_idcs = idcontrols[k:k+chunk_size]
+        where_parts = []
+        params = []
+        for idc in chunk_idcs:
+            parts = idc.split('-')
+            if len(parts) == len(ctrl_cols):
+                sub_conds = []
+                for col, val in zip(ctrl_cols, parts):
+                    sub_conds.append(f"[{col}] = ?")
+                    params.append(val)
+                where_parts.append("(" + " AND ".join(sub_conds) + ")")
+        
+        if not where_parts:
+            continue
+            
+        chunk_query = f"SELECT * FROM [{schema}].[{sel.table_name}] WHERE " + " OR ".join(where_parts)
+        
+        raw_conn = src_engine.raw_connection()
+        try:
+            df_chunk = pd.read_sql(chunk_query, raw_conn, params=tuple(params))
+            if not df_chunk.empty:
+                df_list.append(df_chunk)
+        finally:
+            raw_conn.close()
+
+    total_reextracted = 0
+    if df_list:
+        df_all = pd.concat(df_list, ignore_index=True)
+        # Limpieza de espacios en columnas
+        df_all.columns = [c.strip() for c in df_all.columns]
+        
+        # Calcular idcontrol y _migration_id
+        df_all['_migration_id'] = [str(uuid.uuid4()) for _ in range(len(df_all))]
+        if 'company_id' not in df_all.columns:
+            df_all['company_id'] = company_id
+            
+        actual_cols_in_df = [col for col in df_all.columns if col.lower() in [c.lower() for c in ctrl_cols]]
+        if actual_cols_in_df:
+            # Asegurar orden correcto coincidente con ctrl_cols
+            order_cols = []
+            for cc in ctrl_cols:
+                m = next((col for col in df_all.columns if col.lower() == cc.lower()), None)
+                if m: order_cols.append(m)
+            if order_cols:
+                df_all['idcontrol'] = df_all[order_cols].astype(str).agg('-'.join, axis=1)
+            else:
+                df_all['idcontrol'] = df_all[actual_cols_in_df].astype(str).agg('-'.join, axis=1)
+        else:
+            df_all['idcontrol'] = None
+            
+        # Aplicar reglas calculadas
+        computed_rules = db.query(ComputedColumnRule).filter(
+            ComputedColumnRule.table_selection_id == sel.id,
+            ComputedColumnRule.is_active == True
+        ).order_by(ComputedColumnRule.priority).all()
+        
+        if computed_rules:
+            __apply_computed_rules(df_all, computed_rules, db, company_id, sel.table_name, db_engine=dst_engine)
+            
+        # Sincronizar esquema de tabla intermedia
+        from sqlalchemy import inspect
+        inspector = inspect(dst_engine)
+        existing_cols = [c['name'] for c in inspector.get_columns(raw_table_name)]
+        with dst_engine.begin() as conn:
+            for col_name in df_all.columns:
+                if col_name not in existing_cols:
+                    try:
+                        safe_col = col_name.replace('"', '""')
+                        conn.execute(text(f'ALTER TABLE "{raw_table_name}" ADD COLUMN "{safe_col}" TEXT'))
+                    except Exception as e:
+                        print(f"Error agregando columna {col_name} a tabla intermedia: {e}")
+                        
+        # Limpiar vacíos para Postgres
+        for col in df_all.select_dtypes(include=['object']).columns:
+            df_all[col] = df_all[col].apply(lambda x: None if x == "" else x)
+            
+        # Eliminar previos en base intermedia para evitar duplicados
+        with dst_engine.begin() as conn:
+            conn.execute(
+                text(f'DELETE FROM "{raw_table_name}" WHERE company_id = :cid AND idcontrol IN :idcs'),
+                {"cid": company_id, "idcs": tuple(idcontrols)}
+            )
+            
+        # Insertar en base intermedia
+        df_all.to_sql(raw_table_name, dst_engine, if_exists='append', index=False, chunksize=1000)
+        total_reextracted = len(df_all)
+
+    # ─── Paso 2: Generar en Staging (cf_diariol / cf_diario) ───
+    # 1. Eliminar filas específicas de staging para evitar conflictos de llave/asiento
+    with db.begin_nested():
+        db.execute(DetTable.delete().where(
+            DetTable.c.company_id == company_id,
+            DetTable.c.subcategoria_id == subcategoria_id,
+            DetTable.c.estado.in_(["0", "1", "PENDIENTE", "ERROR"]),
+            DetTable.c.idcontrol.in_(idcontrols)
+        ))
+        if HeadTable is not None:
+            db.execute(HeadTable.delete().where(
+                HeadTable.c.company_id == company_id,
+                HeadTable.c.subcategoria_id == subcategoria_id,
+                HeadTable.c.estado.in_(["0", "1", "PENDIENTE", "ERROR"]),
+                HeadTable.c.idcontrol.in_(idcontrols)
+            ))
+            
+    db.commit()
+
+    # 2. Llamar a generate_to_cf_diariol
+    # Pasamos filtros para forzar a que procese solo estos idcontrols
+    from backend.app.api.endpoints.mapeo import generate_to_cf_diariol, migrate_to_final
+    
+    gen_body = {
+        "company_id": company_id,
+        "subcategoria_id": subcategoria_id,
+        "clear_previous": False,  # Ya lo limpiamos nosotros de manera específica
+        "filters": [
+            {"column": "idcontrol", "operator": "IN", "value": ",".join(idcontrols)}
+        ],
+        "is_realtime": True
+    }
+    
+    gen_res = generate_to_cf_diariol(gen_body, db)
+    lote_id = gen_res.get("lote_id")
+    records_generated = gen_res.get("generated", 0)
+    
+    if gen_res.get("errors"):
+        # Registrar logs de validación
+        print(f"Advertencias en generación de staging: {gen_res.get('errors')}")
+
+    # ─── Paso 3: Migración a Contasis Final ───
+    records_migrated = 0
+    if records_generated > 0 and lote_id:
+        try:
+            mig_res = migrate_to_final(
+                company_id=company_id,
+                subcategoria_id=subcategoria_id,
+                lote_id=lote_id,
+                allow_overwrite=True,
+                db=db
+            )
+            records_migrated = mig_res.get("migrated_lineas", 0)
+        except HTTPException as ex_http:
+            if isinstance(ex_http.detail, dict):
+                ex_http.detail["reextracted"] = total_reextracted
+                ex_http.detail["generated"] = records_generated
+            raise ex_http
+        except Exception as e_mig:
+            print(f"Error en paso de migración: {e_mig}")
+            raise HTTPException(status_code=500, detail=f"Fallo en la migración a Contasis: {str(e_mig)}")
+
+    # Registrar en logs generales del sistema
+    log = IntegLog(
+        company_id=company_id,
+        process_name=f"Reextraer y Reprocesar - {sub.nombre}",
+        status="SUCCESS" if records_migrated > 0 else "WARNING",
+        message=f"Flujo completo ejecutado. Re-extraídos de SQL Server: {total_reextracted} filas. Generados en staging: {records_generated} filas. Migrados a Contasis: {records_migrated} filas.",
+        records_processed=records_migrated
+    )
+    db.add(log)
+    db.commit()
+
+    return {
+        "status": "SUCCESS",
+        "message": f"Proceso completado exitosamente.",
+        "details": {
+            "reextracted": total_reextracted,
+            "generated": records_generated,
+            "migrated": records_migrated,
+            "lote_id": lote_id
+        }
+    }
+
+
+@router.get("/raw-row-detail")
+def get_raw_row_detail(
+    company_id: int,
+    subcategoria_id: int,
+    idcontrol: str,
+    db: Session = Depends(get_dest_db)
+):
+    from sqlalchemy import Table, MetaData, select
+    import numpy as np
+    from decimal import Decimal
+    from datetime import datetime as _dt, date as _date
+
+    # 1. Obtener la subcategoría
+    sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == subcategoria_id).first()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Subcategoría no encontrada")
+
+    if not sub.tabla_origen:
+        raise HTTPException(status_code=400, detail="La subcategoría no posee tabla origen configurada.")
+
+    raw_table_name = sub.tabla_origen.lower().replace(" ", "_")
+    metadata = MetaData()
+    engine = db.get_bind()
+
+    # 2. Cargar la tabla origen en base de datos intermedia (Postgres local)
+    try:
+        RawTable = Table(raw_table_name, metadata, autoload_with=engine)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"No se pudo cargar la tabla intermedia '{raw_table_name}': {str(e)}")
+
+    has_idcontrol = "idcontrol" in RawTable.c
+    has_company = "company_id" in RawTable.c
+
+    if not has_idcontrol:
+        raise HTTPException(status_code=400, detail=f"La tabla intermedia '{raw_table_name}' no posee columna 'idcontrol'.")
+
+    # 3. Consultar el registro
+    stmt = select(RawTable).where(RawTable.c.idcontrol == idcontrol)
+    if has_company:
+        stmt = stmt.where(RawTable.c.company_id == company_id)
+
+    row = db.execute(stmt).first()
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Registro con idcontrol '{idcontrol}' no encontrado en la tabla intermedia '{raw_table_name}'.")
+
+    # 4. Formatear y limpiar tipos de datos no serializables en JSON
+    row_dict = dict(zip(RawTable.columns.keys(), row))
+
+    def _clean_val(v):
+        if v is None: return None
+        if isinstance(v, Decimal): return float(v)
+        if isinstance(v, (_dt, _date)): return str(v)
+        if isinstance(v, bytes): return v.decode("utf-8", errors="replace")
+        if isinstance(v, float) and np.isnan(v): return None
+        return v
+
+    cleaned_row = {k: _clean_val(v) for k, v in row_dict.items() if k != "company_id"}
+    headers = list(cleaned_row.keys())
+
+    return {
+        "source_table": sub.tabla_origen,
+        "headers": headers,
+        "row": cleaned_row
+    }
+
+
+@router.post("/reset-migrated-row")
+def reset_migrated_row(
+    body: dict,
+    db: Session = Depends(get_dest_db)
+):
+    from sqlalchemy import Table, MetaData, select
+    
+    company_id = body.get("company_id")
+    subcategoria_id = body.get("subcategoria_id")
+    idcontrol = body.get("idcontrol")
+
+    if not company_id or not subcategoria_id or not idcontrol:
+        raise HTTPException(status_code=400, detail="Falta company_id, subcategoria_id o idcontrol")
+
+    # 1. Obtener la subcategoría
+    sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == subcategoria_id).first()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Subcategoría no encontrada")
+
+    tabla_det_name = sub.tabla_destino_detalle or "cf_diariol"
+    tabla_head_name = sub.tabla_destino_cabecera or "cf_diario"
+    metadata = MetaData()
+    engine = db.get_bind()
+
+    # 2. Cargar las tablas de staging
+    try:
+        DetTable = Table(tabla_det_name, metadata, autoload_with=engine)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"No se pudo cargar la tabla de detalle '{tabla_det_name}': {str(e)}")
+
+    try:
+        HeadTable = Table(tabla_head_name, metadata, autoload_with=engine)
+    except:
+        HeadTable = None
+
+    # 3. Verificar si el registro existe localmente en staging
+    stmt = select(DetTable).where(
+        DetTable.c.company_id == company_id,
+        DetTable.c.subcategoria_id == subcategoria_id,
+        DetTable.c.idcontrol == idcontrol
+    )
+    rows = db.execute(stmt).fetchall()
+    if not rows:
+        raise HTTPException(status_code=404, detail=f"No se encontraron registros con idcontrol '{idcontrol}' en staging.")
+
+    # 4. Cambiar el estado a '1' (Pendiente) en la base de datos local (staging / medio)
+    # Solo cambiamos de 'MIGRADO' a '1'. Si ya estaba en pendiente, no cambia nada.
+    with db.begin_nested():
+        db.execute(
+            DetTable.update().where(
+                DetTable.c.company_id == company_id,
+                DetTable.c.subcategoria_id == subcategoria_id,
+                DetTable.c.idcontrol == idcontrol,
+                DetTable.c.estado == "MIGRADO"
+            ).values(estado="1")
+        )
+        if HeadTable is not None:
+            db.execute(
+                HeadTable.update().where(
+                    HeadTable.c.company_id == company_id,
+                    HeadTable.c.subcategoria_id == subcategoria_id,
+                    HeadTable.c.idcontrol == idcontrol,
+                    HeadTable.c.estado == "MIGRADO"
+                ).values(estado="1")
+            )
+
+    db.commit()
+
+    # Registrar en auditoría local
+    log = IntegLog(
+        company_id=company_id,
+        process_name=f"Reiniciar Registro - {sub.nombre}",
+        status="SUCCESS",
+        message=f"Registro con idcontrol '{idcontrol}' reiniciado en staging local a estado 'PENDIENTE'. Contasis Final no fue modificado.",
+        records_processed=len(rows)
+    )
+    db.add(log)
+    db.commit()
+
+    return {
+        "status": "SUCCESS",
+        "message": f"Registro con idcontrol '{idcontrol}' reiniciado a estado pendiente ('1') localmente. Recuerde limpiar Contasis Final si es necesario.",
+        "affected_rows": len(rows)
+    }
+
+
 
 

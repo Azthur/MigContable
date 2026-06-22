@@ -5452,3 +5452,969 @@ Found 11 table selections
 MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
 --- ENDPOINT START 60 --- table=ccbrrdoc, company=5
 Found 11 table selections
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 42 --- table=vtaritem, company=6
+Found 10 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 42 --- table=vtaritem, company=6
+Found 10 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 40 --- table=vtaritem, company=6
+Found 12 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 40 --- table=vtaritem, company=6
+Found 12 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 12 table selections
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 12 table selections
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 49 --- table=tbl_conciliados, company=6
+Found 12 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 49 --- table=tbl_conciliados, company=6
+Found 12 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 13 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 13 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 68 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 68 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 69 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 69 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 69 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 68 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 69 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 69 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 68 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 68 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 68 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 68 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 68 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 68 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 69 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 69 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 69 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 69 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 67 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 68 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 68 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 69 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 69 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 51 --- table=ccbmvtos, company=6
+Found 12 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 51 --- table=ccbmvtos, company=6
+Found 12 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 72 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 72 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 74 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 74 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 72 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 72 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 72 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 74 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 59 --- table=ccbrrdoc, company=4
+Found 13 table selections
+MATCH FOUND: CcbRRdoc -> CodCia, CodDoc, NroDoc
+--- ENDPOINT START 59 --- table=ccbrrdoc, company=4
+Found 13 table selections
+MATCH FOUND: CcbRRdoc -> CodCia, CodDoc, NroDoc
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 76 --- table=cntfacturadet, company=4
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 77 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 77 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 78 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 78 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 79 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 79 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 77 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 77 --- table=cntfacturadet, company=5
+Found 13 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 78 --- table=cntfacturadet, company=6
+Found 12 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 79 --- table=cntfacturadet, company=1
+Found 14 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 52 --- table=ccbmvtos, company=4
+Found 17 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 52 --- table=ccbmvtos, company=4
+Found 17 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 71 --- table=cntfacturadet, company=4
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 13 table selections
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 13 table selections
+--- ENDPOINT START 82 --- table=finplanillamovilidaddet, company=6
+Found 12 table selections
+--- ENDPOINT START 82 --- table=finplanillamovilidaddet, company=6
+Found 12 table selections
+--- ENDPOINT START 83 --- table=finplanillamovilidaddet, company=1
+Found 14 table selections
+--- ENDPOINT START 83 --- table=finplanillamovilidaddet, company=1
+Found 14 table selections
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 13 table selections
+--- ENDPOINT START 82 --- table=finplanillamovilidaddet, company=6
+Found 12 table selections
+--- ENDPOINT START 83 --- table=finplanillamovilidaddet, company=1
+Found 14 table selections
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 54 --- table=ccbmvtos, company=4
+Found 17 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 54 --- table=ccbmvtos, company=4
+Found 17 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 80 --- table=finplanillamovilidaddet, company=4
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 33 --- table=vtaritem, company=5
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 33 --- table=vtaritem, company=5
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 85 --- table=finrendiciongastosdet, company=5
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 85 --- table=finrendiciongastosdet, company=5
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 86 --- table=finrendiciongastosdet, company=6
+Found 16 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 86 --- table=finrendiciongastosdet, company=6
+Found 16 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 87 --- table=finrendiciongastosdet, company=1
+Found 18 table selections
+--- ENDPOINT START 87 --- table=finrendiciongastosdet, company=1
+Found 18 table selections
+--- ENDPOINT START 84 --- table=finrendiciongastosdet, company=4
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 85 --- table=finrendiciongastosdet, company=5
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 86 --- table=finrendiciongastosdet, company=6
+Found 16 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 87 --- table=finrendiciongastosdet, company=1
+Found 18 table selections
+--- ENDPOINT START 87 --- table=finrendiciongastosdet, company=1
+Found 18 table selections
+--- ENDPOINT START 79 --- table=cntfacturadet, company=1
+Found 18 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 79 --- table=cntfacturadet, company=1
+Found 18 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 49 --- table=tbl_conciliados, company=6
+Found 16 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 49 --- table=tbl_conciliados, company=6
+Found 16 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 49 --- table=tbl_conciliados, company=6
+Found 16 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 49 --- table=tbl_conciliados, company=6
+Found 16 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 49 --- table=tbl_conciliados, company=6
+Found 16 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 49 --- table=tbl_conciliados, company=6
+Found 16 table selections
+MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 85 --- table=finrendiciongastosdet, company=5
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 85 --- table=finrendiciongastosdet, company=5
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 85 --- table=finrendiciongastosdet, company=5
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 17 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId

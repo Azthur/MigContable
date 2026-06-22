@@ -1,7 +1,25 @@
-GLOBAL EXCEPTION CAUGHT for http://localhost:8080/api/v1/mapeo/origen-preview?company_id=1
+GLOBAL EXCEPTION CAUGHT for http://localhost:8080/api/v1/etl/reextract-reprocess
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/base.py", line 1724, in __getattr__
+    return self._index[key][1]
+           ~~~~~~~~~~~^^^^^
+KeyError: 'idcontrol'
+
+The above exception was the direct cause of the following exception:
+
 Traceback (most recent call last):
   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
     await self.app(scope, receive, _send)
+  File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/backend/app/main.py", line 24, in dispatch
+    response: Response = await call_next(request)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
@@ -43,7 +61,9 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 1002, in run
     result = context.run(func, *args)
              ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/app/backend/app/api/endpoints/mapeo.py", line 2813, in list_origen_preview
-    selections = db.query(TableSelection).join(SourceConnection).filter(
-                          ^^^^^^^^^^^^^^
-UnboundLocalError: cannot access local variable 'TableSelection' where it is not associated with a value
+  File "/app/backend/app/api/endpoints/etl.py", line 2645, in reextract_reprocess
+    stmt = select(DetTable.c.idcontrol).where(
+                  ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/base.py", line 1726, in __getattr__
+    raise AttributeError(key) from err
+AttributeError: idcontrol
