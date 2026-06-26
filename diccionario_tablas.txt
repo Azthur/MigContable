@@ -1,0 +1,2315 @@
+================================================================================
+DICCIONARIO DE TABLAS DE LA BASE DE DATOS (MIGCONTA_DB)
+Proyecto: http://localhost:8080/
+================================================================================
+
+Este documento contiene el listado completo, el propósito y el esquema detallado de
+cada una de las tablas utilizadas en el sistema de integración contable SistemaMigConta.
+
+Total de tablas detectadas: 58
+
+ÍNDICE DE TABLAS:
+----------------------------------------
+ 1. accounting_entries               | Registro histórico de asientos contables procesados en el sistema.
+ 2. admcaja                          | Tabla de origen/staging que contiene los movimientos y transacciones de caja de la empresa.
+ 3. asiento_correlativos             | Control de los números de asientos correlativos por empresa, subcategoría, periodo (año) y mes.
+ 4. asientos_contables_generados     | Asientos contables generados y listos para ser exportados o migrados a Contasis en formato CSV.
+ 5. cat_centros_costo                | Catálogo de centros de costo contables.
+ 6. cat_cuentas_contables            | Catálogo de plan de cuentas contables utilizado para realizar los mapeos.
+ 7. cat_cuentas_presupuesto          | Catálogo de cuentas presupuestales.
+ 8. cat_productos                    | Catálogo de productos.
+ 9. cat_tipo_analitica               | Catálogo de tipos de analítica contable.
+10. cat_tipo_movimiento              | Catálogo de tipos de movimiento contable (ej. boletas, facturas).
+11. cbdmauxi                         | Tabla de origen/staging relacionada con auxiliares o clientes/proveedores en el sistema.
+12. ccbmauxi                         | Tabla de origen/staging de auxiliares contables y datos de terceras entidades de la base de datos.
+13. ccbmvtos                         | Tabla de origen/staging que registra los movimientos y transacciones detalladas de cuentas por cobrar/pagar.
+14. ccbrgdoc                         | Tabla de origen/staging que registra documentos de ventas, facturas y boletas emitidas (Registro de Documentos).
+15. ccbrrdoc                         | Tabla de origen/staging que registra la información de referencia o relación de documentos de venta y notas de crédito.
+16. ccbtabla                         | Tabla general de parámetros y constantes auxiliares configuradas en la base de datos de origen.
+17. cf_diario                        | Staging / tabla intermedia para las cabeceras de asientos contables con la estructura exacta de la tabla `cf_diario` de Contasis.
+18. cf_diariol                       | Staging / tabla intermedia para el detalle de asientos contables con la estructura exacta de la tabla `cf_diariol` de Contasis.
+19. cg_entitrib                      | Tabla de origen/staging de entidades tributarias (clientes, proveedores, RUCs) para el reporte contable.
+20. cjamtipo                         | Tabla de origen/staging que define los tipos de movimientos de caja.
+21. cntfacturacab                    | Tabla de origen/staging que representa la cabecera de las facturas del sistema de ventas.
+22. cntfacturadet                    | Tabla de origen/staging que representa el detalle (ítems) de las facturas del sistema de ventas.
+23. column_filters                   | Filtros específicos aplicados a las columnas durante la extracción ETL de las tablas de origen.
+24. companies                        | Empresas registradas en el sistema para la integración de datos contables (con su nombre, RUC, descripción, etc.).
+25. computed_column_rules            | Reglas condicionales para crear columnas calculadas en el ETL (fórmulas condicionales personalizadas estilo IF/ELSE).
+26. config_account_mapping           | Configuración personalizada para remapear cuentas de origen a cuentas de destino y centros de costo.
+27. config_document_mapping          | Configuración de mapeo de tipos de documentos de origen a tipos de documentos de destino (ej. 'F' -> '01').
+28. config_transformation_rules      | Reglas de transformación personalizadas para los datos.
+29. destination_connections          | Conexiones configuradas para las bases de datos intermedias de destino (PostgreSQL) para cada empresa.
+30. etl_ejecuciones                  | Registro y log individual de cada tarea de pipeline ejecutada en Celery (tiempos, registros extraídos/generados/migrados, errores y logs).
+31. etl_pipeline_config              | Configuración maestra de las ejecuciones recurrentes de Celery para cada pipeline ETL.
+32. etl_realtime_logs                | Registro de logs en tiempo real para las ejecuciones del pipeline ETL.
+33. fac_electronica2                 | Tabla de origen/staging que contiene información complementaria o de control de la facturación electrónica.
+34. final_dest_connections           | Conexiones a las bases de datos del destino contable final (por ejemplo, el software Contasis).
+35. final_table_selections           | Tablas seleccionadas en la base de datos de destino final para el mapeo.
+36. finpagos                         | Tabla de origen/staging que registra los pagos y cobranzas recibidas.
+37. finplanillamovilidadcab          | Tabla de origen/staging para las cabeceras de planillas de movilidad del personal.
+38. finplanillamovilidaddet          | Tabla de origen/staging para el detalle de gastos de movilidad del personal.
+39. finrendiciongastoscab            | Tabla de origen/staging para las cabeceras de rendiciones de gastos y caja chica.
+40. finrendiciongastosdet            | Tabla de origen/staging para los detalles de las rendiciones de gastos.
+41. integ_logs                       | Historial de registros de integración de datos (ETL) con detalles de ejecución, número de filas procesadas, errores y advertencias.
+42. mapeo_categorias                 | Categorías principales de mapeo contable (ej. 'Migración Majestic -> Contasis').
+43. mapeo_lineas_asiento             | Definición detallada de cada línea del asiento contable por subcategoría (cuentas contables, debe, haber, glosa, condiciones de aplicación, ajustes de redondeo, etc.).
+44. mapeo_subcategorias              | Subcategorías específicas de mapeo contable (ej. 'Ventas', 'Compras'). Configura la tabla origen, cabeceras, detalles, redondeos, números de asientos iniciales, etc.
+45. migration_controls               | Registro de control para la migración incremental de datos (último valor migrado, cantidad de registros, estado).
+46. postarje                         | Tabla de origen/staging para transacciones con tarjeta de crédito/débito y terminales de punto de venta (POS).
+47. scheduled_tasks                  | Tareas del planificador interno (Celery Beat) programadas para ejecución de procesos recurrentes (ETL, descarga de tipo de cambio, etc.).
+48. source_connections               | Conexiones configuradas para las bases de datos de origen (SQL Server 2022 de Majestic/ventas) de cada empresa.
+49. table_selections                 | Configuración de las tablas que se extraerán de la base de datos de origen (esquema, nombre de tabla, orden de extracción, consultas personalizadas y columnas de control incremental).
+50. task_logs                        | Registro de ejecuciones de las tareas programadas.
+51. tbl_conciliados                  | Tabla de origen/staging que guarda los registros que ya pasaron por conciliación bancaria.
+52. temp_empty_test                  | Tabla temporal de prueba vacía creada con fines de testeo.
+53. temp_test_table                  | Tabla temporal de prueba para validar la inserción de registros en la base de datos.
+54. tipo_cambio                      | Tipo de cambio diario (compra y venta) obtenido de la SUNAT.
+55. user_catalog_items               | Valores y elementos contenidos en los catálogos personalizados definidos por el usuario.
+56. user_catalogs                    | Catálogos personalizados definidos por el usuario.
+57. users                            | Usuarios del sistema con sus credenciales (hash de contraseña), roles (admin/operador) y estado de activación.
+58. vtaritem                         | Tabla de origen/staging para los detalles de ítems de ventas y facturación diaria.
+
+================================================================================
+
+TABLA 01: accounting_entries
+--------------------------------------------------------------------------------
+Descripción: Registro histórico de asientos contables procesados en el sistema.
+Registros en BD: 0
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | SÍ     | NO 
+  date                           | DATE                 | NO     | NO 
+  account_code                   | VARCHAR(50)          | NO     | NO 
+  debit                          | NUMERIC(18, 2)       | SÍ     | NO 
+  credit                         | NUMERIC(18, 2)       | SÍ     | NO 
+  description                    | VARCHAR(500)         | SÍ     | NO 
+  document_ref                   | VARCHAR(100)         | SÍ     | NO 
+  source_table                   | VARCHAR(200)         | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 02: admcaja
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging que contiene los movimientos y transacciones de caja de la empresa.
+Registros en BD: 400
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  codcia                         | TEXT                 | SÍ     | NO 
+  tipo                           | TEXT                 | SÍ     | NO 
+  codigo                         | TEXT                 | SÍ     | NO 
+  nombre                         | TEXT                 | SÍ     | NO 
+  ctanac                         | TEXT                 | SÍ     | NO 
+  ctausa                         | TEXT                 | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 03: asiento_correlativos
+--------------------------------------------------------------------------------
+Descripción: Control de los números de asientos correlativos por empresa, subcategoría, periodo (año) y mes.
+Registros en BD: 788
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | NO     | NO 
+  subcategoria_id                | INTEGER              | NO     | NO 
+  periodo                        | VARCHAR(10)          | NO     | NO 
+  mes                            | VARCHAR(5)           | NO     | NO 
+  asiento_inicial                | INTEGER              | NO     | NO 
+  asiento_actual                 | INTEGER              | NO     | NO 
+  updated_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+   * subcategoria_id -> mapeo_subcategorias(id)
+
+================================================================================
+
+TABLA 04: asientos_contables_generados
+--------------------------------------------------------------------------------
+Descripción: Asientos contables generados y listos para ser exportados o migrados a Contasis en formato CSV.
+Registros en BD: 181784
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | NO     | NO 
+  subcategoria_id                | INTEGER              | SÍ     | NO 
+  cper                           | VARCHAR(10)          | SÍ     | NO 
+  cmes                           | VARCHAR(5)           | SÍ     | NO 
+  ccodori                        | VARCHAR(10)          | SÍ     | NO 
+  nasiento                       | INTEGER              | SÍ     | NO 
+  nidlin                         | INTEGER              | SÍ     | NO 
+  ntc                            | NUMERIC(10, 6)       | SÍ     | NO 
+  ccodcue                        | VARCHAR(20)          | SÍ     | NO 
+  ndebe                          | NUMERIC(18, 4)       | SÍ     | NO 
+  nhaber                         | NUMERIC(18, 4)       | SÍ     | NO 
+  cglosa                         | VARCHAR(500)         | SÍ     | NO 
+  ndebes                         | NUMERIC(18, 4)       | SÍ     | NO 
+  nhabers                        | NUMERIC(18, 4)       | SÍ     | NO 
+  ndebed                         | NUMERIC(18, 4)       | SÍ     | NO 
+  nhaberd                        | NUMERIC(18, 4)       | SÍ     | NO 
+  ccoddoc                        | VARCHAR(5)           | SÍ     | NO 
+  cserie                         | VARCHAR(20)          | SÍ     | NO 
+  cnumero                        | VARCHAR(20)          | SÍ     | NO 
+  cnumfin                        | VARCHAR(20)          | SÍ     | NO 
+  ffechadoc                      | VARCHAR(20)          | SÍ     | NO 
+  ccodruc                        | VARCHAR(20)          | SÍ     | NO 
+  ccodenti                       | VARCHAR(20)          | SÍ     | NO 
+  ffechaven                      | VARCHAR(20)          | SÍ     | NO 
+  nbase1                         | NUMERIC(18, 4)       | SÍ     | NO 
+  nigv1                          | NUMERIC(18, 4)       | SÍ     | NO 
+  nbase2                         | NUMERIC(18, 4)       | SÍ     | NO 
+  nigv2                          | NUMERIC(18, 4)       | SÍ     | NO 
+  ntot                           | NUMERIC(18, 4)       | SÍ     | NO 
+  nbase1s                        | NUMERIC(18, 4)       | SÍ     | NO 
+  nigv1s                         | NUMERIC(18, 4)       | SÍ     | NO 
+  ntots                          | NUMERIC(18, 4)       | SÍ     | NO 
+  nbase1d                        | NUMERIC(18, 4)       | SÍ     | NO 
+  nigv1d                         | NUMERIC(18, 4)       | SÍ     | NO 
+  ntotd                          | NUMERIC(18, 4)       | SÍ     | NO 
+  ccodcos                        | VARCHAR(20)          | SÍ     | NO 
+  ccodcos2                       | VARCHAR(20)          | SÍ     | NO 
+  ccodpresu                      | VARCHAR(20)          | SÍ     | NO 
+  ccodmon                        | VARCHAR(5)           | SÍ     | NO 
+  cregis                         | VARCHAR(5)           | SÍ     | NO 
+  ncomp                          | INTEGER              | SÍ     | NO 
+  cdes                           | VARCHAR(10)          | SÍ     | NO 
+  cdestino                       | VARCHAR(10)          | SÍ     | NO 
+  nina                           | NUMERIC(18, 4)       | SÍ     | NO 
+  nexo                           | NUMERIC(18, 4)       | SÍ     | NO 
+  nisc                           | NUMERIC(18, 4)       | SÍ     | NO 
+  estado                         | VARCHAR(20)          | SÍ     | NO 
+  lote_id                        | VARCHAR(50)          | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+   * subcategoria_id -> mapeo_subcategorias(id)
+
+================================================================================
+
+TABLA 05: cat_centros_costo
+--------------------------------------------------------------------------------
+Descripción: Catálogo de centros de costo contables.
+Registros en BD: 2
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | SÍ     | NO 
+  codigo                         | VARCHAR(20)          | NO     | NO 
+  descripcion                    | VARCHAR(300)         | NO     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 06: cat_cuentas_contables
+--------------------------------------------------------------------------------
+Descripción: Catálogo de plan de cuentas contables utilizado para realizar los mapeos.
+Registros en BD: 8
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | SÍ     | NO 
+  codigo                         | VARCHAR(20)          | NO     | NO 
+  descripcion                    | VARCHAR(300)         | NO     | NO 
+  tipo                           | VARCHAR(50)          | SÍ     | NO 
+  nivel                          | INTEGER              | SÍ     | NO 
+  moneda                         | VARCHAR(10)          | SÍ     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 07: cat_cuentas_presupuesto
+--------------------------------------------------------------------------------
+Descripción: Catálogo de cuentas presupuestales.
+Registros en BD: 4
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | SÍ     | NO 
+  codigo                         | VARCHAR(20)          | NO     | NO 
+  descripcion                    | VARCHAR(300)         | NO     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 08: cat_productos
+--------------------------------------------------------------------------------
+Descripción: Catálogo de productos.
+Registros en BD: 0
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | SÍ     | NO 
+  codigo                         | VARCHAR(50)          | NO     | NO 
+  descripcion                    | VARCHAR(300)         | NO     | NO 
+  unidad                         | VARCHAR(20)          | SÍ     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 09: cat_tipo_analitica
+--------------------------------------------------------------------------------
+Descripción: Catálogo de tipos de analítica contable.
+Registros en BD: 0
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | SÍ     | NO 
+  codigo                         | VARCHAR(20)          | NO     | NO 
+  descripcion                    | VARCHAR(300)         | NO     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 10: cat_tipo_movimiento
+--------------------------------------------------------------------------------
+Descripción: Catálogo de tipos de movimiento contable (ej. boletas, facturas).
+Registros en BD: 0
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | SÍ     | NO 
+  codigo                         | VARCHAR(10)          | NO     | NO 
+  descripcion                    | VARCHAR(200)         | NO     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 11: cbdmauxi
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging relacionada con auxiliares o clientes/proveedores en el sistema.
+Registros en BD: 43075
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  codcia                         | TEXT                 | SÍ     | NO 
+  clfaux                         | TEXT                 | SÍ     | NO 
+  codaux                         | TEXT                 | SÍ     | NO 
+  nomaux                         | TEXT                 | SÍ     | NO 
+  diraux                         | TEXT                 | SÍ     | NO 
+  rucaux                         | TEXT                 | SÍ     | NO 
+  tlfaux                         | TEXT                 | SÍ     | NO 
+  email                          | TEXT                 | SÍ     | NO 
+  contacto                       | TEXT                 | SÍ     | NO 
+  email2                         | TEXT                 | SÍ     | NO 
+  contacto2                      | TEXT                 | SÍ     | NO 
+  tpodoc                         | TEXT                 | SÍ     | NO 
+  ApePat                         | TEXT                 | SÍ     | NO 
+  ApeMat                         | TEXT                 | SÍ     | NO 
+  NomBres                        | TEXT                 | SÍ     | NO 
+  fax                            | TEXT                 | SÍ     | NO 
+  dueño                          | TEXT                 | SÍ     | NO 
+  codnac                         | TEXT                 | SÍ     | NO 
+  codzon                         | TEXT                 | SÍ     | NO 
+  coddep                         | TEXT                 | SÍ     | NO 
+  codpro                         | TEXT                 | SÍ     | NO 
+  coddis                         | TEXT                 | SÍ     | NO 
+  codven                         | TEXT                 | SÍ     | NO 
+  codest                         | DOUBLE PRECISION     | SÍ     | NO 
+  codret                         | DOUBLE PRECISION     | SÍ     | NO 
+  ptopar                         | TEXT                 | SÍ     | NO 
+  ptolle                         | TEXT                 | SÍ     | NO 
+  crenac                         | DOUBLE PRECISION     | SÍ     | NO 
+  creusa                         | DOUBLE PRECISION     | SÍ     | NO 
+  creeur                         | DOUBLE PRECISION     | SÍ     | NO 
+  fchalt                         | TIMESTAMP            | SÍ     | NO 
+  email0                         | TEXT                 | SÍ     | NO 
+  tpovta                         | TEXT                 | SÍ     | NO 
+  pais                           | TEXT                 | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  T_Ventasruc                    | TEXT                 | SÍ     | NO 
+  C_TRUC                         | TEXT                 | SÍ     | NO 
+  T_filtro                       | TEXT                 | SÍ     | NO 
+  C_cnatjur                      | TEXT                 | SÍ     | NO 
+  C_crazsoc                      | TEXT                 | SÍ     | NO 
+  C_crazsoc_1                    | TEXT                 | SÍ     | NO 
+  C_ApePat                       | TEXT                 | SÍ     | NO 
+  C_ApeMat                       | TEXT                 | SÍ     | NO 
+  C_NomBres                      | TEXT                 | SÍ     | NO 
+  CC_ApePat                      | TEXT                 | SÍ     | NO 
+  CC_ApeMat                      | TEXT                 | SÍ     | NO 
+  CC_NomBres                     | TEXT                 | SÍ     | NO 
+  C_tipoauxiliar                 | TEXT                 | SÍ     | NO 
+  C_tipoauxiliar_f               | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 12: ccbmauxi
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging de auxiliares contables y datos de terceras entidades de la base de datos.
+Registros en BD: 6363
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  CodCia                         | TEXT                 | SÍ     | NO 
+  codaux                         | TEXT                 | SÍ     | NO 
+  nomaux                         | TEXT                 | SÍ     | NO 
+  SdoNac                         | DOUBLE PRECISION     | SÍ     | NO 
+  SdoUsa                         | DOUBLE PRECISION     | SÍ     | NO 
+  SdoEur                         | DOUBLE PRECISION     | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 13: ccbmvtos
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging que registra los movimientos y transacciones detalladas de cuentas por cobrar/pagar.
+Registros en BD: 21113
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  CodCia                         | TEXT                 | SÍ     | NO 
+  anos                           | TEXT                 | SÍ     | NO 
+  mes                            | TEXT                 | SÍ     | NO 
+  coddoc                         | TEXT                 | SÍ     | NO 
+  nrodoc                         | TEXT                 | SÍ     | NO 
+  nroitm                         | TEXT                 | SÍ     | NO 
+  tpodoc                         | TEXT                 | SÍ     | NO 
+  nro_apl                        | TEXT                 | SÍ     | NO 
+  fchdoc                         | TIMESTAMP            | SÍ     | NO 
+  fching                         | TIMESTAMP            | SÍ     | NO 
+  codaux                         | TEXT                 | SÍ     | NO 
+  NomAux                         | TEXT                 | SÍ     | NO 
+  codven                         | TEXT                 | SÍ     | NO 
+  nomven                         | TEXT                 | SÍ     | NO 
+  codmon                         | DOUBLE PRECISION     | SÍ     | NO 
+  tpocmb                         | DOUBLE PRECISION     | SÍ     | NO 
+  tpocmbe                        | DOUBLE PRECISION     | SÍ     | NO 
+  tporef                         | TEXT                 | SÍ     | NO 
+  codref                         | TEXT                 | SÍ     | NO 
+  nroref                         | TEXT                 | SÍ     | NO 
+  import                         | DOUBLE PRECISION     | SÍ     | NO 
+  nropla                         | TEXT                 | SÍ     | NO 
+  glodoc                         | TEXT                 | SÍ     | NO 
+  fmapgo                         | TEXT                 | SÍ     | NO 
+  codigo                         | TEXT                 | SÍ     | NO 
+  codcta                         | TEXT                 | SÍ     | NO 
+  nromes                         | TEXT                 | SÍ     | NO 
+  codope                         | TEXT                 | SÍ     | NO 
+  nroast                         | TEXT                 | SÍ     | NO 
+  flgctb                         | TEXT                 | SÍ     | NO 
+  codbco                         | TEXT                 | SÍ     | NO 
+  nrochq                         | TEXT                 | SÍ     | NO 
+  fchcan                         | TIMESTAMP            | SÍ     | NO 
+  usuario                        | TEXT                 | SÍ     | NO 
+  FlgEst                         | TEXT                 | SÍ     | NO 
+  codasi                         | TEXT                 | SÍ     | NO 
+  nroasi                         | TEXT                 | SÍ     | NO 
+  CodDep                         | TEXT                 | SÍ     | NO 
+  NroDep                         | TEXT                 | SÍ     | NO 
+  fchDep                         | DATE                 | SÍ     | NO 
+  tpopgo                         | TEXT                 | SÍ     | NO 
+  Glosa                          | TEXT                 | SÍ     | NO 
+  Dcmpgo                         | TEXT                 | SÍ     | NO 
+  CodCom                         | TEXT                 | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  C_car                          | TEXT                 | SÍ     | NO 
+  C_monedag                      | TEXT                 | SÍ     | NO 
+  C_tipcomp                      | TEXT                 | SÍ     | NO 
+  C_tipocambiosunat              | DOUBLE PRECISION     | SÍ     | NO 
+  C_numercomprobante             | TEXT                 | SÍ     | NO 
+  C_Serie                        | TEXT                 | SÍ     | NO 
+  C_tipocliente                  | TEXT                 | SÍ     | NO 
+  C_tipcli                       | TEXT                 | SÍ     | NO 
+  C_ctatotal                     | TEXT                 | SÍ     | NO 
+  C_Carcja                       | TEXT                 | SÍ     | NO 
+  C_total                        | DOUBLE PRECISION     | SÍ     | NO 
+  C_total_s                      | TEXT                 | SÍ     | NO 
+  C_total_d                      | TEXT                 | SÍ     | NO 
+  C_cta_Redondeo                 | TEXT                 | SÍ     | NO 
+  C_Comprobante_NC               | TEXT                 | SÍ     | NO 
+  C_serie_NC                     | TEXT                 | SÍ     | NO 
+  C_numero_NC                    | TEXT                 | SÍ     | NO 
+  C_Serie_C                      | TEXT                 | SÍ     | NO 
+  C_numero_C                     | TEXT                 | SÍ     | NO 
+  C_serie_NC_c                   | TEXT                 | SÍ     | NO 
+  C_numero_NC_C                  | TEXT                 | SÍ     | NO 
+  C_periodo                      | TEXT                 | SÍ     | NO 
+  C_mes                          | TEXT                 | SÍ     | NO 
+  C_GLOSA                        | TEXT                 | SÍ     | NO 
+  C_glosa2                       | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 14: ccbrgdoc
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging que registra documentos de ventas, facturas y boletas emitidas (Registro de Documentos).
+Registros en BD: 35015
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  codcia                         | TEXT                 | SÍ     | NO 
+  coddoc                         | TEXT                 | SÍ     | NO 
+  nrodoc                         | TEXT                 | SÍ     | NO 
+  tpodoc                         | TEXT                 | SÍ     | NO 
+  fchdoc                         | TIMESTAMP            | SÍ     | NO 
+  diavto                         | DOUBLE PRECISION     | SÍ     | NO 
+  fchvto                         | TIMESTAMP            | SÍ     | NO 
+  fchgui                         | TIMESTAMP            | SÍ     | NO 
+  fchped                         | TIMESTAMP            | SÍ     | NO 
+  anos                           | TEXT                 | SÍ     | NO 
+  mes                            | TEXT                 | SÍ     | NO 
+  codaux                         | TEXT                 | SÍ     | NO 
+  nomaux                         | TEXT                 | SÍ     | NO 
+  diraux                         | TEXT                 | SÍ     | NO 
+  rucaux                         | TEXT                 | SÍ     | NO 
+  NotAst                         | TEXT                 | SÍ     | NO 
+  codmon                         | DOUBLE PRECISION     | SÍ     | NO 
+  tpocmb                         | DOUBLE PRECISION     | SÍ     | NO 
+  tpocmbe                        | DOUBLE PRECISION     | SÍ     | NO 
+  impbto                         | DOUBLE PRECISION     | SÍ     | NO 
+  impnet                         | DOUBLE PRECISION     | SÍ     | NO 
+  impseg                         | DOUBLE PRECISION     | SÍ     | NO 
+  impfte                         | DOUBLE PRECISION     | SÍ     | NO 
+  impotr                         | DOUBLE PRECISION     | SÍ     | NO 
+  porigv                         | DOUBLE PRECISION     | SÍ     | NO 
+  impigv                         | DOUBLE PRECISION     | SÍ     | NO 
+  imptot                         | DOUBLE PRECISION     | SÍ     | NO 
+  sdodoc                         | DOUBLE PRECISION     | SÍ     | NO 
+  tporef                         | TEXT                 | SÍ     | NO 
+  codref                         | TEXT                 | SÍ     | NO 
+  nroref                         | TEXT                 | SÍ     | NO 
+  nroped                         | TEXT                 | SÍ     | NO 
+  nro_oc                         | TEXT                 | SÍ     | NO 
+  fch_oc                         | TIMESTAMP            | SÍ     | NO 
+  glodoc0                        | TEXT                 | SÍ     | NO 
+  glodoc1                        | TEXT                 | SÍ     | NO 
+  glodoc2                        | TEXT                 | SÍ     | NO 
+  glodoc3                        | TEXT                 | SÍ     | NO 
+  glodoc4                        | TEXT                 | SÍ     | NO 
+  glodoc5                        | TEXT                 | SÍ     | NO 
+  codnac                         | TEXT                 | SÍ     | NO 
+  codzon                         | TEXT                 | SÍ     | NO 
+  codpgo                         | TEXT                 | SÍ     | NO 
+  nompgo                         | TEXT                 | SÍ     | NO 
+  codven                         | TEXT                 | SÍ     | NO 
+  nomven                         | TEXT                 | SÍ     | NO 
+  porcom                         | DOUBLE PRECISION     | SÍ     | NO 
+  coddep                         | TEXT                 | SÍ     | NO 
+  codpro                         | TEXT                 | SÍ     | NO 
+  coddis                         | TEXT                 | SÍ     | NO 
+  ptopar                         | TEXT                 | SÍ     | NO 
+  ptolle                         | TEXT                 | SÍ     | NO 
+  tramo01                        | TEXT                 | SÍ     | NO 
+  tramo02                        | TEXT                 | SÍ     | NO 
+  tramo03                        | TEXT                 | SÍ     | NO 
+  codtra                         | TEXT                 | SÍ     | NO 
+  nomtra                         | TEXT                 | SÍ     | NO 
+  dirtra                         | TEXT                 | SÍ     | NO 
+  ructra                         | TEXT                 | SÍ     | NO 
+  nomcho                         | TEXT                 | SÍ     | NO 
+  nrovehi                        | TEXT                 | SÍ     | NO 
+  nrobre                         | TEXT                 | SÍ     | NO 
+  cerins                         | TEXT                 | SÍ     | NO 
+  marca                          | TEXT                 | SÍ     | NO 
+  peraut                         | TEXT                 | SÍ     | NO 
+  dni                            | TEXT                 | SÍ     | NO 
+  nromes                         | TEXT                 | SÍ     | NO 
+  codope                         | TEXT                 | SÍ     | NO 
+  nroast                         | TEXT                 | SÍ     | NO 
+  tpofac                         | TEXT                 | SÍ     | NO 
+  tpocta                         | DOUBLE PRECISION     | SÍ     | NO 
+  hraimp                         | TEXT                 | SÍ     | NO 
+  usuario                        | TEXT                 | SÍ     | NO 
+  flgest                         | TEXT                 | SÍ     | NO 
+  flgubc                         | TEXT                 | SÍ     | NO 
+  flgsit                         | TEXT                 | SÍ     | NO 
+  nropla                         | TEXT                 | SÍ     | NO 
+  CodCta                         | TEXT                 | SÍ     | NO 
+  NroUni                         | TEXT                 | SÍ     | NO 
+  fchubc                         | TEXT                 | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  C_car                          | TEXT                 | SÍ     | NO 
+  C_coddoc                       | TEXT                 | SÍ     | NO 
+  C_moneda                       | TEXT                 | SÍ     | NO 
+  C_notacredito                  | TEXT                 | SÍ     | NO 
+  C_numercomprobante             | TEXT                 | SÍ     | NO 
+  C_puntoventa                   | TEXT                 | SÍ     | NO 
+  C_tipocambiosunat              | DOUBLE PRECISION     | SÍ     | NO 
+  C_tipocliente                  | TEXT                 | SÍ     | NO 
+  C_numercomprobanteNC           | TEXT                 | SÍ     | NO 
+  C_puntoventaNCF                | TEXT                 | SÍ     | NO 
+  c_SerieNCF                     | TEXT                 | SÍ     | NO 
+  C_carNC                        | TEXT                 | SÍ     | NO 
+  C_fechaNC                      | TIMESTAMP            | SÍ     | NO 
+
+================================================================================
+
+TABLA 15: ccbrrdoc
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging que registra la información de referencia o relación de documentos de venta y notas de crédito.
+Registros en BD: 74377
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  CodCia                         | TEXT                 | SÍ     | NO 
+  Anos                           | TEXT                 | SÍ     | NO 
+  TpoDoc                         | TEXT                 | SÍ     | NO 
+  CodDoc                         | TEXT                 | SÍ     | NO 
+  NroDoc                         | TEXT                 | SÍ     | NO 
+  Codigo                         | TEXT                 | SÍ     | NO 
+  Nombre                         | TEXT                 | SÍ     | NO 
+  GloDoc0                        | TEXT                 | SÍ     | NO 
+  GloDoc1                        | TEXT                 | SÍ     | NO 
+  GloDoc2                        | TEXT                 | SÍ     | NO 
+  GloDoc3                        | TEXT                 | SÍ     | NO 
+  GloDoc4                        | TEXT                 | SÍ     | NO 
+  Import                         | DOUBLE PRECISION     | SÍ     | NO 
+  AftMov                         | TEXT                 | SÍ     | NO 
+  FlgEst                         | TEXT                 | SÍ     | NO 
+  CodCta                         | TEXT                 | SÍ     | NO 
+  NomCta                         | TEXT                 | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  C_car                          | TEXT                 | SÍ     | NO 
+  Periodo_mes                    | TEXT                 | SÍ     | NO 
+  C_coddoc                       | TEXT                 | SÍ     | NO 
+  codref1                        | TEXT                 | SÍ     | NO 
+  C_moneda                       | TEXT                 | SÍ     | NO 
+  C_numercomprobante             | TEXT                 | SÍ     | NO 
+  C_puntoventa                   | TEXT                 | SÍ     | NO 
+  c_Seriedoc                     | TEXT                 | SÍ     | NO 
+  C_tipocambiosunat              | TEXT                 | SÍ     | NO 
+  c_total                        | TEXT                 | SÍ     | NO 
+  C_Dscto                        | TEXT                 | SÍ     | NO 
+  C_Vtareal                      | TEXT                 | SÍ     | NO 
+  c_S_total                      | TEXT                 | SÍ     | NO 
+  C_S_Dscto                      | TEXT                 | SÍ     | NO 
+  C_S_Vtareal                    | TEXT                 | SÍ     | NO 
+  c_D_total                      | TEXT                 | SÍ     | NO 
+  C_D_Dscto                      | TEXT                 | SÍ     | NO 
+  C_D_Vtareal                    | TEXT                 | SÍ     | NO 
+  C_Producto                     | TEXT                 | SÍ     | NO 
+  C_PrudctoCodigo                | TEXT                 | SÍ     | NO 
+  C_VTA_TERCEROS                 | TEXT                 | SÍ     | NO 
+  C_VTA_RELACIONADA              | TEXT                 | SÍ     | NO 
+  C_DSCTO_TERCERO                | TEXT                 | SÍ     | NO 
+  C_DSCTO_RELACIONADO            | TEXT                 | SÍ     | NO 
+  tipocliente                    | TEXT                 | SÍ     | NO 
+  T_tipmon                       | TEXT                 | SÍ     | NO 
+  C_CuentotalA                   | TEXT                 | SÍ     | NO 
+  C_igvporcentaje                | TEXT                 | SÍ     | NO 
+  C_totalfactura                 | TEXT                 | SÍ     | NO 
+  C_S_totalfactura               | TEXT                 | SÍ     | NO 
+  C_igvimporte                   | TEXT                 | SÍ     | NO 
+  C_D_totalfactura               | TEXT                 | SÍ     | NO 
+  C_S_igvimporte                 | TEXT                 | SÍ     | NO 
+  C_D_igvimporte                 | TEXT                 | SÍ     | NO 
+  C_tipoNC                       | TEXT                 | SÍ     | NO 
+  C_SerieNC                      | TEXT                 | SÍ     | NO 
+  C_numeroNC                     | TEXT                 | SÍ     | NO 
+  C_fechaNC                      | TEXT                 | SÍ     | NO 
+  C_ctaigv                       | TEXT                 | SÍ     | NO 
+  C_DSCTO_T                      | TEXT                 | SÍ     | NO 
+  C_CTABASE_F                    | TEXT                 | SÍ     | NO 
+  C_CTADESCUENTO_F               | TEXT                 | SÍ     | NO 
+  C_RUC                          | TEXT                 | SÍ     | NO 
+  C_RAZONSOCIAL                  | TEXT                 | SÍ     | NO 
+  C_mes                          | TEXT                 | SÍ     | NO 
+  C_estado1                      | TEXT                 | SÍ     | NO 
+  c_estado                       | TEXT                 | SÍ     | NO 
+  C_glosa                        | TEXT                 | SÍ     | NO 
+  C_fechaEmision                 | TEXT                 | SÍ     | NO 
+  C_fechaNC_Contasis             | TEXT                 | SÍ     | NO 
+  C_basetotal                    | TEXT                 | SÍ     | NO 
+  C_S_basetotal                  | TEXT                 | SÍ     | NO 
+  C_D_basetotal                  | TEXT                 | SÍ     | NO 
+  c_Seriedoc_F                   | TEXT                 | SÍ     | NO 
+  C_numercomprobante_F           | TEXT                 | SÍ     | NO 
+  URLVTA_pdf                     | TEXT                 | SÍ     | NO 
+  URLVTA_XML                     | TEXT                 | SÍ     | NO 
+  URLVTA_CDR                     | TEXT                 | SÍ     | NO 
+  ESTADO_VTA                     | TEXT                 | SÍ     | NO 
+  Glosa2_F                       | TEXT                 | SÍ     | NO 
+  fchdoc                         | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 16: ccbtabla
+--------------------------------------------------------------------------------
+Descripción: Tabla general de parámetros y constantes auxiliares configuradas en la base de datos de origen.
+Registros en BD: 300
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  CodCia                         | TEXT                 | SÍ     | NO 
+  Tabla                          | TEXT                 | SÍ     | NO 
+  Codigo                         | TEXT                 | SÍ     | NO 
+  Nombre                         | TEXT                 | SÍ     | NO 
+  CtaNac                         | TEXT                 | SÍ     | NO 
+  CtaUsa                         | TEXT                 | SÍ     | NO 
+  CtaEur                         | TEXT                 | SÍ     | NO 
+  CodMon                         | BIGINT               | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  C_car                          | TEXT                 | SÍ     | NO 
+  BC_CUENTA                      | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 17: cf_diario
+--------------------------------------------------------------------------------
+Descripción: Staging / tabla intermedia para las cabeceras de asientos contables con la estructura exacta de la tabla `cf_diario` de Contasis.
+Registros en BD: 26738
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | SÍ     | NO 
+  subcategoria_id                | INTEGER              | SÍ     | NO 
+  lote_id                        | VARCHAR(50)          | SÍ     | NO 
+  estado                         | VARCHAR(20)          | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+  cper                           | CHAR(4)              | SÍ     | NO 
+  cmes                           | CHAR(2)              | SÍ     | NO 
+  ccodori                        | CHAR(3)              | SÍ     | NO 
+  nasiento                       | NUMERIC(6, 0)        | SÍ     | NO 
+  ffecasi                        | DATE                 | SÍ     | NO 
+  cmoneda                        | CHAR(1)              | SÍ     | NO 
+  ccodusu                        | CHAR(20)             | SÍ     | NO 
+  tregistro                      | TIMESTAMP            | SÍ     | NO 
+  ccodsu                         | CHAR(2)              | SÍ     | NO 
+  ntcblo                         | NUMERIC(1, 0)        | SÍ     | NO 
+  ccodbas                        | CHAR(10)             | SÍ     | NO 
+  nidreg                         | NUMERIC(15, 0)       | SÍ     | NO 
+  nidlin                         | NUMERIC(6, 0)        | SÍ     | NO 
+  chknotc                        | NUMERIC(1, 0)        | SÍ     | NO 
+  cglosa_2                       | TEXT                 | SÍ     | NO 
+  nidregcob                      | NUMERIC(15, 0)       | SÍ     | NO 
+  idcontrol                      | VARCHAR(255)         | SÍ     | NO 
+  extra_data                     | JSON                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 18: cf_diariol
+--------------------------------------------------------------------------------
+Descripción: Staging / tabla intermedia para el detalle de asientos contables con la estructura exacta de la tabla `cf_diariol` de Contasis.
+Registros en BD: 110846
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | SÍ     | NO 
+  subcategoria_id                | INTEGER              | SÍ     | NO 
+  lote_id                        | VARCHAR(50)          | SÍ     | NO 
+  estado                         | VARCHAR(20)          | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+  cper                           | CHAR(4)              | SÍ     | NO 
+  cmes                           | CHAR(2)              | SÍ     | NO 
+  ccodori                        | CHAR(3)              | SÍ     | NO 
+  nasiento                       | NUMERIC(6, 0)        | SÍ     | NO 
+  nidlin                         | NUMERIC(6, 0)        | SÍ     | NO 
+  ntc                            | NUMERIC(10, 6)       | SÍ     | NO 
+  ccodcue                        | CHAR(20)             | SÍ     | NO 
+  ndebe                          | NUMERIC(15, 2)       | SÍ     | NO 
+  nhaber                         | NUMERIC(15, 2)       | SÍ     | NO 
+  cglosa                         | VARCHAR(80)          | SÍ     | NO 
+  ndebes                         | NUMERIC(15, 2)       | SÍ     | NO 
+  nhabers                        | NUMERIC(15, 2)       | SÍ     | NO 
+  ndebed                         | NUMERIC(15, 2)       | SÍ     | NO 
+  nhaberd                        | NUMERIC(15, 2)       | SÍ     | NO 
+  cdes                           | CHAR(1)              | SÍ     | NO 
+  cdestino                       | CHAR(3)              | SÍ     | NO 
+  ndifauto                       | NUMERIC(1, 0)        | SÍ     | NO 
+  najusauto                      | NUMERIC(1, 0)        | SÍ     | NO 
+  cregis                         | CHAR(1)              | SÍ     | NO 
+  ncomp                          | NUMERIC(1, 0)        | SÍ     | NO 
+  ccoddoc                        | CHAR(2)              | SÍ     | NO 
+  cserie                         | CHAR(20)             | SÍ     | NO 
+  cnumero                        | CHAR(20)             | SÍ     | NO 
+  cnumfin                        | CHAR(20)             | SÍ     | NO 
+  ffechadoc                      | DATE                 | SÍ     | NO 
+  ccodruc                        | CHAR(15)             | SÍ     | NO 
+  ccodenti                       | CHAR(11)             | SÍ     | NO 
+  ffechaven                      | DATE                 | SÍ     | NO 
+  nbase1                         | NUMERIC(15, 2)       | SÍ     | NO 
+  nigv1                          | NUMERIC(15, 2)       | SÍ     | NO 
+  nbase2                         | NUMERIC(15, 2)       | SÍ     | NO 
+  nigv2                          | NUMERIC(15, 2)       | SÍ     | NO 
+  nbase3                         | NUMERIC(15, 2)       | SÍ     | NO 
+  nigv3                          | NUMERIC(15, 2)       | SÍ     | NO 
+  nina                           | NUMERIC(15, 2)       | SÍ     | NO 
+  nexo                           | NUMERIC(15, 2)       | SÍ     | NO 
+  nisc                           | NUMERIC(15, 2)       | SÍ     | NO 
+  nivabase                       | NUMERIC(15, 2)       | SÍ     | NO 
+  nivaimp                        | NUMERIC(15, 2)       | SÍ     | NO 
+  ntot                           | NUMERIC(15, 2)       | SÍ     | NO 
+  nbase1s                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nigv1s                         | NUMERIC(15, 2)       | SÍ     | NO 
+  nbase2s                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nigv2s                         | NUMERIC(15, 2)       | SÍ     | NO 
+  nbase3s                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nigv3s                         | NUMERIC(15, 2)       | SÍ     | NO 
+  ninas                          | NUMERIC(15, 2)       | SÍ     | NO 
+  nexos                          | NUMERIC(15, 2)       | SÍ     | NO 
+  niscs                          | NUMERIC(15, 2)       | SÍ     | NO 
+  nivabases                      | NUMERIC(15, 2)       | SÍ     | NO 
+  nivaimps                       | NUMERIC(15, 2)       | SÍ     | NO 
+  ntots                          | NUMERIC(15, 2)       | SÍ     | NO 
+  nbase1d                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nigv1d                         | NUMERIC(15, 2)       | SÍ     | NO 
+  nbase2d                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nigv2d                         | NUMERIC(15, 2)       | SÍ     | NO 
+  nbase3d                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nigv3d                         | NUMERIC(15, 2)       | SÍ     | NO 
+  ninad                          | NUMERIC(15, 2)       | SÍ     | NO 
+  nexod                          | NUMERIC(15, 2)       | SÍ     | NO 
+  niscd                          | NUMERIC(15, 2)       | SÍ     | NO 
+  nivabased                      | NUMERIC(15, 2)       | SÍ     | NO 
+  nivaimpd                       | NUMERIC(15, 2)       | SÍ     | NO 
+  ntotd                          | NUMERIC(15, 2)       | SÍ     | NO 
+  ccodclas                       | CHAR(1)              | SÍ     | NO 
+  ccodflu                        | CHAR(4)              | SÍ     | NO 
+  ccodpago                       | CHAR(3)              | SÍ     | NO 
+  ccodcos                        | CHAR(9)              | SÍ     | NO 
+  ccodcos2                       | CHAR(9)              | SÍ     | NO 
+  ccodpresu                      | CHAR(10)             | SÍ     | NO 
+  ccodcam                        | CHAR(4)              | SÍ     | NO 
+  ccodcam2                       | CHAR(4)              | SÍ     | NO 
+  ccodecpntribcol                | CHAR(2)              | SÍ     | NO 
+  ccodecpnniifcol                | CHAR(2)              | SÍ     | NO 
+  cglosa2                        | VARCHAR(80)          | SÍ     | NO 
+  cmesc                          | CHAR(2)              | SÍ     | NO 
+  cmreg                          | CHAR(1)              | SÍ     | NO 
+  ccodocon                       | CHAR(4)              | SÍ     | NO 
+  ndiferido                      | NUMERIC(1, 0)        | SÍ     | NO 
+  ffechadif                      | DATE                 | SÍ     | NO 
+  nresp                          | NUMERIC(1, 0)        | SÍ     | NO 
+  ccodpps                        | CHAR(2)              | SÍ     | NO 
+  ccodpds                        | CHAR(5)              | SÍ     | NO 
+  cregisre                       | CHAR(1)              | SÍ     | NO 
+  nperdenre                      | NUMERIC(1, 0)        | SÍ     | NO 
+  nporre                         | NUMERIC(5, 2)        | SÍ     | NO 
+  ffecre                         | DATE                 | SÍ     | NO 
+  cserre                         | CHAR(6)              | SÍ     | NO 
+  cnumre                         | CHAR(13)             | SÍ     | NO 
+  cnumdere                       | CHAR(15)             | SÍ     | NO 
+  ntcre                          | NUMERIC(10, 6)       | SÍ     | NO 
+  nbaseres                       | NUMERIC(15, 2)       | SÍ     | NO 
+  nbasered                       | NUMERIC(15, 2)       | SÍ     | NO 
+  nimpres                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nimpred                        | NUMERIC(15, 2)       | SÍ     | NO 
+  cpdbdetcod                     | CHAR(8)              | SÍ     | NO 
+  ccodretran                     | CHAR(2)              | SÍ     | NO 
+  ccodtopdet                     | CHAR(2)              | SÍ     | NO 
+  npagdetra                      | NUMERIC(1, 0)        | SÍ     | NO 
+  cdocnodom                      | CHAR(20)             | SÍ     | NO 
+  ccodtipren                     | CHAR(2)              | SÍ     | NO 
+  crefdoc                        | CHAR(2)              | SÍ     | NO 
+  freffec                        | DATE                 | SÍ     | NO 
+  crefser                        | CHAR(10)             | SÍ     | NO 
+  crefnum                        | CHAR(13)             | SÍ     | NO 
+  ccoddas                        | CHAR(3)              | SÍ     | NO 
+  cyeardas                       | CHAR(4)              | SÍ     | NO 
+  ccorrdas                       | CHAR(6)              | SÍ     | NO 
+  ffembdas                       | DATE                 | SÍ     | NO 
+  ffregdas                       | DATE                 | SÍ     | NO 
+  nfobdas                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nfobdad                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nlecorre                       | NUMERIC(6, 0)        | SÍ     | NO 
+  clecvesta                      | CHAR(1)              | SÍ     | NO 
+  clecvmes                       | CHAR(2)              | SÍ     | NO 
+  clecvper                       | CHAR(4)              | SÍ     | NO 
+  cledmcesta                     | CHAR(1)              | SÍ     | NO 
+  cledmcmes                      | CHAR(2)              | SÍ     | NO 
+  cledmcper                      | CHAR(4)              | SÍ     | NO 
+  nlecorrere                     | NUMERIC(6, 0)        | SÍ     | NO 
+  nautamo                        | NUMERIC(1, 0)        | SÍ     | NO 
+  ffec_dc                        | DATE                 | SÍ     | NO 
+  cdoc_dc                        | CHAR(2)              | SÍ     | NO 
+  cser_dc                        | CHAR(20)             | SÍ     | NO 
+  cnum_dc                        | CHAR(20)             | SÍ     | NO 
+  cdoc_nd                        | CHAR(2)              | SÍ     | NO 
+  cser_nd                        | CHAR(20)             | SÍ     | NO 
+  cnum_nd                        | CHAR(20)             | SÍ     | NO 
+  nrenbru_nd                     | NUMERIC(15, 2)       | SÍ     | NO 
+  nrennet_nd                     | NUMERIC(15, 2)       | SÍ     | NO 
+  nimpret_nd                     | NUMERIC(15, 2)       | SÍ     | NO 
+  ndedcos_nd                     | NUMERIC(15, 2)       | SÍ     | NO 
+  ntasret_nd                     | NUMERIC(6, 2)        | SÍ     | NO 
+  ccodmon                        | CHAR(3)              | SÍ     | NO 
+  ntc_nd                         | NUMERIC(5, 3)        | SÍ     | NO 
+  nintext                        | NUMERIC(1, 0)        | SÍ     | NO 
+  nicbper                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nicbpers                       | NUMERIC(15, 2)       | SÍ     | NO 
+  nicbperd                       | NUMERIC(15, 2)       | SÍ     | NO 
+  nigvxacre                      | NUMERIC(1, 0)        | SÍ     | NO 
+  ccodsu                         | CHAR(2)              | SÍ     | NO 
+  ffecasi                        | DATE                 | SÍ     | NO 
+  idxacre                        | CHAR(30)             | SÍ     | NO 
+  cmonxacre                      | CHAR(1)              | SÍ     | NO 
+  nidreglin                      | NUMERIC(6, 0)        | SÍ     | NO 
+  crvieap                        | CHAR(1)              | SÍ     | NO 
+  valida_sunat                   | NUMERIC(20, 0)       | SÍ     | NO 
+  nflgigvrec                     | NUMERIC(1, 0)        | SÍ     | NO 
+  nflgprorrateo                  | NUMERIC(1, 0)        | SÍ     | NO 
+  cctapro                        | CHAR(20)             | SÍ     | NO 
+  npigv                          | NUMERIC(5, 2)        | SÍ     | NO 
+  nadopcion                      | NUMERIC(2, 0)        | SÍ     | NO 
+  nporceparti                    | NUMERIC(6, 2)        | SÍ     | NO 
+  nimpbenefley                   | NUMERIC(15, 2)       | SÍ     | NO 
+  nbasetg                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nbasetgs                       | NUMERIC(15, 2)       | SÍ     | NO 
+  nbasetgd                       | NUMERIC(15, 2)       | SÍ     | NO 
+  nigvtg                         | NUMERIC(15, 2)       | SÍ     | NO 
+  nigvtgs                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nigvtgd                        | NUMERIC(15, 2)       | SÍ     | NO 
+  ninatg                         | NUMERIC(15, 2)       | SÍ     | NO 
+  ninatgs                        | NUMERIC(15, 2)       | SÍ     | NO 
+  ninatgd                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nexotg                         | NUMERIC(15, 2)       | SÍ     | NO 
+  nexotgs                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nexotgd                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nexptg                         | NUMERIC(15, 2)       | SÍ     | NO 
+  nexptgs                        | NUMERIC(15, 2)       | SÍ     | NO 
+  nexptgd                        | NUMERIC(15, 2)       | SÍ     | NO 
+  idparti                        | CHAR(50)             | SÍ     | NO 
+  ctipoparti                     | CHAR(1)              | SÍ     | NO 
+  idcontrol                      | VARCHAR(255)         | SÍ     | NO 
+  nflgtranfg                     | NUMERIC(1, 0)        | SÍ     | NO 
+  ctipaigv                       | CHAR(2)              | SÍ     | NO 
+  nvvtg                          | NUMERIC(15, 2)       | SÍ     | NO 
+  nimptg                         | NUMERIC(15, 2)       | SÍ     | NO 
+  extra_data                     | JSON                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 19: cg_entitrib
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging de entidades tributarias (clientes, proveedores, RUCs) para el reporte contable.
+Registros en BD: 35395
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | SÍ     | NO 
+  subcategoria_id                | INTEGER              | SÍ     | NO 
+  lote_id                        | VARCHAR(50)          | SÍ     | NO 
+  estado                         | VARCHAR(20)          | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+  ccodruc                        | CHAR(15)             | SÍ     | NO 
+  ctipdoc                        | CHAR(1)              | SÍ     | NO 
+  cnatjur                        | CHAR(1)              | SÍ     | NO 
+  capepat                        | CHAR(30)             | SÍ     | NO 
+  capemat                        | CHAR(30)             | SÍ     | NO 
+  cnom1                          | CHAR(30)             | SÍ     | NO 
+  cnom2                          | CHAR(30)             | SÍ     | NO 
+  crazsoc                        | CHAR(150)            | SÍ     | NO 
+  cdirec                         | CHAR(250)            | SÍ     | NO 
+  ctelef                         | CHAR(60)             | SÍ     | NO 
+  cnomcom                        | CHAR(50)             | SÍ     | NO 
+  nbuencon                       | NUMERIC(1, 0)        | SÍ     | NO 
+  nagenper                       | NUMERIC(1, 0)        | SÍ     | NO 
+  nagenret                       | NUMERIC(1, 0)        | SÍ     | NO 
+  nutianu                        | NUMERIC(1, 0)        | SÍ     | NO 
+  nagepor                        | NUMERIC(5, 2)        | SÍ     | NO 
+  nagemonmin                     | NUMERIC(15, 2)       | SÍ     | NO 
+  ccodtipent                     | CHAR(3)              | SÍ     | NO 
+  ncondi                         | NUMERIC(1, 0)        | SÍ     | NO 
+  frenexon                       | DATE                 | SÍ     | NO 
+  ccodpais                       | CHAR(4)              | SÍ     | NO 
+  ccodconvdi                     | CHAR(2)              | SÍ     | NO 
+  cnroregdigem                   | CHAR(15)             | SÍ     | NO 
+  ccatdigem                      | CHAR(5)              | SÍ     | NO 
+  csitdigem                      | CHAR(20)             | SÍ     | NO 
+  cempdigem                      | CHAR(1)              | SÍ     | NO 
+  ccodpag                        | CHAR(2)              | SÍ     | NO 
+  nbloruc                        | NUMERIC(1, 0)        | SÍ     | NO 
+  cestadoruc                     | CHAR(100)            | SÍ     | NO 
+  ncreditos                      | NUMERIC(15, 2)       | SÍ     | NO 
+  ncreditod                      | NUMERIC(15, 2)       | SÍ     | NO 
+  ccodlprecio                    | CHAR(3)              | SÍ     | NO 
+  nexpcon                        | NUMERIC(1, 0)        | SÍ     | NO 
+  ctipviafin                     | CHAR(20)             | SÍ     | NO 
+  cnomviafin                     | CHAR(30)             | SÍ     | NO 
+  cnumerofin                     | CHAR(10)             | SÍ     | NO 
+  cinteriorfin                   | CHAR(20)             | SÍ     | NO 
+  czonafin                       | CHAR(40)             | SÍ     | NO 
+  cdistfin                       | CHAR(40)             | SÍ     | NO 
+  cprovfin                       | CHAR(30)             | SÍ     | NO 
+  cdepfin                        | CHAR(30)             | SÍ     | NO 
+  ccodubi                        | CHAR(6)              | SÍ     | NO 
+  cemail                         | CHAR(150)            | SÍ     | NO 
+  ccodvend                       | CHAR(4)              | SÍ     | NO 
+  nflgvend                       | NUMERIC(1, 0)        | SÍ     | NO 
+  ccodocon                       | CHAR(4)              | SÍ     | NO 
+  ccodcos                        | CHAR(9)              | SÍ     | NO 
+  ccodcos2                       | CHAR(9)              | SÍ     | NO 
+  ccodcategoria                  | CHAR(5)              | SÍ     | NO 
+  ccodubicacion                  | CHAR(5)              | SÍ     | NO 
+  nflgclieinterno                | NUMERIC(1, 0)        | SÍ     | NO 
+
+================================================================================
+
+TABLA 20: cjamtipo
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging que define los tipos de movimientos de caja.
+Registros en BD: 246
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  CodCia                         | TEXT                 | SÍ     | NO 
+  Tabla                          | TEXT                 | SÍ     | NO 
+  Codigo                         | TEXT                 | SÍ     | NO 
+  Nombre                         | TEXT                 | SÍ     | NO 
+  Digito                         | DOUBLE PRECISION     | SÍ     | NO 
+  ClfAux                         | TEXT                 | SÍ     | NO 
+  CtaNac                         | TEXT                 | SÍ     | NO 
+  CtaUsa                         | TEXT                 | SÍ     | NO 
+  CtaEur                         | TEXT                 | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  C_carpago                      | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 21: cntfacturacab
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging que representa la cabecera de las facturas del sistema de ventas.
+Registros en BD: 3199
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  Id                             | BIGINT               | SÍ     | NO 
+  CodCia                         | TEXT                 | SÍ     | NO 
+  NumRucProveedor                | TEXT                 | SÍ     | NO 
+  NomProveedor                   | TEXT                 | SÍ     | NO 
+  CodTipoDoc                     | TEXT                 | SÍ     | NO 
+  Serie                          | TEXT                 | SÍ     | NO 
+  Numero                         | TEXT                 | SÍ     | NO 
+  FecEmision                     | DATE                 | SÍ     | NO 
+  FecVencimiento                 | DATE                 | SÍ     | NO 
+  FecRegistro                    | DATE                 | SÍ     | NO 
+  CodMoneda                      | TEXT                 | SÍ     | NO 
+  TipoCambio                     | DOUBLE PRECISION     | SÍ     | NO 
+  SubTotal                       | DOUBLE PRECISION     | SÍ     | NO 
+  IGV                            | DOUBLE PRECISION     | SÍ     | NO 
+  OtrosTributos                  | DOUBLE PRECISION     | SÍ     | NO 
+  Total                          | DOUBLE PRECISION     | SÍ     | NO 
+  NroOrdenCompra                 | TEXT                 | SÍ     | NO 
+  TipoOc                         | TEXT                 | SÍ     | NO 
+  AnosOc                         | TEXT                 | SÍ     | NO 
+  CodCiaOc                       | TEXT                 | SÍ     | NO 
+  Estado                         | TEXT                 | SÍ     | NO 
+  Observaciones                  | TEXT                 | SÍ     | NO 
+  ModoRegistro                   | TEXT                 | SÍ     | NO 
+  IdCompraRef                    | TEXT                 | SÍ     | NO 
+  DirEmisor                      | TEXT                 | SÍ     | NO 
+  UbigeoEmisor                   | TEXT                 | SÍ     | NO 
+  DirReceptor                    | TEXT                 | SÍ     | NO 
+  MtoTotalLetras                 | TEXT                 | SÍ     | NO 
+  NomComercialEmisor             | TEXT                 | SÍ     | NO 
+  CreatedAt                      | TIMESTAMP            | SÍ     | NO 
+  CreatedBy                      | TEXT                 | SÍ     | NO 
+  UpdatedAt                      | TIMESTAMP            | SÍ     | NO 
+  Uuid                           | TEXT                 | SÍ     | NO 
+  MtoGravado                     | DOUBLE PRECISION     | SÍ     | NO 
+  MtoExonerado                   | DOUBLE PRECISION     | SÍ     | NO 
+  MtoInafecto                    | DOUBLE PRECISION     | SÍ     | NO 
+  MtoGratuito                    | DOUBLE PRECISION     | SÍ     | NO 
+  MtoAnticipos                   | DOUBLE PRECISION     | SÍ     | NO 
+  MtoISC                         | DOUBLE PRECISION     | SÍ     | NO 
+  MtoICBPER                      | DOUBLE PRECISION     | SÍ     | NO 
+  MtoOtrosCargos                 | DOUBLE PRECISION     | SÍ     | NO 
+  DetLeyenda                     | TEXT                 | SÍ     | NO 
+  DetBienServicio                | TEXT                 | SÍ     | NO 
+  DetMedioPago                   | TEXT                 | SÍ     | NO 
+  DetNroCuenta                   | TEXT                 | SÍ     | NO 
+  DetPorcentaje                  | TEXT                 | SÍ     | NO 
+  DetMonto                       | TEXT                 | SÍ     | NO 
+  NomComercialProv               | TEXT                 | SÍ     | NO 
+  DirProveedor                   | TEXT                 | SÍ     | NO 
+  UbigeoProveedor                | TEXT                 | SÍ     | NO 
+  DirReceptorFactura             | TEXT                 | SÍ     | NO 
+  CodTipTransaccion              | TEXT                 | SÍ     | NO 
+  IndEstadoCpe                   | TEXT                 | SÍ     | NO 
+  IndProcedencia                 | TEXT                 | SÍ     | NO 
+  PlacaVehicular                 | TEXT                 | SÍ     | NO 
+  MtoExportacion                 | DOUBLE PRECISION     | SÍ     | NO 
+  MtoDescuentos                  | DOUBLE PRECISION     | SÍ     | NO 
+  MtoRedondeo                    | DOUBLE PRECISION     | SÍ     | NO 
+  CodTipoNota                    | TEXT                 | SÍ     | NO 
+  DesTipoNota                    | TEXT                 | SÍ     | NO 
+  DesMotivo                      | TEXT                 | SÍ     | NO 
+  DocModificaSerie               | TEXT                 | SÍ     | NO 
+  DocModificaNumero              | TEXT                 | SÍ     | NO 
+  DocModificaTipo                | TEXT                 | SÍ     | NO 
+  CreditoMtoPendiente            | DOUBLE PRECISION     | SÍ     | NO 
+  CreditoFecPlazo                | DATE                 | SÍ     | NO 
+  CreditoNumCuotas               | BIGINT               | SÍ     | NO 
+  CreditoCuotasJson              | TEXT                 | SÍ     | NO 
+  DocsRelacionadosJson           | TEXT                 | SÍ     | NO 
+  XmlDataJson                    | TEXT                 | SÍ     | NO 
+  DocModificaFecha               | TEXT                 | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  C_car                          | TEXT                 | SÍ     | NO 
+  C_tipocambiosunat              | TEXT                 | SÍ     | NO 
+  FecPeriodoContable             | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 22: cntfacturadet
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging que representa el detalle (ítems) de las facturas del sistema de ventas.
+Registros en BD: 4090
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  Id                             | BIGINT               | SÍ     | NO 
+  FacturaCabId                   | BIGINT               | SÍ     | NO 
+  NroItem                        | BIGINT               | SÍ     | NO 
+  CodMaterial                    | TEXT                 | SÍ     | NO 
+  Descripcion                    | TEXT                 | SÍ     | NO 
+  UnidadMedida                   | TEXT                 | SÍ     | NO 
+  Cantidad                       | DOUBLE PRECISION     | SÍ     | NO 
+  PrecioUnitario                 | DOUBLE PRECISION     | SÍ     | NO 
+  Descuento                      | DOUBLE PRECISION     | SÍ     | NO 
+  SubTotal                       | DOUBLE PRECISION     | SÍ     | NO 
+  IGV                            | DOUBLE PRECISION     | SÍ     | NO 
+  ICBPER                         | DOUBLE PRECISION     | SÍ     | NO 
+  Total                          | DOUBLE PRECISION     | SÍ     | NO 
+  CantidadOC                     | DOUBLE PRECISION     | SÍ     | NO 
+  CantidadAlmacen                | TEXT                 | SÍ     | NO 
+  CodProveedor                   | TEXT                 | SÍ     | NO 
+  DesUnidadMedida                | TEXT                 | SÍ     | NO 
+  MtoICBPERItem                  | DOUBLE PRECISION     | SÍ     | NO 
+  MtoDescuento                   | DOUBLE PRECISION     | SÍ     | NO 
+  Inci                           | TEXT                 | SÍ     | NO 
+  Fabricante                     | TEXT                 | SÍ     | NO 
+  Obs1                           | TEXT                 | SÍ     | NO 
+  Obs2                           | TEXT                 | SÍ     | NO 
+  Obs3                           | TEXT                 | SÍ     | NO 
+  Obs4                           | TEXT                 | SÍ     | NO 
+  ExtraDataJson                  | TEXT                 | SÍ     | NO 
+  FechaVencimientoItem           | DATE                 | SÍ     | NO 
+  CuentaContable                 | TEXT                 | SÍ     | NO 
+  PorcIgv                        | DOUBLE PRECISION     | SÍ     | NO 
+  TipoOp                         | TEXT                 | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  CodCia                         | TEXT                 | SÍ     | NO 
+  C_car                          | TEXT                 | SÍ     | NO 
+  C_TipoDoc                      | TEXT                 | SÍ     | NO 
+  C_Serie                        | TEXT                 | SÍ     | NO 
+  C_NumRucProveedor              | TEXT                 | SÍ     | NO 
+  C_NomProveedor                 | TEXT                 | SÍ     | NO 
+  C_Numero                       | TEXT                 | SÍ     | NO 
+  C_FecEmision                   | DATE                 | SÍ     | NO 
+  C_FecVencimiento               | DATE                 | SÍ     | NO 
+  C_CodMoneda                    | TEXT                 | SÍ     | NO 
+  C_SubTotal                     | DOUBLE PRECISION     | SÍ     | NO 
+  C_IGV                          | DOUBLE PRECISION     | SÍ     | NO 
+  C_Total                        | DOUBLE PRECISION     | SÍ     | NO 
+  C_Estado                       | TEXT                 | SÍ     | NO 
+  C_Observaciones                | TEXT                 | SÍ     | NO 
+  C_Uuid                         | TEXT                 | SÍ     | NO 
+  C_MtoGravado                   | DOUBLE PRECISION     | SÍ     | NO 
+  C_MtoExonerado                 | DOUBLE PRECISION     | SÍ     | NO 
+  C_MtoInafecto                  | DOUBLE PRECISION     | SÍ     | NO 
+  C_MtoGratuito                  | DOUBLE PRECISION     | SÍ     | NO 
+  C_MtoAnticipos                 | DOUBLE PRECISION     | SÍ     | NO 
+  C_MtoISC                       | DOUBLE PRECISION     | SÍ     | NO 
+  C_MtoICBPER                    | DOUBLE PRECISION     | SÍ     | NO 
+  C_MtoOtrosCargos               | DOUBLE PRECISION     | SÍ     | NO 
+  C_DocModificaSerie             | TEXT                 | SÍ     | NO 
+  C_DocModificaNumero            | TEXT                 | SÍ     | NO 
+  C_DocModificaTipo              | TEXT                 | SÍ     | NO 
+  C_DocModificaFecha             | TEXT                 | SÍ     | NO 
+  C_tipocambiosunat              | TEXT                 | SÍ     | NO 
+  C_S_MtoGravado                 | TEXT                 | SÍ     | NO 
+  C_S_MtoExonerado               | TEXT                 | SÍ     | NO 
+  C_S_MtoInafecto                | TEXT                 | SÍ     | NO 
+  C_S_IGV                        | TEXT                 | SÍ     | NO 
+  C_S_Total                      | TEXT                 | SÍ     | NO 
+  C_D_MtoGravado                 | TEXT                 | SÍ     | NO 
+  C_D_MtoExonerado               | TEXT                 | SÍ     | NO 
+  C_D_MtoInafecto                | TEXT                 | SÍ     | NO 
+  C_D_IGV                        | TEXT                 | SÍ     | NO 
+  C_D_Total                      | TEXT                 | SÍ     | NO 
+  C_tipocliente                  | TEXT                 | SÍ     | NO 
+  T_tipmonP                      | TEXT                 | SÍ     | NO 
+  C_ctatotal_1                   | TEXT                 | SÍ     | NO 
+  C_ctaigv1                      | TEXT                 | SÍ     | NO 
+  C_Serie_F                      | TEXT                 | SÍ     | NO 
+  C_Numero_F                     | TEXT                 | SÍ     | NO 
+  C_mes                          | TEXT                 | SÍ     | NO 
+  C_periodo                      | TEXT                 | SÍ     | NO 
+  C_DocModificaSerie_F           | TEXT                 | SÍ     | NO 
+  C_DocModificaNumero_F          | TEXT                 | SÍ     | NO 
+  C_DocModificaTipo_F            | TEXT                 | SÍ     | NO 
+  C_moneda                       | TEXT                 | SÍ     | NO 
+  C_glosa2                       | TEXT                 | SÍ     | NO 
+  C_S_SubTotal                   | TEXT                 | SÍ     | NO 
+  C_D_SubTotal                   | TEXT                 | SÍ     | NO 
+  codcta2                        | TEXT                 | SÍ     | NO 
+  C_monecta                      | TEXT                 | SÍ     | NO 
+  C_ctatotal_2                   | TEXT                 | SÍ     | NO 
+  C_ctatotal_3                   | TEXT                 | SÍ     | NO 
+  C_periodoconta                 | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 23: column_filters
+--------------------------------------------------------------------------------
+Descripción: Filtros específicos aplicados a las columnas durante la extracción ETL de las tablas de origen.
+Registros en BD: 240
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  table_selection_id             | INTEGER              | NO     | NO 
+  column_name                    | VARCHAR(200)         | NO     | NO 
+  operator                       | VARCHAR(20)          | NO     | NO 
+  filter_value                   | VARCHAR(500)         | SÍ     | NO 
+  filter_value2                  | VARCHAR(500)         | SÍ     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * table_selection_id -> table_selections(id)
+
+================================================================================
+
+TABLA 24: companies
+--------------------------------------------------------------------------------
+Descripción: Empresas registradas en el sistema para la integración de datos contables (con su nombre, RUC, descripción, etc.).
+Registros en BD: 6
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  name                           | VARCHAR(200)         | NO     | NO 
+  ruc                            | VARCHAR(20)          | SÍ     | NO 
+  description                    | VARCHAR(500)         | SÍ     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+  updated_at                     | TIMESTAMP            | SÍ     | NO 
+
+================================================================================
+
+TABLA 25: computed_column_rules
+--------------------------------------------------------------------------------
+Descripción: Reglas condicionales para crear columnas calculadas en el ETL (fórmulas condicionales personalizadas estilo IF/ELSE).
+Registros en BD: 2054
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  table_selection_id             | INTEGER              | NO     | NO 
+  new_column_name                | VARCHAR(200)         | NO     | NO 
+  source_column                  | VARCHAR(200)         | NO     | NO 
+  condition_value                | VARCHAR(500)         | NO     | NO 
+  result_value                   | VARCHAR(500)         | NO     | NO 
+  default_value                  | VARCHAR(500)         | SÍ     | NO 
+  priority                       | INTEGER              | SÍ     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * table_selection_id -> table_selections(id)
+
+================================================================================
+
+TABLA 26: config_account_mapping
+--------------------------------------------------------------------------------
+Descripción: Configuración personalizada para remapear cuentas de origen a cuentas de destino y centros de costo.
+Registros en BD: 0
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | SÍ     | NO 
+  source_account_code            | VARCHAR(50)          | NO     | NO 
+  source_account_name            | VARCHAR(200)         | SÍ     | NO 
+  dest_account_code              | VARCHAR(50)          | NO     | NO 
+  dest_cost_center               | VARCHAR(50)          | SÍ     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+  updated_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 27: config_document_mapping
+--------------------------------------------------------------------------------
+Descripción: Configuración de mapeo de tipos de documentos de origen a tipos de documentos de destino (ej. 'F' -> '01').
+Registros en BD: 0
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | SÍ     | NO 
+  source_doc_type                | VARCHAR(20)          | NO     | NO 
+  dest_doc_type                  | VARCHAR(20)          | NO     | NO 
+  description                    | VARCHAR(100)         | SÍ     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 28: config_transformation_rules
+--------------------------------------------------------------------------------
+Descripción: Reglas de transformación personalizadas para los datos.
+Registros en BD: 0
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  rule_name                      | VARCHAR(100)         | NO     | NO 
+  description                    | TEXT                 | SÍ     | NO 
+  rule_type                      | VARCHAR(50)          | SÍ     | NO 
+  rule_content                   | TEXT                 | NO     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+
+================================================================================
+
+TABLA 29: destination_connections
+--------------------------------------------------------------------------------
+Descripción: Conexiones configuradas para las bases de datos intermedias de destino (PostgreSQL) para cada empresa.
+Registros en BD: 6
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | NO     | NO 
+  host                           | VARCHAR(200)         | NO     | NO 
+  port                           | INTEGER              | SÍ     | NO 
+  database_name                  | VARCHAR(200)         | NO     | NO 
+  username                       | VARCHAR(100)         | NO     | NO 
+  password                       | VARCHAR(500)         | NO     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  last_tested_at                 | TIMESTAMP            | SÍ     | NO 
+  last_test_status               | VARCHAR(20)          | SÍ     | NO 
+  last_test_message              | TEXT                 | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 30: etl_ejecuciones
+--------------------------------------------------------------------------------
+Descripción: Registro y log individual de cada tarea de pipeline ejecutada en Celery (tiempos, registros extraídos/generados/migrados, errores y logs).
+Registros en BD: 17721
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  pipeline_id                    | INTEGER              | NO     | NO 
+  empresa_id                     | INTEGER              | NO     | NO 
+  subcategoria_id                | INTEGER              | NO     | NO 
+  celery_task_id                 | VARCHAR(255)         | SÍ     | NO 
+  status                         | VARCHAR(20)          | NO     | NO 
+  step_current                   | VARCHAR(20)          | SÍ     | NO 
+  records_extracted              | INTEGER              | SÍ     | NO 
+  records_generated              | INTEGER              | SÍ     | NO 
+  records_migrated               | INTEGER              | SÍ     | NO 
+  queued_at                      | TIMESTAMP            | SÍ     | NO 
+  started_at                     | TIMESTAMP            | SÍ     | NO 
+  finished_at                    | TIMESTAMP            | SÍ     | NO 
+  duration_s                     | NUMERIC(10, 2)       | SÍ     | NO 
+  error_message                  | TEXT                 | SÍ     | NO 
+  error_traceback                | TEXT                 | SÍ     | NO 
+  retry_count                    | INTEGER              | SÍ     | NO 
+  details                        | JSON                 | SÍ     | NO 
+
+  Llaves Foráneas:
+   * empresa_id -> companies(id)
+   * pipeline_id -> etl_pipeline_config(id)
+
+================================================================================
+
+TABLA 31: etl_pipeline_config
+--------------------------------------------------------------------------------
+Descripción: Configuración maestra de las ejecuciones recurrentes de Celery para cada pipeline ETL.
+Registros en BD: 74
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  empresa_id                     | INTEGER              | NO     | NO 
+  subcategoria_id                | INTEGER              | NO     | NO 
+  nombre                         | VARCHAR(300)         | NO     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  schedule_type                  | VARCHAR(20)          | NO     | NO 
+  schedule_value                 | VARCHAR(100)         | NO     | NO 
+  run_extraction                 | BOOLEAN              | SÍ     | NO 
+  run_generation                 | BOOLEAN              | SÍ     | NO 
+  run_migration                  | BOOLEAN              | SÍ     | NO 
+  params                         | JSON                 | SÍ     | NO 
+  priority                       | INTEGER              | SÍ     | NO 
+  max_retries                    | INTEGER              | SÍ     | NO 
+  retry_backoff                  | INTEGER              | SÍ     | NO 
+  day_of_week                    | VARCHAR(20)          | SÍ     | NO 
+  day_of_month                   | INTEGER              | SÍ     | NO 
+  last_run_at                    | TIMESTAMP            | SÍ     | NO 
+  last_status                    | VARCHAR(20)          | SÍ     | NO 
+  last_duration_s                | NUMERIC(10, 2)       | SÍ     | NO 
+  last_error                     | TEXT                 | SÍ     | NO 
+  run_count                      | BIGINT               | SÍ     | NO 
+  error_count                    | BIGINT               | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+  updated_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * empresa_id -> companies(id)
+   * subcategoria_id -> mapeo_subcategorias(id)
+
+================================================================================
+
+TABLA 32: etl_realtime_logs
+--------------------------------------------------------------------------------
+Descripción: Registro de logs en tiempo real para las ejecuciones del pipeline ETL.
+Registros en BD: 228
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | NO     | NO 
+  run_date                       | TIMESTAMP            | SÍ     | NO 
+  status                         | VARCHAR(20)          | NO     | NO 
+  message                        | TEXT                 | SÍ     | NO 
+  records_extracted              | INTEGER              | SÍ     | NO 
+  records_generated              | INTEGER              | SÍ     | NO 
+  records_migrated               | INTEGER              | SÍ     | NO 
+  errors                         | JSON                 | SÍ     | NO 
+  subcategorias                  | TEXT                 | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 33: fac_electronica2
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging que contiene información complementaria o de control de la facturación electrónica.
+Registros en BD: 71522
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  codcia                         | TEXT                 | SÍ     | NO 
+  coddoc                         | TEXT                 | SÍ     | NO 
+  nrodoc                         | TEXT                 | SÍ     | NO 
+  fec_felect                     | TIMESTAMP            | SÍ     | NO 
+  codigo_hash                    | TEXT                 | SÍ     | NO 
+  codusu                         | TEXT                 | SÍ     | NO 
+  fec_anula                      | TIMESTAMP            | SÍ     | NO 
+  usu_anula                      | TEXT                 | SÍ     | NO 
+  detrac                         | BOOLEAN              | SÍ     | NO 
+  URL                            | TEXT                 | SÍ     | NO 
+  UUID                           | TEXT                 | SÍ     | NO 
+  RESPUESTA                      | TEXT                 | SÍ     | NO 
+  Anulacion                      | BOOLEAN              | SÍ     | NO 
+  fec_anulacion                  | TEXT                 | SÍ     | NO 
+  respuesta_anulacion            | TEXT                 | SÍ     | NO 
+  ticket_anulacion               | TEXT                 | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  CAR_FAC                        | TEXT                 | SÍ     | NO 
+  URLVTA_pdf                     | TEXT                 | SÍ     | NO 
+  URLVTA_XML                     | TEXT                 | SÍ     | NO 
+  URLVTA_CDR                     | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 34: final_dest_connections
+--------------------------------------------------------------------------------
+Descripción: Conexiones a las bases de datos del destino contable final (por ejemplo, el software Contasis).
+Registros en BD: 6
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | NO     | NO 
+  db_type                        | VARCHAR(20)          | SÍ     | NO 
+  host                           | VARCHAR(200)         | NO     | NO 
+  port                           | INTEGER              | SÍ     | NO 
+  database_name                  | VARCHAR(200)         | NO     | NO 
+  username                       | VARCHAR(100)         | NO     | NO 
+  password                       | VARCHAR(500)         | NO     | NO 
+  target_table                   | VARCHAR(200)         | SÍ     | NO 
+  target_schema                  | VARCHAR(100)         | SÍ     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  last_tested_at                 | TIMESTAMP            | SÍ     | NO 
+  last_test_status               | VARCHAR(20)          | SÍ     | NO 
+  last_test_message              | TEXT                 | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 35: final_table_selections
+--------------------------------------------------------------------------------
+Descripción: Tablas seleccionadas en la base de datos de destino final para el mapeo.
+Registros en BD: 17
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | NO     | NO 
+  final_dest_connection_id       | INTEGER              | NO     | NO 
+  table_schema                   | VARCHAR(100)         | SÍ     | NO 
+  table_name                     | VARCHAR(200)         | NO     | NO 
+  is_selected                    | BOOLEAN              | SÍ     | NO 
+  description                    | VARCHAR(500)         | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+   * final_dest_connection_id -> final_dest_connections(id)
+
+================================================================================
+
+TABLA 36: finpagos
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging que registra los pagos y cobranzas recibidas.
+Registros en BD: 36
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  Id                             | BIGINT               | SÍ     | NO 
+  CodCia                         | TEXT                 | SÍ     | NO 
+  NroOrdenCompra                 | TEXT                 | SÍ     | NO 
+  DetalleId                      | BIGINT               | SÍ     | NO 
+  MontoPago                      | DOUBLE PRECISION     | SÍ     | NO 
+  FechaPago                      | DATE                 | SÍ     | NO 
+  BancoPago                      | TEXT                 | SÍ     | NO 
+  Moneda                         | TEXT                 | SÍ     | NO 
+  TipoPago                       | TEXT                 | SÍ     | NO 
+  NroOperacion                   | TEXT                 | SÍ     | NO 
+  Notas                          | TEXT                 | SÍ     | NO 
+  UsuarioRegistro                | TEXT                 | SÍ     | NO 
+  FechaRegistro                  | TIMESTAMP            | SÍ     | NO 
+  RucProveedor                   | TEXT                 | SÍ     | NO 
+  Proveedor                      | TEXT                 | SÍ     | NO 
+  TipoComprobante                | TEXT                 | SÍ     | NO 
+  FechaEmision                   | DATE                 | SÍ     | NO 
+  Serie                          | TEXT                 | SÍ     | NO 
+  Numero                         | TEXT                 | SÍ     | NO 
+  NroFactura                     | TEXT                 | SÍ     | NO 
+  ConceptoPago                   | TEXT                 | SÍ     | NO 
+  TipoOc                         | TEXT                 | SÍ     | NO 
+  Uuid                           | TEXT                 | SÍ     | NO 
+  GrupoAplicacion                | TEXT                 | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  C_carbanco                     | TEXT                 | SÍ     | NO 
+  C_bancomoneda                  | TEXT                 | SÍ     | NO 
+  C_Cuentabanco                  | TEXT                 | SÍ     | NO 
+  C_carpago                      | TEXT                 | SÍ     | NO 
+  C_PagoCtaNac                   | TEXT                 | SÍ     | NO 
+  C_PagoCtaUsa                   | TEXT                 | SÍ     | NO 
+  C_PagoCtaEur                   | TEXT                 | SÍ     | NO 
+  C_tipocliente                  | TEXT                 | SÍ     | NO 
+  T_tipmonP                      | TEXT                 | SÍ     | NO 
+  C_Ctapagofactura_0             | TEXT                 | SÍ     | NO 
+  C_Ctapagofactura_1             | TEXT                 | SÍ     | NO 
+  C_ctafactura_2                 | TEXT                 | SÍ     | NO 
+  C_mes                          | TEXT                 | SÍ     | NO 
+  C_periodo                      | TEXT                 | SÍ     | NO 
+  C_TipoBanco                    | TEXT                 | SÍ     | NO 
+  C_Seriebanco                   | TEXT                 | SÍ     | NO 
+  C_numeroBanco                  | TEXT                 | SÍ     | NO 
+  C_Seriebanco_F                 | TEXT                 | SÍ     | NO 
+  C_numeroBanco_F                | TEXT                 | SÍ     | NO 
+  C_tipocambiosunat              | TEXT                 | SÍ     | NO 
+  C_S_MontoPago                  | TEXT                 | SÍ     | NO 
+  C_D_MontoPago                  | TEXT                 | SÍ     | NO 
+  C_tipofactura                  | TEXT                 | SÍ     | NO 
+  C_seriefactura                 | TEXT                 | SÍ     | NO 
+  C_numerofactura                | TEXT                 | SÍ     | NO 
+  C_fechafactura                 | TEXT                 | SÍ     | NO 
+  C_seriefactura_f               | TEXT                 | SÍ     | NO 
+  C_numerofactura_f              | TEXT                 | SÍ     | NO 
+  C_glosa2                       | TEXT                 | SÍ     | NO 
+  C_moneda_Final                 | TEXT                 | SÍ     | NO 
+  c_car_rendicion                | TEXT                 | SÍ     | NO 
+  C_cuenta_rendicion             | TEXT                 | SÍ     | NO 
+  C_cuenta_contasi_final         | TEXT                 | SÍ     | NO 
+  C_Estado_mig                   | TEXT                 | SÍ     | NO 
+  c_ruc1                         | TEXT                 | SÍ     | NO 
+  C_ruc_f                        | TEXT                 | SÍ     | NO 
+  C_AplicAntic                   | TEXT                 | SÍ     | NO 
+  C_carpago1                     | TEXT                 | SÍ     | NO 
+  C_PAGOANTI_F1                  | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 37: finplanillamovilidadcab
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging para las cabeceras de planillas de movilidad del personal.
+Registros en BD: 467
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  Id                             | BIGINT               | SÍ     | NO 
+  CodCia                         | TEXT                 | SÍ     | NO 
+  NroPlanilla                    | TEXT                 | SÍ     | NO 
+  FechaEmision                   | DATE                 | SÍ     | NO 
+  Periodo                        | TEXT                 | SÍ     | NO 
+  CodAux                         | TEXT                 | SÍ     | NO 
+  NomAux                         | TEXT                 | SÍ     | NO 
+  RucDni                         | TEXT                 | SÍ     | NO 
+  TotalGastado                   | DOUBLE PRECISION     | SÍ     | NO 
+  Estado                         | TEXT                 | SÍ     | NO 
+  UsuarioRegistro                | TEXT                 | SÍ     | NO 
+  FechaRegistro                  | TIMESTAMP            | SÍ     | NO 
+  UuidLink                       | TEXT                 | SÍ     | NO 
+  AprobadorDocumento             | TEXT                 | SÍ     | NO 
+  AprobadorNombre                | TEXT                 | SÍ     | NO 
+  FechaAprobacion                | TIMESTAMP            | SÍ     | NO 
+  FecPeriodoContable             | DATE                 | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  C_car                          | TEXT                 | SÍ     | NO 
+  C_Cuentabase                   | TEXT                 | SÍ     | NO 
+  C_Cuentatotal                  | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 38: finplanillamovilidaddet
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging para el detalle de gastos de movilidad del personal.
+Registros en BD: 1880
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  Id                             | BIGINT               | SÍ     | NO 
+  PlanillaId                     | BIGINT               | SÍ     | NO 
+  Fecha                          | DATE                 | SÍ     | NO 
+  Motivo                         | TEXT                 | SÍ     | NO 
+  Desde                          | TEXT                 | SÍ     | NO 
+  Hasta                          | TEXT                 | SÍ     | NO 
+  Monto                          | DOUBLE PRECISION     | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  C_codcia                       | TEXT                 | SÍ     | NO 
+  C_NroPlanilla                  | TEXT                 | SÍ     | NO 
+  C_FechaEmision                 | DATE                 | SÍ     | NO 
+  C_CodAux                       | TEXT                 | SÍ     | NO 
+  C_NomAux                       | TEXT                 | SÍ     | NO 
+  C_RucDni                       | TEXT                 | SÍ     | NO 
+  C_TotalGastado                 | DOUBLE PRECISION     | SÍ     | NO 
+  C_Estado                       | TEXT                 | SÍ     | NO 
+  C_FechaRegistro                | TIMESTAMP            | SÍ     | NO 
+  C_UuidLink                     | TEXT                 | SÍ     | NO 
+  fechconta                      | DATE                 | SÍ     | NO 
+  C_ FecPeriodoContable          | DATE                 | SÍ     | NO 
+  C_periodo                      | TEXT                 | SÍ     | NO 
+  C_mes                          | TEXT                 | SÍ     | NO 
+  C_tipo                         | TEXT                 | SÍ     | NO 
+  C_serie                        | TEXT                 | SÍ     | NO 
+  C_numero                       | TEXT                 | SÍ     | NO 
+  C_tipocambiosunat              | DOUBLE PRECISION     | SÍ     | NO 
+  C_S_Monto                      | DOUBLE PRECISION     | SÍ     | NO 
+  C_D_Monto                      | DOUBLE PRECISION     | SÍ     | NO 
+  C_MonedaF                      | TEXT                 | SÍ     | NO 
+  C_S_total                      | DOUBLE PRECISION     | SÍ     | NO 
+  C_D_total                      | DOUBLE PRECISION     | SÍ     | NO 
+  C_Serie_F                      | TEXT                 | SÍ     | NO 
+  C_Numero_F                     | TEXT                 | SÍ     | NO 
+  C_ctabaseF                     | TEXT                 | SÍ     | NO 
+  C_ctatotalF                    | TEXT                 | SÍ     | NO 
+  C_Observaciones                | TEXT                 | SÍ     | NO 
+  C_glosa2                       | TEXT                 | SÍ     | NO 
+  C_estadoF                      | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 39: finrendiciongastoscab
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging para las cabeceras de rendiciones de gastos y caja chica.
+Registros en BD: 277
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  Id                             | BIGINT               | SÍ     | NO 
+  CodCia                         | TEXT                 | SÍ     | NO 
+  NroRendicion                   | TEXT                 | SÍ     | NO 
+  Fecha                          | DATE                 | SÍ     | NO 
+  Periodo                        | TEXT                 | SÍ     | NO 
+  Moneda                         | TEXT                 | SÍ     | NO 
+  CodAux                         | TEXT                 | SÍ     | NO 
+  NomAux                         | TEXT                 | SÍ     | NO 
+  RucDni                         | TEXT                 | SÍ     | NO 
+  TipoRendicion                  | TEXT                 | SÍ     | NO 
+  SaldoInicial                   | DOUBLE PRECISION     | SÍ     | NO 
+  SaldoFinal                     | DOUBLE PRECISION     | SÍ     | NO 
+  TotalGastado                   | DOUBLE PRECISION     | SÍ     | NO 
+  TotalReembolso                 | DOUBLE PRECISION     | SÍ     | NO 
+  Estado                         | TEXT                 | SÍ     | NO 
+  UsuarioRegistro                | TEXT                 | SÍ     | NO 
+  FechaRegistro                  | TIMESTAMP            | SÍ     | NO 
+  UuidLink                       | TEXT                 | SÍ     | NO 
+  AprobadorDocumento             | TEXT                 | SÍ     | NO 
+  AprobadorNombre                | TEXT                 | SÍ     | NO 
+  FechaAprobacion                | TIMESTAMP            | SÍ     | NO 
+  FecPeriodoContable             | DATE                 | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  C_car                          | TEXT                 | SÍ     | NO 
+  C_Cuentabase                   | TEXT                 | SÍ     | NO 
+  C_Cuentatotal                  | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 40: finrendiciongastosdet
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging para los detalles de las rendiciones de gastos.
+Registros en BD: 19473
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  Id                             | BIGINT               | SÍ     | NO 
+  RendicionId                    | BIGINT               | SÍ     | NO 
+  Fecha                          | DATE                 | SÍ     | NO 
+  TipoDoc                        | TEXT                 | SÍ     | NO 
+  Serie                          | TEXT                 | SÍ     | NO 
+  Numero                         | TEXT                 | SÍ     | NO 
+  RucPro                         | TEXT                 | SÍ     | NO 
+  NomPro                         | TEXT                 | SÍ     | NO 
+  ProjectCard                    | TEXT                 | SÍ     | NO 
+  CentroCostos                   | TEXT                 | SÍ     | NO 
+  ExpenseCategory                | TEXT                 | SÍ     | NO 
+  Detalles                       | TEXT                 | SÍ     | NO 
+  ImporteSoles                   | DOUBLE PRECISION     | SÍ     | NO 
+  ImporteDolares                 | DOUBLE PRECISION     | SÍ     | NO 
+  DocReferenciaId                | BIGINT               | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  C_codcia                       | TEXT                 | SÍ     | NO 
+  C_NroRendicion                 | TEXT                 | SÍ     | NO 
+  C_Fecha1                       | TEXT                 | SÍ     | NO 
+  C_Periodo1                     | TEXT                 | SÍ     | NO 
+  C_Moneda                       | TEXT                 | SÍ     | NO 
+  C_CodAux                       | TEXT                 | SÍ     | NO 
+  C_NomAux                       | TEXT                 | SÍ     | NO 
+  C_RucDni                       | TEXT                 | SÍ     | NO 
+  C_TipoRendicion                | TEXT                 | SÍ     | NO 
+  C_SaldoInicial                 | TEXT                 | SÍ     | NO 
+  C_SaldoFinal                   | TEXT                 | SÍ     | NO 
+  C_TotalGastado                 | TEXT                 | SÍ     | NO 
+  C_TotalReembolso               | TEXT                 | SÍ     | NO 
+  C_Estado                       | TEXT                 | SÍ     | NO 
+  C_UuidLink                     | TEXT                 | SÍ     | NO 
+  fechconta                      | TEXT                 | SÍ     | NO 
+  C_Cuentabase1                  | TEXT                 | SÍ     | NO 
+  C_Cuentatotal1                 | TEXT                 | SÍ     | NO 
+  C_tipocambiosunat              | TEXT                 | SÍ     | NO 
+  C_periodo                      | TEXT                 | SÍ     | NO 
+  C_mes                          | TEXT                 | SÍ     | NO 
+  C_tipo_Rendi                   | TEXT                 | SÍ     | NO 
+  C_tipo_0                       | TEXT                 | SÍ     | NO 
+  C_tipo_F                       | TEXT                 | SÍ     | NO 
+  C_serie_F                      | TEXT                 | SÍ     | NO 
+  C_numero_0                     | TEXT                 | SÍ     | NO 
+  C_Numero_F                     | TEXT                 | SÍ     | NO 
+  C_tipocliente                  | TEXT                 | SÍ     | NO 
+  T_tipmonP                      | TEXT                 | SÍ     | NO 
+  C_ctatotal_1                   | TEXT                 | SÍ     | NO 
+  C_moneda_Final                 | TEXT                 | SÍ     | NO 
+  C_glosa2                       | TEXT                 | SÍ     | NO 
+  C_subtotal_O                   | TEXT                 | SÍ     | NO 
+  C_S_SubTotal                   | TEXT                 | SÍ     | NO 
+  C_D_SubTotal                   | TEXT                 | SÍ     | NO 
+  C_S_TotalGastado               | TEXT                 | SÍ     | NO 
+  C_D_TotalGastado               | TEXT                 | SÍ     | NO 
+  C_ctabase_final                | TEXT                 | SÍ     | NO 
+  C_ctatotal_final               | TEXT                 | SÍ     | NO 
+  C_estadoF                      | TEXT                 | SÍ     | NO 
+  C_observaciones                | TEXT                 | SÍ     | NO 
+  C_serie_rendi                  | TEXT                 | SÍ     | NO 
+  C_nume_rendi                   | TEXT                 | SÍ     | NO 
+  C_serie_rendi_F                | TEXT                 | SÍ     | NO 
+  C_nume_rendi_F                 | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 41: integ_logs
+--------------------------------------------------------------------------------
+Descripción: Historial de registros de integración de datos (ETL) con detalles de ejecución, número de filas procesadas, errores y advertencias.
+Registros en BD: 28063
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | SÍ     | NO 
+  process_name                   | VARCHAR(100)         | SÍ     | NO 
+  status                         | VARCHAR(20)          | SÍ     | NO 
+  message                        | TEXT                 | SÍ     | NO 
+  details                        | TEXT                 | SÍ     | NO 
+  records_processed              | INTEGER              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 42: mapeo_categorias
+--------------------------------------------------------------------------------
+Descripción: Categorías principales de mapeo contable (ej. 'Migración Majestic -> Contasis').
+Registros en BD: 48
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | NO     | NO 
+  nombre                         | VARCHAR(300)         | NO     | NO 
+  descripcion                    | TEXT                 | SÍ     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 43: mapeo_lineas_asiento
+--------------------------------------------------------------------------------
+Descripción: Definición detallada de cada línea del asiento contable por subcategoría (cuentas contables, debe, haber, glosa, condiciones de aplicación, ajustes de redondeo, etc.).
+Registros en BD: 453
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  subcategoria_id                | INTEGER              | NO     | NO 
+  orden                          | INTEGER              | SÍ     | NO 
+  nombre_linea                   | VARCHAR(200)         | SÍ     | NO 
+  mapeo_detalle                  | JSON                 | SÍ     | NO 
+  condicion_aplicacion           | VARCHAR(500)         | SÍ     | NO 
+  nivel                          | VARCHAR(20)          | SÍ     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+  aplica_ajuste_redondeo         | BOOLEAN              | SÍ     | NO 
+
+  Llaves Foráneas:
+   * subcategoria_id -> mapeo_subcategorias(id)
+
+================================================================================
+
+TABLA 44: mapeo_subcategorias
+--------------------------------------------------------------------------------
+Descripción: Subcategorías específicas de mapeo contable (ej. 'Ventas', 'Compras'). Configura la tabla origen, cabeceras, detalles, redondeos, números de asientos iniciales, etc.
+Registros en BD: 119
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  categoria_id                   | INTEGER              | NO     | NO 
+  nombre                         | VARCHAR(300)         | NO     | NO 
+  descripcion                    | TEXT                 | SÍ     | NO 
+  tabla_origen                   | VARCHAR(200)         | SÍ     | NO 
+  codigo_origen                  | VARCHAR(10)          | SÍ     | NO 
+  clave_asiento                  | VARCHAR(500)         | SÍ     | NO 
+  mapeo_cabecera                 | JSON                 | SÍ     | NO 
+  tabla_destino_detalle          | VARCHAR(200)         | SÍ     | NO 
+  tabla_destino_cabecera         | VARCHAR(200)         | SÍ     | NO 
+  col_destino_nasiento           | VARCHAR(100)         | SÍ     | NO 
+  col_destino_nidlin             | VARCHAR(100)         | SÍ     | NO 
+  schema_destino                 | VARCHAR(100)         | SÍ     | NO 
+  generate_headers               | BOOLEAN              | SÍ     | NO 
+  generate_details               | BOOLEAN              | SÍ     | NO 
+  filter_rules                   | JSON                 | SÍ     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+  asiento_inicial                | INTEGER              | SÍ     | NO 
+  control_column_origen          | VARCHAR(200)         | SÍ     | NO 
+  last_generated_control_value   | VARCHAR(200)         | SÍ     | NO 
+  col_destino_debe               | VARCHAR(100)         | SÍ     | NO 
+  col_destino_haber              | VARCHAR(100)         | SÍ     | NO 
+  pares_redondeo                 | JSON                 | SÍ     | NO 
+  col_origen_periodo             | VARCHAR(100)         | SÍ     | NO 
+  col_origen_mes                 | VARCHAR(100)         | SÍ     | NO 
+
+  Llaves Foráneas:
+   * categoria_id -> mapeo_categorias(id)
+
+================================================================================
+
+TABLA 45: migration_controls
+--------------------------------------------------------------------------------
+Descripción: Registro de control para la migración incremental de datos (último valor migrado, cantidad de registros, estado).
+Registros en BD: 60
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | NO     | NO 
+  source_table                   | VARCHAR(200)         | NO     | NO 
+  control_column                 | VARCHAR(100)         | SÍ     | NO 
+  last_migrated_value            | VARCHAR(500)         | SÍ     | NO 
+  total_migrated                 | BIGINT               | SÍ     | NO 
+  last_run_at                    | TIMESTAMP            | SÍ     | NO 
+  last_run_status                | VARCHAR(20)          | SÍ     | NO 
+  last_run_message               | TEXT                 | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 46: postarje
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging para transacciones con tarjeta de crédito/débito y terminales de punto de venta (POS).
+Registros en BD: 1445
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  codtarj                        | TEXT                 | SÍ     | NO 
+  CODcia                         | TEXT                 | SÍ     | NO 
+  tiptarj                        | TEXT                 | SÍ     | NO 
+  comtarj                        | TEXT                 | SÍ     | NO 
+  PTOVTA                         | TEXT                 | SÍ     | NO 
+  DESTARJ                        | TEXT                 | SÍ     | NO 
+  ACTTARJ                        | BOOLEAN              | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 47: scheduled_tasks
+--------------------------------------------------------------------------------
+Descripción: Tareas del planificador interno (Celery Beat) programadas para ejecución de procesos recurrentes (ETL, descarga de tipo de cambio, etc.).
+Registros en BD: 31
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | SÍ     | NO 
+  task_type                      | VARCHAR(50)          | NO     | NO 
+  schedule_type                  | VARCHAR(20)          | NO     | NO 
+  time_str                       | VARCHAR(10)          | NO     | NO 
+  day_of_week                    | VARCHAR(20)          | SÍ     | NO 
+  day_of_month                   | INTEGER              | SÍ     | NO 
+  params                         | JSON                 | SÍ     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  last_run                       | TIMESTAMP            | SÍ     | NO 
+  next_run                       | TIMESTAMP            | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+  updated_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 48: source_connections
+--------------------------------------------------------------------------------
+Descripción: Conexiones configuradas para las bases de datos de origen (SQL Server 2022 de Majestic/ventas) de cada empresa.
+Registros en BD: 6
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | NO     | NO 
+  db_type                        | VARCHAR(20)          | SÍ     | NO 
+  host                           | VARCHAR(200)         | NO     | NO 
+  port                           | INTEGER              | SÍ     | NO 
+  database_name                  | VARCHAR(200)         | NO     | NO 
+  username                       | VARCHAR(100)         | NO     | NO 
+  password                       | VARCHAR(500)         | NO     | NO 
+  driver                         | VARCHAR(100)         | SÍ     | NO 
+  extra_params                   | TEXT                 | SÍ     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  last_tested_at                 | TIMESTAMP            | SÍ     | NO 
+  last_test_status               | VARCHAR(20)          | SÍ     | NO 
+  last_test_message              | TEXT                 | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 49: table_selections
+--------------------------------------------------------------------------------
+Descripción: Configuración de las tablas que se extraerán de la base de datos de origen (esquema, nombre de tabla, orden de extracción, consultas personalizadas y columnas de control incremental).
+Registros en BD: 97
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | NO     | NO 
+  source_connection_id           | INTEGER              | NO     | NO 
+  table_schema                   | VARCHAR(100)         | SÍ     | NO 
+  table_name                     | VARCHAR(200)         | NO     | NO 
+  is_selected                    | BOOLEAN              | SÍ     | NO 
+  extraction_order               | INTEGER              | SÍ     | NO 
+  custom_query                   | TEXT                 | SÍ     | NO 
+  date_column                    | VARCHAR(100)         | SÍ     | NO 
+  control_column                 | VARCHAR(100)         | SÍ     | NO 
+  control_column_type            | VARCHAR(20)          | SÍ     | NO 
+  description                    | VARCHAR(500)         | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+   * source_connection_id -> source_connections(id)
+
+================================================================================
+
+TABLA 50: task_logs
+--------------------------------------------------------------------------------
+Descripción: Registro de ejecuciones de las tareas programadas.
+Registros en BD: 696
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  task_id                        | INTEGER              | NO     | NO 
+  status                         | VARCHAR(20)          | NO     | NO 
+  message                        | VARCHAR              | SÍ     | NO 
+  details                        | JSON                 | SÍ     | NO 
+  started_at                     | TIMESTAMP            | SÍ     | NO 
+  finished_at                    | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * task_id -> scheduled_tasks(id)
+
+================================================================================
+
+TABLA 51: tbl_conciliados
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging que guarda los registros que ya pasaron por conciliación bancaria.
+Registros en BD: 78799
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  Id                             | BIGINT               | SÍ     | NO 
+  ReconciliationDetailId         | BIGINT               | SÍ     | NO 
+  IdCobranza_CodCia              | TEXT                 | SÍ     | NO 
+  IdCobranza_coddoc              | TEXT                 | SÍ     | NO 
+  IdCobranza_nrodoc              | TEXT                 | SÍ     | NO 
+  IdCobranza_nroitm              | TEXT                 | SÍ     | NO 
+  codref                         | TEXT                 | SÍ     | NO 
+  nroref                         | TEXT                 | SÍ     | NO 
+  importe                        | DOUBLE PRECISION     | SÍ     | NO 
+  codaux                         | TEXT                 | SÍ     | NO 
+  IdBanco                        | BIGINT               | SÍ     | NO 
+  Fecha_banco                    | TIMESTAMP            | SÍ     | NO 
+  empresa                        | TEXT                 | SÍ     | NO 
+  codigo_banco                   | TEXT                 | SÍ     | NO 
+  CreatedAt                      | TIMESTAMP            | SÍ     | NO 
+  nro_operacion                  | TEXT                 | SÍ     | NO 
+  usuario                        | TEXT                 | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  C_carbanc                      | TEXT                 | SÍ     | NO 
+  C_Moneda                       | BIGINT               | SÍ     | NO 
+  C_Moneda_T                     | TEXT                 | SÍ     | NO 
+  C_cuentaBanco                  | DOUBLE PRECISION     | SÍ     | NO 
+  C_tipocliente                  | TEXT                 | SÍ     | NO 
+  C_tipocambiosunat              | DOUBLE PRECISION     | SÍ     | NO 
+  C_coddoc                       | TEXT                 | SÍ     | NO 
+  c_Seriedoc                     | TEXT                 | SÍ     | NO 
+  C_numercomprobante             | TEXT                 | SÍ     | NO 
+  T_tipmon                       | TEXT                 | SÍ     | NO 
+  C_CuentotalA                   | TEXT                 | SÍ     | NO 
+  C_Filial_Can                   | TEXT                 | SÍ     | NO 
+  C_glosa                        | TEXT                 | SÍ     | NO 
+  C_cuentatotal_F                | TEXT                 | SÍ     | NO 
+  C_total                        | DOUBLE PRECISION     | SÍ     | NO 
+  C_totalS                       | TEXT                 | SÍ     | NO 
+  C_totalD                       | TEXT                 | SÍ     | NO 
+  C_FT_Serie                     | TEXT                 | SÍ     | NO 
+  C_FT_numero                    | TEXT                 | SÍ     | NO 
+  C_op_Serie                     | TEXT                 | SÍ     | NO 
+  C_op_numero                    | TEXT                 | SÍ     | NO 
+  C_periodo                      | TEXT                 | SÍ     | NO 
+  C_mes                          | TEXT                 | SÍ     | NO 
+  C_FT_SerieFinla                | TEXT                 | SÍ     | NO 
+  C_FT_numero_final              | TEXT                 | SÍ     | NO 
+  C_OP_serie_Finla               | TEXT                 | SÍ     | NO 
+  C_OP_numero_final              | TEXT                 | SÍ     | NO 
+  C_BANCOP                       | TEXT                 | SÍ     | NO 
+  C_glosa_2                      | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 52: temp_empty_test
+--------------------------------------------------------------------------------
+Descripción: Tabla temporal de prueba vacía creada con fines de testeo.
+Registros en BD: 4
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  test_col                       | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 53: temp_test_table
+--------------------------------------------------------------------------------
+Descripción: Tabla temporal de prueba para validar la inserción de registros en la base de datos.
+Registros en BD: 1
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  C_car                          | TEXT                 | SÍ     | NO 
+  fchdoc                         | TIMESTAMP            | SÍ     | NO 
+  C_fechaEmision                 | TEXT                 | SÍ     | NO 
+
+================================================================================
+
+TABLA 54: tipo_cambio
+--------------------------------------------------------------------------------
+Descripción: Tipo de cambio diario (compra y venta) obtenido de la SUNAT.
+Registros en BD: 391
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  fecha                          | DATE                 | NO     | NO 
+  compra                         | NUMERIC(10, 6)       | NO     | NO 
+  venta                          | NUMERIC(10, 6)       | NO     | NO 
+  source                         | VARCHAR(50)          | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+================================================================================
+
+TABLA 55: user_catalog_items
+--------------------------------------------------------------------------------
+Descripción: Valores y elementos contenidos en los catálogos personalizados definidos por el usuario.
+Registros en BD: 1635
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  catalog_id                     | INTEGER              | NO     | NO 
+  data                           | JSON                 | NO     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * catalog_id -> user_catalogs(id)
+
+================================================================================
+
+TABLA 56: user_catalogs
+--------------------------------------------------------------------------------
+Descripción: Catálogos personalizados definidos por el usuario.
+Registros en BD: 59
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  company_id                     | INTEGER              | NO     | NO 
+  name                           | VARCHAR(100)         | NO     | NO 
+  description                    | VARCHAR(255)         | SÍ     | NO 
+  columns                        | JSON                 | NO     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+
+  Llaves Foráneas:
+   * company_id -> companies(id)
+
+================================================================================
+
+TABLA 57: users
+--------------------------------------------------------------------------------
+Descripción: Usuarios del sistema con sus credenciales (hash de contraseña), roles (admin/operador) y estado de activación.
+Registros en BD: 9
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  id                             | INTEGER              | NO     | SÍ 
+  email                          | VARCHAR(255)         | NO     | NO 
+  hashed_password                | VARCHAR(255)         | NO     | NO 
+  full_name                      | VARCHAR(255)         | SÍ     | NO 
+  role                           | VARCHAR(50)          | SÍ     | NO 
+  is_active                      | BOOLEAN              | SÍ     | NO 
+  created_at                     | TIMESTAMP            | SÍ     | NO 
+  updated_at                     | TIMESTAMP            | SÍ     | NO 
+
+================================================================================
+
+TABLA 58: vtaritem
+--------------------------------------------------------------------------------
+Descripción: Tabla de origen/staging para los detalles de ítems de ventas y facturación diaria.
+Registros en BD: 36781
+
+  Columna                        | Tipo de Datos        | Null?  | PK?
+  -------------------------------+----------------------+--------+----
+  CodCia                         | TEXT                 | SÍ     | NO 
+  anos                           | TEXT                 | SÍ     | NO 
+  coddoc                         | TEXT                 | SÍ     | NO 
+  nrodoc                         | TEXT                 | SÍ     | NO 
+  nroitm                         | DOUBLE PRECISION     | SÍ     | NO 
+  fchdoc                         | TIMESTAMP            | SÍ     | NO 
+  nrogui                         | TEXT                 | SÍ     | NO 
+  nroped                         | TEXT                 | SÍ     | NO 
+  codmat                         | TEXT                 | SÍ     | NO 
+  desmat                         | TEXT                 | SÍ     | NO 
+  nota01                         | TEXT                 | SÍ     | NO 
+  nota02                         | TEXT                 | SÍ     | NO 
+  nota03                         | TEXT                 | SÍ     | NO 
+  nota04                         | TEXT                 | SÍ     | NO 
+  nota05                         | TEXT                 | SÍ     | NO 
+  undvta                         | TEXT                 | SÍ     | NO 
+  facequ                         | DOUBLE PRECISION     | SÍ     | NO 
+  lote                           | TEXT                 | SÍ     | NO 
+  expdte                         | TEXT                 | SÍ     | NO 
+  glosa00                        | TEXT                 | SÍ     | NO 
+  glosa01                        | TEXT                 | SÍ     | NO 
+  glosa02                        | TEXT                 | SÍ     | NO 
+  glosa03                        | TEXT                 | SÍ     | NO 
+  glosa04                        | TEXT                 | SÍ     | NO 
+  candes                         | DOUBLE PRECISION     | SÍ     | NO 
+  preuni                         | DOUBLE PRECISION     | SÍ     | NO 
+  d1                             | DOUBLE PRECISION     | SÍ     | NO 
+  d2                             | DOUBLE PRECISION     | SÍ     | NO 
+  d3                             | DOUBLE PRECISION     | SÍ     | NO 
+  impigv                         | DOUBLE PRECISION     | SÍ     | NO 
+  implin                         | DOUBLE PRECISION     | SÍ     | NO 
+  FlgEst                         | TEXT                 | SÍ     | NO 
+  ILinea                         | DOUBLE PRECISION     | SÍ     | NO 
+  nrolote                        | TEXT                 | SÍ     | NO 
+  fchlote                        | TIMESTAMP            | SÍ     | NO 
+  _migration_id                  | TEXT                 | SÍ     | NO 
+  company_id                     | BIGINT               | SÍ     | NO 
+  idcontrol                      | TEXT                 | SÍ     | NO 
+  C_car                          | TEXT                 | SÍ     | NO 
+  C_coddoc                       | TEXT                 | SÍ     | NO 
+  codref1                        | TEXT                 | SÍ     | NO 
+  C_moneda                       | TEXT                 | SÍ     | NO 
+  C_numercomprobante             | TEXT                 | SÍ     | NO 
+  C_puntoventa                   | TEXT                 | SÍ     | NO 
+  c_Seriedoc                     | TEXT                 | SÍ     | NO 
+  C_tipocambiosunat              | DOUBLE PRECISION     | SÍ     | NO 
+  c_total                        | DOUBLE PRECISION     | SÍ     | NO 
+  C_Dscto                        | DOUBLE PRECISION     | SÍ     | NO 
+  C_Vtareal                      | DOUBLE PRECISION     | SÍ     | NO 
+  c_S_total                      | TEXT                 | SÍ     | NO 
+  C_S_Dscto                      | TEXT                 | SÍ     | NO 
+  C_S_Vtareal                    | TEXT                 | SÍ     | NO 
+  c_D_total                      | TEXT                 | SÍ     | NO 
+  C_D_Dscto                      | TEXT                 | SÍ     | NO 
+  C_D_Vtareal                    | TEXT                 | SÍ     | NO 
+  C_Producto                     | TEXT                 | SÍ     | NO 
+  C_PrudctoCodigo                | TEXT                 | SÍ     | NO 
+  C_VTA_TERCEROS                 | BIGINT               | SÍ     | NO 
+  C_VTA_RELACIONADA              | BIGINT               | SÍ     | NO 
+  C_DSCTO_TERCERO                | BIGINT               | SÍ     | NO 
+  C_DSCTO_RELACIONADO            | BIGINT               | SÍ     | NO 
+  tipocliente                    | TEXT                 | SÍ     | NO 
+  T_tipmon                       | TEXT                 | SÍ     | NO 
+  C_CuentotalA                   | TEXT                 | SÍ     | NO 
+  C_igvporcentaje                | DOUBLE PRECISION     | SÍ     | NO 
+  C_totalfactura                 | DOUBLE PRECISION     | SÍ     | NO 
+  C_S_totalfactura               | TEXT                 | SÍ     | NO 
+  C_igvimporte                   | DOUBLE PRECISION     | SÍ     | NO 
+  C_D_totalfactura               | TEXT                 | SÍ     | NO 
+  C_S_igvimporte                 | TEXT                 | SÍ     | NO 
+  C_D_igvimporte                 | TEXT                 | SÍ     | NO 
+  C_tipoNC                       | TEXT                 | SÍ     | NO 
+  C_SerieNC                      | TEXT                 | SÍ     | NO 
+  C_numeroNC                     | TEXT                 | SÍ     | NO 
+  C_fechaNC                      | TIMESTAMP            | SÍ     | NO 
+  C_ctaigv                       | TEXT                 | SÍ     | NO 
+  C_DSCTO_T                      | TEXT                 | SÍ     | NO 
+  C_CTABASE_F                    | TEXT                 | SÍ     | NO 
+  C_CTADESCUENTO_F               | TEXT                 | SÍ     | NO 
+  C_RUC                          | TEXT                 | SÍ     | NO 
+  C_RAZONSOCIAL                  | TEXT                 | SÍ     | NO 
+  C_mes                          | TEXT                 | SÍ     | NO 
+  C_estado1                      | TEXT                 | SÍ     | NO 
+  c_estado                       | TEXT                 | SÍ     | NO 
+  C_glosa                        | TEXT                 | SÍ     | NO 
+  C_fechaEmision                 | TEXT                 | SÍ     | NO 
+  C_fechaNC_Contasis             | TEXT                 | SÍ     | NO 
+  C_basetotal                    | DOUBLE PRECISION     | SÍ     | NO 
+  C_S_basetotal                  | TEXT                 | SÍ     | NO 
+  C_D_basetotal                  | TEXT                 | SÍ     | NO 
+  c_Seriedoc_F                   | TEXT                 | SÍ     | NO 
+  C_numercomprobante_F           | TEXT                 | SÍ     | NO 
+  URLVTA_pdf                     | TEXT                 | SÍ     | NO 
+  URLVTA_XML                     | TEXT                 | SÍ     | NO 
+  URLVTA_CDR                     | TEXT                 | SÍ     | NO 
+  ESTADO_VTA                     | TEXT                 | SÍ     | NO 
+  Glosa2_F                       | TEXT                 | SÍ     | NO 
+  V_TTG                          | TEXT                 | SÍ     | NO 
+  TTG                            | TEXT                 | SÍ     | NO 
+  Valor_TTG                      | TEXT                 | SÍ     | NO 
+  Monto_TTG                      | TEXT                 | SÍ     | NO 
+  Importe_TTG                    | TEXT                 | SÍ     | NO 
+  Base_TTG                       | TEXT                 | SÍ     | NO 
+  igv_TTG                        | TEXT                 | SÍ     | NO 
+  Base_TTG_S                     | TEXT                 | SÍ     | NO 
+  igv_TTG_S                      | TEXT                 | SÍ     | NO 
+  Base_TTG_D                     | TEXT                 | SÍ     | NO 
+  igv_TTG_D                      | TEXT                 | SÍ     | NO 
+  nflgtranfg                     | TEXT                 | SÍ     | NO 
+  ctipaigv                       | TEXT                 | SÍ     | NO 
+  Cta_TTG                        | TEXT                 | SÍ     | NO 
+
+================================================================================
