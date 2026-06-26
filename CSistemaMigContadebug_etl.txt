@@ -50912,3 +50912,71 @@ Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
 Params: ['730']
 Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
 Params: ['730']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['007', 'TVA FR334409538   ']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[FinPlanillaMovilidadDet] WHERE [PlanillaId] > ?
+Params: ['102']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['002', '48063418          ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['005', 'BJH 947           ']
+Query: SELECT * FROM [dbo].[CbdMAuxi] WHERE [codcia] = ? AND [rucaux] > ?
+Params: ['004', 'IVHF1060000       ']
+Query: SELECT * FROM [dbo].[FinPlanillaMovilidadDet] WHERE [PlanillaId] > ?
+Params: ['102']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['007', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['003', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CcbMVtos] WHERE [CodCia] = ? AND [anos] >= ?
+Params: ['005', '2026']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[FinPlanillaMovilidadDet] WHERE [PlanillaId] > ?
+Params: ['102']
+Query: SELECT * FROM [dbo].[tbl_Conciliados] WHERE [Id] > ?
+Params: ['15835']
+Query: SELECT * FROM [dbo].[FinRendicionGastosDet] WHERE [RendicionId] > ?
+Params: ['68']
+Query: SELECT * FROM [dbo].[FinPlanillaMovilidadDet] WHERE [PlanillaId] > ?
+Params: ['102']
+Query: SELECT * FROM [dbo].[FinRendicionGastosDet] WHERE [RendicionId] > ?
+Params: ['68']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[FinRendicionGastosDet] WHERE [RendicionId] > ?
+Params: ['68']
+Query: SELECT * FROM [dbo].[FinRendicionGastosDet] 
+Params: []
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
+Query: SELECT * FROM [dbo].[CntFacturaDet] WHERE [FacturaCabId] > ?
+Params: ['730']
