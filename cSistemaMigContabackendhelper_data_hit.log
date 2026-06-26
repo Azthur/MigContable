@@ -6418,3 +6418,177 @@ MATCH FOUND: FinRendicionGastosDet -> RendicionId
 --- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
 Found 17 table selections
 MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 82 --- table=finplanillamovilidaddet, company=6
+Found 16 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 82 --- table=finplanillamovilidaddet, company=6
+Found 16 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 34 --- table=ccbmvtos, company=5
+Found 19 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 34 --- table=ccbmvtos, company=5
+Found 19 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 68 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 68 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 47 --- table=ccbmvtos, company=5
+Found 19 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 47 --- table=ccbmvtos, company=5
+Found 19 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 72 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 72 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 72 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 72 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 18 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 18 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 89 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 89 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 89 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 89 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 89 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 89 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 89 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 89 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
