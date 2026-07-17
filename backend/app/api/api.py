@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from backend.app.api.endpoints import config, etl, logs, companies, catalogos, mapeo, tipo_cambio, catalogs, auth, tasks, pipeline
+from backend.app.api.endpoints import config, etl, logs, companies, catalogos, mapeo, tipo_cambio, catalogs, auth, tasks, pipeline, io_monitor
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
@@ -13,3 +13,4 @@ api_router.include_router(tipo_cambio.router, prefix="/tipo-cambio", tags=["Tipo
 api_router.include_router(catalogs.router, prefix="/catalogs", tags=["Catálogos Dinámicos"])
 api_router.include_router(tasks.router, prefix="/tasks", tags=["Tasks"])
 api_router.include_router(pipeline.router, prefix="/pipelines", tags=["ETL Pipelines"])
+api_router.include_router(io_monitor.router, prefix="/monitoring", tags=["I/O Monitoring"])

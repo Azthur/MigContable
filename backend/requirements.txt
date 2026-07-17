@@ -18,4 +18,5 @@ apscheduler
 pytz
 celery
 redis
-flower
+flower
+psutil

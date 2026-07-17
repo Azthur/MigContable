@@ -5,6 +5,11 @@ class Settings(BaseSettings):
     API_PORT: int = 8000
     DEBUG: bool = True
     
+    # Logging Configuration
+    LOG_LEVEL: str = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+    ENABLE_FILE_LOGGING: bool = False  # Desactivado por defecto para reducir I/O
+    ENABLE_DB_LOGGING: bool = True  # Logging en base de datos (IntegLog)
+    
     # Source Database (SQL Server)
     SQL_SERVER_CONNECTION_STRING: str
     

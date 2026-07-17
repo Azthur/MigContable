@@ -7,6 +7,7 @@ from celery import Task
 from backend.app.celery_app import celery
 from backend.app.celery_tasks import company_semaphore
 from backend.app.core.database import DestSessionLocal
+from backend.app.core.io_monitor import track_io
 from datetime import datetime, timezone
 import traceback
 
@@ -67,6 +68,7 @@ class ETLTask(Task):
     time_limit=1800,       # 30 min hard limit
     soft_time_limit=1500,  # 25 min soft limit (raises SoftTimeLimitExceeded)
 )
+@track_io("celery_etl_pipeline")
 def run_etl_pipeline(self, pipeline_id: int):
     """
     Worker genérico: recibe pipeline_id, carga todo de DB, ejecuta.

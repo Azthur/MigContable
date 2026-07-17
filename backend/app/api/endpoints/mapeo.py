@@ -15,6 +15,7 @@ from backend.app.models.models import (
     ColumnFilter, TableSelection, SourceConnection, MigrationControl,
     AsientoContableGenerado, ComputedColumnRule
 )
+from backend.app.core.io_monitor import track_io
 from pydantic import BaseModel
 import re
 import ast
@@ -2115,6 +2116,7 @@ def _generate_subcategoria_cf_diariol(
 
 
 @router.post("/generate-to-cf-diariol")
+@track_io("generate_cf_diariol")
 def generate_to_cf_diariol(body: dict, db: Session = Depends(get_dest_db)):
     """
     Genera asientos contables directamente en la tabla cf_diariol (staging en migconta_db).

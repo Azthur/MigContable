@@ -13,6 +13,7 @@ from backend.app.models.models import (
     ComputedColumnRule, AsientoCorrelativo, EtlRealtimeLog
 )
 from backend.app.services.connection_manager import ConnectionManager
+from backend.app.core.io_monitor import track_io
 
 router = APIRouter()
 
@@ -168,6 +169,7 @@ def __apply_computed_rules(df, computed_rules, db, company_id, table_name, db_en
             raise Exception(rule_detail)
 
 
+@track_io("etl_incremental")
 def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, start_date: str = None, end_date: str = None, full_refresh: bool = False):
     """Ejecuta ETL incremental para una tabla específica con sus filtros"""
     sel = db.query(TableSelection).filter(TableSelection.id == table_selection_id).first()
@@ -214,20 +216,29 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
     schema = sel.table_schema or "dbo"
     query = f"SELECT * FROM [{schema}].[{sel.table_name}] {where_clause}"
     
-    try:
-        with open("C:\\SistemaMigConta\\debug_etl.txt", "a") as f:
-            f.write(f"Query: {query}\nParams: {params}\n")
-    except:
-        pass
+    # File logging controlado por configuración para reducir I/O
+    from backend.app.core.config import get_settings
+    settings = get_settings()
+    if settings.ENABLE_FILE_LOGGING:
+        try:
+            with open("C:\\SistemaMigConta\\debug_etl.txt", "a") as f:
+                f.write(f"Query: {query}\nParams: {params}\n")
+        except:
+            pass
 
-    log = IntegLog(
-        company_id=company_id,
-        process_name=f"ETL Incremental - {sel.table_name}",
-        status="RUNNING",
-        message=f"DEBUG: p_style={p_style} query={query} | Iniciando extracción..."
-    )
-    db.add(log)
-    db.commit()
+    # Logging optimizado: commit diferido hasta el final de la operación
+    # Solo crear log si está habilitado en configuración
+    if settings.ENABLE_DB_LOGGING:
+        log = IntegLog(
+            company_id=company_id,
+            process_name=f"ETL Incremental - {sel.table_name}",
+            status="RUNNING",
+            message=f"DEBUG: p_style={p_style} query={query} | Iniciando extracción..."
+        )
+        db.add(log)
+        # Commit removido - se hará al final para reducir I/O
+    else:
+        log = None
 
     try:
         computed_rules = db.query(ComputedColumnRule).filter(
@@ -306,12 +317,12 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                     df['idcontrol'] = None # Siempre crear la columna
                     diag_msg = f" | [IDCONTROL NOT FOUND] Buscaba: {ctrl_cols} en: {df_cols_lower[:8]}"
                 
-                if hasattr(log, "message"):
+                if log and hasattr(log, "message"):
                     if log.message is None: log.message = ""
                     log.message += diag_msg
             except Exception as e:
                 df['idcontrol'] = None
-                if hasattr(log, "message"):
+                if log and hasattr(log, "message"):
                     if log.message is None: log.message = ""
                     log.message += f" | [IDCONTROL ERROR] {e}"
             
@@ -335,16 +346,20 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                 dest_type_map = {c['name']: str(c['type']).upper() for c in col_info_list}
                 
                 # Garantizar que _migration_id exista y esté poblado ANTES de extraer df_pending
-                with dst_engine.begin() as conn:
-                    if "_migration_id" not in existing_columns:
+                # Optimización: solo ejecutar ALTER TABLE si la columna no existe
+                if "_migration_id" not in existing_columns:
+                    with dst_engine.begin() as conn:
                         try:
                             conn.execute(text(f'ALTER TABLE "{table_dest_name}" ADD COLUMN "_migration_id" TEXT'))
                             existing_columns.append("_migration_id")
                         except Exception as em:
                             print(f"Warn: No se pudo agregar _migration_id a {table_dest_name}: {em}")
-                    
+                
+                # Poblar _migration_id solo si la columna existe
+                if "_migration_id" in existing_columns:
                     try:
-                        conn.execute(text(f'UPDATE "{table_dest_name}" SET "_migration_id" = MD5(random()::text || clock_timestamp()::text) WHERE "_migration_id" IS NULL'))
+                        with dst_engine.begin() as conn:
+                            conn.execute(text(f'UPDATE "{table_dest_name}" SET "_migration_id" = MD5(random()::text || clock_timestamp()::text) WHERE "_migration_id" IS NULL'))
                     except Exception as em2:
                         print(f"Warn: No se pudo poblar _migration_id: {em2}")
                 
@@ -400,9 +415,18 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                             lambda x: None if pd.isna(x) or str(x).strip() in ['', 'nan', 'None'] else x
                         )
                     
+                    # Optimización: usar tabla temporal con limpieza explícita para reducir I/O
                     temp_table = f"temp_update_{table_dest_name}_{company_id}"
-                    # Crear tabla temporal SIN dtype_map para evitar conflictos de tipos
-                    df_pending.to_sql(temp_table, dst_engine, if_exists="replace", index=False)
+                    
+                    # Limpiar tabla temporal de ejecuciones anteriores para reducir I/O acumulado
+                    try:
+                        with dst_engine.begin() as conn:
+                            conn.execute(text(f'DROP TABLE IF EXISTS "{temp_table}"'))
+                    except Exception:
+                        pass
+                    
+                    # Crear tabla temporal con chunksize mayor para reducir I/O de escritura
+                    df_pending.to_sql(temp_table, dst_engine, if_exists="replace", index=False, chunksize=5000)
                     print(f"DEBUG ETL: temp table {temp_table} creado con {len(df_pending)} filas")
                     
                     if update_cols:
@@ -418,9 +442,12 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                             
                         if match_col:
                             # 1. Asegurar que las columnas calculadas existan en la tabla destino
-                            with dst_engine.begin() as conn:
-                                for new_col in update_cols:
-                                    if new_col not in existing_columns:
+                            # Optimización: solo agregar columnas que no existen
+                            new_cols_to_add = [new_col for new_col in update_cols if new_col not in existing_columns]
+                            
+                            if new_cols_to_add:
+                                with dst_engine.begin() as conn:
+                                    for new_col in new_cols_to_add:
                                         try:
                                             safe_col = new_col.replace('"', '""')
                                             conn.execute(text(f'ALTER TABLE "{table_dest_name}" ADD COLUMN "{safe_col}" TEXT'))
@@ -449,8 +476,9 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                             with dst_engine.begin() as conn:
                                 conn.execute(text(update_sql))
                                 conn.execute(text(f'DROP TABLE "{temp_table}"'))
-                            log.message = log.message or ""
-                            log.message += f" | Fórmulas actualizadas en {len(df_pending)} registros pendientes"
+                            if log:
+                                log.message = log.message or ""
+                                log.message += f" | Fórmulas actualizadas en {len(df_pending)} registros pendientes"
                             print(f"DEBUG ETL: Fórmulas OK para {table_dest_name}: {len(df_pending)} registros, {len(update_cols)} columnas")
                         else:
                             print(f"No key column found to update pending formulas in {table_dest_name}")
@@ -464,7 +492,8 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                 import traceback
                 traceback.print_exc()
                 print(f"Error reevaluando formulas en pendientes de {table_dest_name}: {ev_e}")
-                log.message = (log.message or "") + f" | [ERROR FORMULAS] {ev_e}"
+                if log:
+                    log.message = (log.message or "") + f" | [ERROR FORMULAS] {ev_e}"
 
         rows_count = len(df)
 
@@ -487,17 +516,18 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                         df.head(0).to_sql(table_dest_empty, dst_engine, if_exists='replace', index=False)
                     except Exception as e:
                         print(f"Error creating empty table {table_dest_empty}: {e}")
-            log.status = "SUCCESS"
             
-            base_msg = f"Sin registros {'nuevos ' if not full_refresh else ''}en {sel.table_name}"
-            if log.message and "Fórmulas actualizadas" in log.message:
-                log.message = f"{base_msg} {log.message}"
-            else:
-                log.message = base_msg
-                
-            log.records_processed = 0
-            db.commit()
-            return {"status": "OK", "message": log.message, "records": 0, "extracted_rows": []}
+            if log:
+                log.status = "SUCCESS"
+                base_msg = f"Sin registros {'nuevos ' if not full_refresh else ''}en {sel.table_name}"
+                if log.message and "Fórmulas actualizadas" in log.message:
+                    log.message = f"{base_msg} {log.message}"
+                else:
+                    log.message = base_msg
+                log.records_processed = 0
+                db.commit()
+            
+            return {"status": "OK", "message": "Sin registros nuevos", "records": 0, "extracted_rows": []}
 
         # Insertar en BD intermedia (append o replace)
         table_dest = sel.table_name.lower().replace(" ", "_")
@@ -516,11 +546,14 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                 except Exception as e:
                     print(f"Error borrando datos previos de {company_id} en {table_dest}: {e}")
 
-            # Sincronizar esquema SIEMPRE (agregar columnas nuevas como las calculadas)
+            # Sincronizar esquema optimizada: solo agregar columnas que no existen
+            # Esto reduce I/O evitando ALTER TABLE innecesarios
             existing_cols = [c['name'] for c in inspector.get_columns(table_dest)]
-            with dst_engine.begin() as conn:
-                for col_name in df.columns:
-                    if col_name not in existing_cols:
+            new_cols_to_add = [col_name for col_name in df.columns if col_name not in existing_cols]
+            
+            if new_cols_to_add:
+                with dst_engine.begin() as conn:
+                    for col_name in new_cols_to_add:
                         try:
                             safe_col = col_name.replace('"', '""')
                             conn.execute(text(f'ALTER TABLE "{table_dest}" ADD COLUMN "{safe_col}" TEXT'))
@@ -536,15 +569,16 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
         # Escribir en destino (siempre append ya que borramos previamente)
         df.to_sql(table_dest, dst_engine, if_exists='append', index=False, chunksize=1000)
 
-        # Crear índices para acelerar consultas posteriores
-        try:
-            with dst_engine.connect() as conn:
-                conn.execute(text(f'CREATE INDEX IF NOT EXISTS "idx_{table_dest.lower()}_company_id" ON "{table_dest}" (company_id)'))
-                if "idcontrol" in df.columns:
-                    conn.execute(text(f'CREATE INDEX IF NOT EXISTS "idx_{table_dest.lower()}_idcontrol" ON "{table_dest}" (idcontrol)'))
-                conn.commit()
-        except Exception as idx_err:
-            print(f"Error creando indices en {table_dest}: {idx_err}")
+        # Creación de índices removida del ETL para reducir I/O
+        # Los índices deben crearse una vez durante setup/migración inicial
+        # try:
+        #     with dst_engine.connect() as conn:
+        #         conn.execute(text(f'CREATE INDEX IF NOT EXISTS "idx_{table_dest.lower()}_company_id" ON "{table_dest}" (company_id)'))
+        #         if "idcontrol" in df.columns:
+        #             conn.execute(text(f'CREATE INDEX IF NOT EXISTS "idx_{table_dest.lower()}_idcontrol" ON "{table_dest}" (idcontrol)'))
+        #         conn.commit()
+        # except Exception as idx_err:
+        #     print(f"Error creando indices en {table_dest}: {idx_err}")
 
         # Actualizar control incremental
         if sel.control_column and rows_count > 0:
@@ -579,15 +613,15 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
             control.last_run_at = datetime.now()
             control.last_run_status = "OK"
 
-        log.status = "SUCCESS"
-        success_part = f"Migrados {rows_count} registros de {sel.table_name} a tabla '{table_dest}'"
-        if hasattr(log, "message") and log.message:
-            log.message += f" | {success_part}"
-        else:
-            log.message = success_part
-        
-        log.records_processed = rows_count
-        db.commit()
+        if log:
+            log.status = "SUCCESS"
+            success_part = f"Migrados {rows_count} registros de {sel.table_name} a tabla '{table_dest}'"
+            if hasattr(log, "message") and log.message:
+                log.message += f" | {success_part}"
+            else:
+                log.message = success_part
+            log.records_processed = rows_count
+            db.commit()
         
         # Sanitize for JSON safety (converting NaN/NaT to None)
         df_clean = df.copy()
@@ -603,15 +637,17 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
                 pass
         extracted_rows_dict = df_clean.to_dict(orient="records")
         
-        return {"status": "OK", "message": log.message, "records": rows_count, "extracted_rows": extracted_rows_dict}
+        message = log.message if log else f"Migrados {rows_count} registros de {sel.table_name}"
+        return {"status": "OK", "message": message, "records": rows_count, "extracted_rows": extracted_rows_dict}
 
     except Exception as e:
         import traceback
-        log.status = "ERROR"
-        log.message = f"[{sel.table_name}] {str(e)}"
-        log.details = traceback.format_exc()
-        db.commit()
-        return {"status": "ERROR", "message": log.message}
+        if log:
+            log.status = "ERROR"
+            log.message = f"[{sel.table_name}] {str(e)}"
+            log.details = traceback.format_exc()
+            db.commit()
+        return {"status": "ERROR", "message": f"[{sel.table_name}] {str(e)}"}
 
 
 @router.post("/run-incremental/{company_id}/{table_selection_id}")
@@ -645,6 +681,7 @@ def trigger_etl(
     return result
 
 
+@track_io("etl_full_sync")
 def run_etl_job_sync(company_id: int, start_date: str, end_date: str, full_refresh: bool, db: Session):
     """Synchronous ETL: runs all extractions and returns the result to the caller."""
     company = db.query(Company).filter(Company.id == company_id).first()
@@ -739,6 +776,7 @@ def run_etl_job(company_id: int, start_date: str, end_date: str, full_refresh: b
 
 # ─── Generación de Asientos Contables ────────────────────────────────────────
 
+@track_io("generate_asientos")
 @router.post("/generate-asientos")
 def generate_asientos_contables(
     body: dict,

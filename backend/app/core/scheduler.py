@@ -22,8 +22,7 @@ def execute_scheduled_task(task_id: int):
         # Registrar inicio
         log = TaskLog(task_id=task.id, status="RUNNING")
         db.add(log)
-        db.commit()
-        db.refresh(log)
+        # Commit removido para reducir I/O - se hará al final
 
         if task.task_type == "TC_SUNAT":
             # Descarga de TC
@@ -56,6 +55,7 @@ def execute_scheduled_task(task_id: int):
                         
                     log.status = "SUCCESS"
                     log.message = f"TC sincronizado: Compra {item['compra']}, Venta {item['venta']}"
+                    # Commit removido - se hará al final del bloque try
                 else:
                     log.status = "ERROR"
                     log.message = data.get("message", "Error desconocido o sin datos")
@@ -137,7 +137,7 @@ def execute_scheduled_task(task_id: int):
                     sub.asiento_inicial = 1
                     sub.last_generated_control_value = None
                     count += 1
-                db.commit()
+                # Commit removido - se hará al final del bloque try
                 log.status = "SUCCESS"
                 log.message = f"Mes rotado: {count} subcategorías reiniciadas (asiento inicial = 1)."
             except Exception as e:
