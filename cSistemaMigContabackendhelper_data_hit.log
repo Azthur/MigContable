@@ -6910,3 +6910,507 @@ MATCH FOUND: tbl_Conciliados -> Id
 --- ENDPOINT START 46 --- table=tbl_conciliados, company=5
 Found 19 table selections
 MATCH FOUND: tbl_Conciliados -> Id
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 18 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 18 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 18 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 18 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 18 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 18 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 18 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 18 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 18 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 18 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 47 --- table=ccbmvtos, company=5
+Found 19 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 42 --- table=vtaritem, company=6
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 39 --- table=vtaritem, company=6
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 39 --- table=vtaritem, company=6
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 42 --- table=vtaritem, company=6
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 42 --- table=vtaritem, company=6
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 42 --- table=vtaritem, company=6
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 100 --- table=finpagos, company=1
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 100 --- table=finpagos, company=1
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 89 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 91 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 91 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 91 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 91 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 91 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 91 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 91 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 91 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 88 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 89 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 89 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 90 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 91 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 91 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 92 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 92 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 93 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 93 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 94 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 94 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 95 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 95 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 95 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 95 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 92 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 92 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 96 --- table=finpagos, company=6
+Found 17 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 96 --- table=finpagos, company=6
+Found 17 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 97 --- table=finpagos, company=6
+Found 17 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 97 --- table=finpagos, company=6
+Found 17 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 98 --- table=finpagos, company=6
+Found 17 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 98 --- table=finpagos, company=6
+Found 17 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 99 --- table=finpagos, company=6
+Found 17 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 99 --- table=finpagos, company=6
+Found 17 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 100 --- table=finpagos, company=1
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 100 --- table=finpagos, company=1
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 101 --- table=finpagos, company=1
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 101 --- table=finpagos, company=1
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 102 --- table=finpagos, company=1
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 102 --- table=finpagos, company=1
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 103 --- table=finpagos, company=1
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 103 --- table=finpagos, company=1
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 121 --- table=finpagos, company=7
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 121 --- table=finpagos, company=7
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 122 --- table=finpagos, company=7
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 122 --- table=finpagos, company=7
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 123 --- table=finpagos, company=7
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 123 --- table=finpagos, company=7
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 124 --- table=finpagos, company=7
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 124 --- table=finpagos, company=7
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 91 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 91 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 91 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 91 --- table=finpagos, company=5
+Found 19 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 42 --- table=vtaritem, company=6
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 42 --- table=vtaritem, company=6
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 42 --- table=vtaritem, company=6
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 70 --- table=cntfacturadet, company=1
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 54 --- table=ccbmvtos, company=4
+Found 18 table selections
+MATCH FOUND: CcbMVtos -> coddoc, nrodoc
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 18 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 18 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 18 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 86 --- table=finrendiciongastosdet, company=6
+Found 17 table selections
+MATCH FOUND: FinRendicionGastosDet -> RendicionId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 65 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 18 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 18 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 18 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 18 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 92 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 92 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 92 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 93 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 93 --- table=finpagos, company=4
+Found 18 table selections
+MATCH FOUND: FinPagos -> Id
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 18 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 18 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 66 --- table=cntfacturadet, company=1
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 72 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 72 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 72 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 72 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 73 --- table=cntfacturadet, company=6
+Found 17 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
