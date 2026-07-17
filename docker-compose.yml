@@ -30,6 +30,14 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
   # ─── Celery Worker ───
   celery-worker:
@@ -37,7 +45,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: sistemamigconta-worker
-    command: celery -A backend.app.celery_app worker --loglevel=info --queues=etl --concurrency=4
+    command: celery -A backend.app.celery_app worker --loglevel=info --queues=etl --concurrency=2
     volumes:
       - .:/app
     environment:
@@ -57,6 +65,14 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 1G
 
   # ─── Celery Beat (Scheduler) ───
   celery-beat:
@@ -119,6 +135,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
 volumes:
   postgres_data:
