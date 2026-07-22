@@ -9,5 +9,6 @@ __pycache__
 *.txt
 *.sqlite
 *.db
+postgres_data
 !backend/requirements.txt
 !backend/app/main.py

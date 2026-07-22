@@ -40,10 +40,12 @@ class ConnectionManager:
 
     @staticmethod
     def _resolve_host(host: str) -> str:
-        """Resuelve localhost a host.docker.internal si está en Docker (Linux)."""
+        """Resuelve localhost a host.docker.internal si está en Docker (Linux).
+        Solo convierte localhost/127.0.0.1, deja IPs de red local sin cambios."""
         import os
         if os.name != 'nt' and host in ("localhost", "127.0.0.1"):
             return "host.docker.internal"
+        # No convertir IPs de red local (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
         return host
 
     @staticmethod
