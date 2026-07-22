@@ -2,6 +2,10 @@
 postgres_data/
 redis_data/
 
+# Database backups
+*.sql
+backup_*.sql
+
 # Python
 *.pyc
 __pycache__/
