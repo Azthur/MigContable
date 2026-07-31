@@ -1,0 +1,164 @@
+{
+  "empresas": [
+    {
+      "codcia": "01",
+      "empresa_id": 1,
+      "nombre": "BOTICA MAGISTRAL YELAVE S.A.C.",
+      "contasis": {
+        "host": "192.168.2.90",
+        "port": 5432,
+        "database": "contasis_003",
+        "username": "postgres",
+        "password": "postgres"
+      },
+      "subcategorias": [
+        {
+          "id": 80,
+          "nombre": "209-Planilla de Movilidad - YLV Industrias",
+          "tabla_origen": "FinPlanillaMovilidadDet",
+          "cuentas": {
+            "DEBITO": "6599004",
+            "CREDITO": "469901"
+          },
+          "campos": [
+            {"campo_origen": "FIXED", "campo_destino": "cper", "tipo_dato": "STRING", "valor_fijo": "2026", "es_requerido": true, "orden": 1},
+            {"campo_origen": "FIXED", "campo_destino": "cmes", "tipo_dato": "STRING", "valor_fijo": "01", "es_requerido": true, "orden": 2},
+            {"campo_origen": "Fecha", "campo_destino": "ffecasi", "tipo_dato": "DATE", "valor_fijo": null, "es_requerido": true, "orden": 3},
+            {"campo_origen": "FIXED", "campo_destino": "ntc", "tipo_dato": "NUMERIC", "valor_fijo": "1.0", "es_requerido": true, "orden": 4},
+            {"campo_origen": "FIXED", "campo_destino": "cmoneda", "tipo_dato": "STRING", "valor_fijo": "PEN", "es_requerido": true, "orden": 5},
+            {"campo_origen": "Monto", "campo_destino": "ndebe", "tipo_dato": "NUMERIC", "valor_fijo": null, "es_requerido": true, "orden": 6},
+            {"campo_origen": "Monto", "campo_destino": "nhaber", "tipo_dato": "NUMERIC", "valor_fijo": null, "es_requerido": true, "orden": 7},
+            {"campo_origen": "Motivo", "campo_destino": "cglosa_2", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 8},
+            {"campo_origen": "FIXED", "campo_destino": "ccodori", "tipo_dato": "STRING", "valor_fijo": "209", "es_requerido": true, "orden": 9},
+            {"campo_origen": "EXTRACTED", "campo_destino": "cserie", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 10},
+            {"campo_origen": "EXTRACTED", "campo_destino": "cnumero", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 11}
+          ]
+        },
+        {
+          "id": 81,
+          "nombre": "209-Planilla de Movilidad - YLV Nature",
+          "tabla_origen": "FinPlanillaMovilidadDet",
+          "cuentas": {
+            "DEBITO": "6599004",
+            "CREDITO": "469901"
+          },
+          "campos": [
+            {"campo_origen": "FIXED", "campo_destino": "cper", "tipo_dato": "STRING", "valor_fijo": "2026", "es_requerido": true, "orden": 1},
+            {"campo_origen": "FIXED", "campo_destino": "cmes", "tipo_dato": "STRING", "valor_fijo": "01", "es_requerido": true, "orden": 2},
+            {"campo_origen": "Fecha", "campo_destino": "ffecasi", "tipo_dato": "DATE", "valor_fijo": null, "es_requerido": true, "orden": 3},
+            {"campo_origen": "FIXED", "campo_destino": "ntc", "tipo_dato": "NUMERIC", "valor_fijo": "1.0", "es_requerido": true, "orden": 4},
+            {"campo_origen": "FIXED", "campo_destino": "cmoneda", "tipo_dato": "STRING", "valor_fijo": "PEN", "es_requerido": true, "orden": 5},
+            {"campo_origen": "Monto", "campo_destino": "ndebe", "tipo_dato": "NUMERIC", "valor_fijo": null, "es_requerido": true, "orden": 6},
+            {"campo_origen": "Monto", "campo_destino": "nhaber", "tipo_dato": "NUMERIC", "valor_fijo": null, "es_requerido": true, "orden": 7},
+            {"campo_origen": "Motivo", "campo_destino": "cglosa_2", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 8},
+            {"campo_origen": "FIXED", "campo_destino": "ccodori", "tipo_dato": "STRING", "valor_fijo": "209", "es_requerido": true, "orden": 9},
+            {"campo_origen": "EXTRACTED", "campo_destino": "cserie", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 10},
+            {"campo_origen": "EXTRACTED", "campo_destino": "cnumero", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 11}
+          ]
+        },
+        {
+          "id": 82,
+          "nombre": "209-Planilla de Movilidad - YLV Corpo",
+          "tabla_origen": "FinPlanillaMovilidadDet",
+          "cuentas": {
+            "DEBITO": "6599004",
+            "CREDITO": "469901"
+          },
+          "campos": [
+            {"campo_origen": "FIXED", "campo_destino": "cper", "tipo_dato": "STRING", "valor_fijo": "2026", "es_requerido": true, "orden": 1},
+            {"campo_origen": "FIXED", "campo_destino": "cmes", "tipo_dato": "STRING", "valor_fijo": "01", "es_requerido": true, "orden": 2},
+            {"campo_origen": "Fecha", "campo_destino": "ffecasi", "tipo_dato": "DATE", "valor_fijo": null, "es_requerido": true, "orden": 3},
+            {"campo_origen": "FIXED", "campo_destino": "ntc", "tipo_dato": "NUMERIC", "valor_fijo": "1.0", "es_requerido": true, "orden": 4},
+            {"campo_origen": "FIXED", "campo_destino": "cmoneda", "tipo_dato": "STRING", "valor_fijo": "PEN", "es_requerido": true, "orden": 5},
+            {"campo_origen": "Monto", "campo_destino": "ndebe", "tipo_dato": "NUMERIC", "valor_fijo": null, "es_requerido": true, "orden": 6},
+            {"campo_origen": "Monto", "campo_destino": "nhaber", "tipo_dato": "NUMERIC", "valor_fijo": null, "es_requerido": true, "orden": 7},
+            {"campo_origen": "Motivo", "campo_destino": "cglosa_2", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 8},
+            {"campo_origen": "FIXED", "campo_destino": "ccodori", "tipo_dato": "STRING", "valor_fijo": "209", "es_requerido": true, "orden": 9},
+            {"campo_origen": "EXTRACTED", "campo_destino": "cserie", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 10},
+            {"campo_origen": "EXTRACTED", "campo_destino": "cnumero", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 11}
+          ]
+        },
+        {
+          "id": 83,
+          "nombre": "209-Planilla de Movilidad - YLV Botica",
+          "tabla_origen": "FinPlanillaMovilidadDet",
+          "cuentas": {
+            "DEBITO": "6599004",
+            "CREDITO": "469901"
+          },
+          "campos": [
+            {"campo_origen": "FIXED", "campo_destino": "cper", "tipo_dato": "STRING", "valor_fijo": "2026", "es_requerido": true, "orden": 1},
+            {"campo_origen": "FIXED", "campo_destino": "cmes", "tipo_dato": "STRING", "valor_fijo": "01", "es_requerido": true, "orden": 2},
+            {"campo_origen": "Fecha", "campo_destino": "ffecasi", "tipo_dato": "DATE", "valor_fijo": null, "es_requerido": true, "orden": 3},
+            {"campo_origen": "FIXED", "campo_destino": "ntc", "tipo_dato": "NUMERIC", "valor_fijo": "1.0", "es_requerido": true, "orden": 4},
+            {"campo_origen": "FIXED", "campo_destino": "cmoneda", "tipo_dato": "STRING", "valor_fijo": "PEN", "es_requerido": true, "orden": 5},
+            {"campo_origen": "Monto", "campo_destino": "ndebe", "tipo_dato": "NUMERIC", "valor_fijo": null, "es_requerido": true, "orden": 6},
+            {"campo_origen": "Monto", "campo_destino": "nhaber", "tipo_dato": "NUMERIC", "valor_fijo": null, "es_requerido": true, "orden": 7},
+            {"campo_origen": "Motivo", "campo_destino": "cglosa_2", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 8},
+            {"campo_origen": "FIXED", "campo_destino": "ccodori", "tipo_dato": "STRING", "valor_fijo": "209", "es_requerido": true, "orden": 9},
+            {"campo_origen": "EXTRACTED", "campo_destino": "cserie", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 10},
+            {"campo_origen": "EXTRACTED", "campo_destino": "cnumero", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 11}
+          ]
+        },
+        {
+          "id": 116,
+          "nombre": "209-Planilla de Movilidad - YLV Grupo",
+          "tabla_origen": "FinPlanillaMovilidadDet",
+          "cuentas": {
+            "DEBITO": "6599004",
+            "CREDITO": "469901"
+          },
+          "campos": [
+            {"campo_origen": "FIXED", "campo_destino": "cper", "tipo_dato": "STRING", "valor_fijo": "2026", "es_requerido": true, "orden": 1},
+            {"campo_origen": "FIXED", "campo_destino": "cmes", "tipo_dato": "STRING", "valor_fijo": "01", "es_requerido": true, "orden": 2},
+            {"campo_origen": "Fecha", "campo_destino": "ffecasi", "tipo_dato": "DATE", "valor_fijo": null, "es_requerido": true, "orden": 3},
+            {"campo_origen": "FIXED", "campo_destino": "ntc", "tipo_dato": "NUMERIC", "valor_fijo": "1.0", "es_requerido": true, "orden": 4},
+            {"campo_origen": "FIXED", "campo_destino": "cmoneda", "tipo_dato": "STRING", "valor_fijo": "PEN", "es_requerido": true, "orden": 5},
+            {"campo_origen": "Monto", "campo_destino": "ndebe", "tipo_dato": "NUMERIC", "valor_fijo": null, "es_requerido": true, "orden": 6},
+            {"campo_origen": "Monto", "campo_destino": "nhaber", "tipo_dato": "NUMERIC", "valor_fijo": null, "es_requerido": true, "orden": 7},
+            {"campo_origen": "Motivo", "campo_destino": "cglosa_2", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 8},
+            {"campo_origen": "FIXED", "campo_destino": "ccodori", "tipo_dato": "STRING", "valor_fijo": "209", "es_requerido": true, "orden": 9},
+            {"campo_origen": "EXTRACTED", "campo_destino": "cserie", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 10},
+            {"campo_origen": "EXTRACTED", "campo_destino": "cnumero", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 11}
+          ]
+        }
+      ]
+    },
+    {
+      "codcia": "05",
+      "empresa_id": 5,
+      "nombre": "YELAVE NATURE S.A.C.",
+      "contasis": {
+        "host": "192.168.2.90",
+        "port": 5432,
+        "database": "contasis_002",
+        "username": "postgres",
+        "password": "postgres"
+      },
+      "subcategorias": [
+        {
+          "id": 81,
+          "nombre": "209-Planilla de Movilidad - YLV Nature",
+          "tabla_origen": "FinPlanillaMovilidadCab",
+          "cuentas": {
+            "DEBITO": "6599004",
+            "CREDITO": "469901"
+          },
+          "campos": [
+            {"campo_origen": "FIXED", "campo_destino": "cper", "tipo_dato": "STRING", "valor_fijo": "2026", "es_requerido": true, "orden": 1},
+            {"campo_origen": "FIXED", "campo_destino": "cmes", "tipo_dato": "STRING", "valor_fijo": "05", "es_requerido": true, "orden": 2},
+            {"campo_origen": "FechaEmision", "campo_destino": "ffecasi", "tipo_dato": "DATE", "valor_fijo": null, "es_requerido": true, "orden": 3},
+            {"campo_origen": "FIXED", "campo_destino": "ntc", "tipo_dato": "NUMERIC", "valor_fijo": "1.0", "es_requerido": true, "orden": 4},
+            {"campo_origen": "FIXED", "campo_destino": "cmoneda", "tipo_dato": "STRING", "valor_fijo": "1", "es_requerido": true, "orden": 5},
+            {"campo_origen": "TotalGastado", "campo_destino": "ndebe", "tipo_dato": "NUMERIC", "valor_fijo": null, "es_requerido": true, "orden": 6},
+            {"campo_origen": "TotalGastado", "campo_destino": "nhaber", "tipo_dato": "NUMERIC", "valor_fijo": null, "es_requerido": true, "orden": 7},
+            {"campo_origen": "FIXED", "campo_destino": "cglosa_2", "tipo_dato": "STRING", "valor_fijo": "Migración Libro 209", "es_requerido": true, "orden": 8},
+            {"campo_origen": "FIXED", "campo_destino": "ccodori", "tipo_dato": "STRING", "valor_fijo": "209", "es_requerido": true, "orden": 9},
+            {"campo_origen": "EXTRACTED", "campo_destino": "cserie", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 10},
+            {"campo_origen": "EXTRACTED", "campo_destino": "cnumero", "tipo_dato": "STRING", "valor_fijo": null, "es_requerido": true, "orden": 11}
+          ]
+        }
+      ]
+    }
+  ]
+}

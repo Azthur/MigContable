@@ -1,0 +1,20 @@
+# Ejemplo de configuración de cron para Libro 209 Migrator
+# Agregar esto al crontab con: crontab -e
+
+# Ejecutar cada hora en el minuto 0
+0 * * * * /usr/bin/python3 /path/to/libro209_migrator.py >> /var/log/libro209_cron.log 2>&1
+
+# Ejecutar cada 30 minutos
+*/30 * * * * /usr/bin/python3 /path/to/libro209_migrator.py >> /var/log/libro209_cron.log 2>&1
+
+# Ejecutar cada día a las 6:00 AM
+0 6 * * * /usr/bin/python3 /path/to/libro209_migrator.py >> /var/log/libro209_cron.log 2>&1
+
+# Ejecutar cada día de lunes a viernes a las 8:00 AM, 12:00 PM y 4:00 PM
+0 8,12,16 * * 1-5 /usr/bin/python3 /path/to/libro209_migrator.py >> /var/log/libro209_cron.log 2>&1
+
+# Ejemplo con variables de entorno
+0 * * * * export SQL_SERVER_HOST=localhost && export SQL_SERVER_DATABASE=YLV && export EMPRESA_ID=5 && /usr/bin/python3 /path/to/libro209_migrator.py >> /var/log/libro209_cron.log 2>&1
+
+# Ejemplo cargando archivo de configuración
+0 * * * * /bin/bash -c 'source /etc/libro209/config.env && /usr/bin/python3 /path/to/libro209_migrator.py' >> /var/log/libro209_cron.log 2>&1
