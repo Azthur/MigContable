@@ -667,7 +667,16 @@ def reset_migration_control(control_id: int, db: Session = Depends(get_dest_db))
 def delete_subcategoria_asientos(company_id: int, subcategoria_id: int, db: Session = Depends(get_dest_db)):
     """Elimina asientos NO migrados (estado 0 o 1) de una subcategoría específica."""
     from sqlalchemy import Table, MetaData
-    from backend.app.core.database import dest_engine as engine
+    from backend.app.core.database import dest_engine as engine, get_dest_db
+    import decimal
+    import datetime as dt_module
+
+    # Obtener sesión de base de datos si no se proporcionó
+    if db is None:
+        db = next(get_dest_db())
+        should_close_db = True
+    else:
+        should_close_db = False
 
     sub = db.query(MapeoSubcategoria).filter(MapeoSubcategoria.id == subcategoria_id).first()
     if not sub:
@@ -969,7 +978,7 @@ def _extract_period_month(sub_filter_rules, adhoc_filters, sub=None, df=None):
     custom_mes_col = getattr(sub, "col_origen_mes", None)
     
     # helper lists
-    period_cols = ["cper", "cperiodo", "c_periodo", "anos", "anio", "ano", "periodo", "c_per"]
+    period_cols = ["cper", "cperiodo", "c_periodo", "anos", "anio", "ano", "periodo", "c_per", "fecha"]
     mes_cols = ["cmes", "c_mes", "mes", "c_mes_c"]
     
     # Check adhoc first as they are run-time overrides
@@ -984,7 +993,26 @@ def _extract_period_month(sub_filter_rules, adhoc_filters, sub=None, df=None):
                 
         # fallback to standard names
         if not periodo and col in period_cols:
-            periodo = str(f.get("value") or "").strip()
+            val = str(f.get("value") or "").strip()
+            # If it's a date column, extract the year
+            if col == "fecha" and val:
+                # Extract year from date formats like "2026-06-01" or "2026/06/01"
+                import re
+                year_match = re.search(r'(\d{4})', val)
+                if year_match:
+                    periodo = year_match.group(1)
+                else:
+                    periodo = val
+            else:
+                periodo = val
+        # Also check value2 for date columns (for BETWEEN operators)
+        if not periodo and col in period_cols:
+            val2 = str(f.get("value2") or "").strip()
+            if col == "fecha" and val2:
+                import re
+                year_match = re.search(r'(\d{4})', val2)
+                if year_match:
+                    periodo = year_match.group(1)
         if not mes and col in mes_cols:
             mes = str(f.get("value") or "").strip()
             if len(mes) == 1 and mes.isdigit():
@@ -1001,7 +1029,18 @@ def _extract_period_month(sub_filter_rules, adhoc_filters, sub=None, df=None):
                 mes = f"0{mes}"
                 
         if not periodo and col in period_cols:
-            periodo = str(f.get("value") or "").strip()
+            val = str(f.get("value") or "").strip()
+            # If it's a date column, extract the year
+            if col == "fecha" and val:
+                # Extract year from date formats like "2026-06-01" or "2026/06/01"
+                import re
+                year_match = re.search(r'(\d{4})', val)
+                if year_match:
+                    periodo = year_match.group(1)
+                else:
+                    periodo = val
+            else:
+                periodo = val
         if not mes and col in mes_cols:
             mes = str(f.get("value") or "").strip()
             if len(mes) == 1 and mes.isdigit():
@@ -1035,7 +1074,18 @@ def _extract_period_month(sub_filter_rules, adhoc_filters, sub=None, df=None):
                 if col in df_cols_lower:
                     val = df.iloc[0][df_cols_lower[col]]
                     if pd.notna(val):
-                        periodo = str(val).strip()
+                        val_str = str(val).strip()
+                        # If it's a date column, extract the year
+                        if col == "fecha" and val_str:
+                            # Extract year from date formats like "2026-06-01" or "2026/06/01"
+                            import re
+                            year_match = re.search(r'(\d{4})', val_str)
+                            if year_match:
+                                periodo = year_match.group(1)
+                            else:
+                                periodo = val_str
+                        else:
+                            periodo = val_str
                         break
                         
         if not mes:
@@ -1071,11 +1121,16 @@ def _get_df_period_month_cols(df, sub):
             period_col_in_df = df_cols_lower[c_col_p]
             
     if not period_col_in_df:
-        period_cols = ["cper", "cperiodo", "c_periodo", "anos", "anio", "ano", "periodo", "c_per"]
-        for col in period_cols:
-            if col in df_cols_lower:
-                period_col_in_df = df_cols_lower[col]
-                break
+        # Check for exact "fecha" match first (case-insensitive)
+        if "fecha" in df_cols_lower:
+            period_col_in_df = df_cols_lower["fecha"]
+        else:
+            # Fallback to other period columns
+            period_cols = ["cper", "cperiodo", "c_periodo", "anos", "anio", "ano", "periodo", "c_per"]
+            for col in period_cols:
+                if col in df_cols_lower:
+                    period_col_in_df = df_cols_lower[col]
+                    break
 
     custom_mes_col = getattr(sub, "col_origen_mes", None)
     mes_col_in_df = None
@@ -1585,6 +1640,14 @@ def _generate_subcategoria_cf_diariol(
     else:
         if period_col:
             df['_row_periodo'] = df[period_col].astype(str).str.strip()
+            # If it's a date column, extract the year
+            if period_col.lower() == "fecha":
+                import re
+                df['_row_periodo'] = df['_row_periodo'].apply(lambda x: re.search(r'(\d{4})', str(x)).group(1) if re.search(r'(\d{4})', str(x)) else x)
+            # If it's a calculated column like C_periodo, use default_period if values are invalid
+            elif period_col.lower().startswith("c_") and default_period:
+                # Replace nan/None values with default_period from filters
+                df['_row_periodo'] = df['_row_periodo'].apply(lambda x: default_period if str(x).strip() in ['nan', 'None', ''] else str(x).strip())
         else:
             df['_row_periodo'] = default_period or ""
 
@@ -1876,6 +1939,12 @@ def _generate_subcategoria_cf_diariol(
                 row_dict["cper"] = str(row_calc["_row_periodo"])
             if "cmes" in det_cols:
                 row_dict["cmes"] = str(row_calc["_row_mes"])
+            
+            # Auto-populate clecvper and cledmcper with cper if not explicitly mapped
+            if "clecvper" in det_cols and ("clecvper" not in row_dict or row_dict["clecvper"] is None):
+                row_dict["clecvper"] = str(row_calc["_row_periodo"])
+            if "cledmcper" in det_cols and ("cledmcper" not in row_dict or row_dict["cledmcper"] is None):
+                row_dict["cledmcper"] = str(row_calc["_row_periodo"])
             
             row_dict["_aplica_ajuste_redondeo"] = getattr(linea, "aplica_ajuste_redondeo", False)
 
@@ -2400,13 +2469,12 @@ def clear_local_staging(
 
 
 
-@router.post("/migrate-to-final/{company_id}")
-def migrate_to_final(
+def _migrate_to_final_internal(
     company_id: int,
     lote_id: Optional[str] = None,
     allow_overwrite: bool = False,
     subcategoria_id: Optional[int] = None,
-    db: Session = Depends(get_dest_db)
+    db: Optional[Session] = None
 ):
     """
     Migra registros PENDIENTE de cf_diariol (staging en migconta_db) al destino final de Contasis.
@@ -2417,7 +2485,14 @@ def migrate_to_final(
     from backend.app.models.models import FinalDestConnection, MapeoCategoria, MapeoSubcategoria, AsientoCorrelativo
     from backend.app.services.connection_manager import ConnectionManager
     from sqlalchemy import Table, MetaData, text
-    from backend.app.core.database import dest_engine as local_engine
+    from backend.app.core.database import dest_engine as local_engine, get_dest_db
+
+    # Obtener sesión de base de datos si no se proporcionó
+    if db is None:
+        db = next(get_dest_db())
+        should_close_db = True
+    else:
+        should_close_db = False
 
     # Obtener conexión destino final
     final_conn = db.query(FinalDestConnection).filter(
@@ -2814,18 +2889,40 @@ def migrate_to_final(
                 }
             )
 
-        return {
+        result = {
             "message": f"Migración exitosa: {migrated_lineas} líneas y {migrated_cabeceras} cabeceras",
             "migrated_lineas": migrated_lineas,
             "migrated_cabeceras": migrated_cabeceras,
             "lote_id": lote_id
         }
+        
+        # Cerrar sesión si la creamos nosotros
+        if should_close_db:
+            db.close()
+            
+        return result
 
     except HTTPException:
+        if should_close_db:
+            db.close()
         raise
     except Exception as e:
         db.rollback()
+        if should_close_db:
+            db.close()
         raise HTTPException(status_code=500, detail={"message": f"Fallo catastrófico en migración: {str(e)}", "failed_rows": []})
+
+
+@router.post("/migrate-to-final/{company_id}")
+def migrate_to_final(
+    company_id: int,
+    lote_id: Optional[str] = None,
+    allow_overwrite: bool = False,
+    subcategoria_id: Optional[int] = None,
+    db: Session = Depends(get_dest_db)
+):
+    """Wrapper API para migración a destino final"""
+    return _migrate_to_final_internal(company_id, lote_id, allow_overwrite, subcategoria_id, db)
 
 
 @router.get("/cf-diariol")
@@ -3312,11 +3409,10 @@ def list_origen_preview(
     return results
 
 
-@router.get("/validate-staging")
-def validate_staging_data(
+def _validate_staging_data_internal(
     company_id: int,
     subcategoria_id: Optional[int] = None,
-    db: Session = Depends(get_dest_db)
+    db: Optional[Session] = None
 ):
     """
     Valida los datos ya generados en staging (cf_diario, cf_diariol) contra las restricciones
@@ -3324,9 +3420,16 @@ def validate_staging_data(
     Retorna un reporte detallado de violaciones para corregir antes de migrar.
     """
     from sqlalchemy import Table, MetaData
-    from backend.app.core.database import dest_engine as engine
+    from backend.app.core.database import dest_engine as engine, get_dest_db
     import decimal
     import datetime as dt_module
+
+    # Obtener sesión de base de datos si no se proporcionó
+    if db is None:
+        db = next(get_dest_db())
+        should_close_db = True
+    else:
+        should_close_db = False
 
     metadata = MetaData()
 
@@ -3483,12 +3586,28 @@ def validate_staging_data(
 
     total_violations = sum(len(t["violations"]) for t in tables_checked)
 
-    return {
+    result = {
         "company_id": company_id,
         "total_violations": total_violations,
         "tables": tables_checked,
         "status": "OK" if total_violations == 0 else "TIENE_ERRORES"
     }
+    
+    # Cerrar sesión si la creamos nosotros
+    if should_close_db:
+        db.close()
+        
+    return result
+
+
+@router.get("/validate-staging")
+def validate_staging_data(
+    company_id: int,
+    subcategoria_id: Optional[int] = None,
+    db: Session = Depends(get_dest_db)
+):
+    """Wrapper API para validación de staging"""
+    return _validate_staging_data_internal(company_id, subcategoria_id, db)
 
 @router.get("/asientos-generados/export-csv")
 def export_asientos_csv(company_id: int, lote_id: Optional[str] = None,
