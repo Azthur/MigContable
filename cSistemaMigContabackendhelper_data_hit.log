@@ -7990,3 +7990,114 @@ MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
 --- ENDPOINT START 42 --- table=vtaritem, company=6
 Found 17 table selections
 MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 64 --- table=cntfacturadet, company=5
+Found 19 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 35 --- table=vtaritem, company=5
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 4 --- table=vtaritem, company=1
+Found 19 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 42 --- table=vtaritem, company=6
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 42 --- table=vtaritem, company=6
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 42 --- table=vtaritem, company=6
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 42 --- table=vtaritem, company=6
+Found 17 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 28 --- table=vtaritem, company=4
+Found 18 table selections
+MATCH FOUND: VtaRItem -> CodCia, coddoc, nrodoc
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 81 --- table=finplanillamovilidaddet, company=5
+Found 19 table selections
+MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
+--- ENDPOINT START 63 --- table=cntfacturadet, company=4
+Found 18 table selections
+MATCH FOUND: CntFacturaDet -> FacturaCabId

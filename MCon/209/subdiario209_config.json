@@ -1,0 +1,76 @@
+{
+  "empresas": {
+    "002": {
+      "nombre": "BOTICA YLV",
+      "contasis_db": "contasis_003",
+      "cuentas": {
+        "DEBITO": "6599004",
+        "CREDITO": "469901"
+      }
+    },
+    "003": {
+      "nombre": "CORP YLV",
+      "contasis_db": "contasis_004",
+      "cuentas": {
+        "DEBITO": "6599004",
+        "CREDITO": "469901"
+      }
+    },
+    "004": {
+      "nombre": "GRUPO YLV",
+      "contasis_db": "contasis_006",
+      "cuentas": {
+        "DEBITO": "6599004",
+        "CREDITO": "469901"
+      }
+    },
+    "005": {
+      "nombre": "INDUSTRIAS",
+      "contasis_db": "contasis_005",
+      "cuentas": {
+        "DEBITO": "6599004",
+        "CREDITO": "469901"
+      }
+    },
+    "007": {
+      "nombre": "YELAVE NATURE",
+      "contasis_db": "contasis_002",
+      "cuentas": {
+        "DEBITO": "6599004",
+        "CREDITO": "469901"
+      }
+    }
+  },
+  "migracion": {
+    "ccodori": "209",
+    "cmoneda": "1",
+    "ntc": "1.0",
+    "campos_cabecera": {
+      "ffecasi": "FechaEmision",
+      "ndebe": "TotalGastado",
+      "nhaber": "TotalGastado",
+      "cglosa_2": "NroPlanilla"
+    },
+    "campos_detalle": {
+      "ndebe": "Monto",
+      "nhaber": "Monto",
+      "cglosa": "Motivo"
+    }
+  },
+  "contasis": {
+    "host": "192.168.2.90",
+    "port": 5432,
+    "username": "postgres",
+    "password": "postgres"
+  },
+  "sql_server": {
+    "server": "192.168.1.17",
+    "database": "YELAVE22",
+    "uid": "sa",
+    "pwd": "Pa$$word"
+  },
+  "control": {
+    "tabla": "Subdiario209_ControlMigracion",
+    "crear_tabla": true
+  }
+}
