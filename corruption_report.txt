@@ -1,0 +1,30 @@
+=== REPORTE DE CARACTERES CORRUPTOS EN CONTASIS ===
+
+Patrones buscados:
+  - ┬á
+  - ┬é
+  - ┬í
+  - ┬ó
+  - ┬ú
+  - ┬ñ
+  - ┬¿
+  - ┬
+  - í┤
+  - ┤
+  - á
+  - íÁ
+  - Á
+  - éP
+  - éS
+  - é
+  - Dé
+
+
+contasis_002:
+  No se encontraron caracteres corruptos
+
+contasis_004:
+  No se encontraron caracteres corruptos
+
+contasis_005:
+  No se encontraron caracteres corruptos

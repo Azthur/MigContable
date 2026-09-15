@@ -1,0 +1,128 @@
+RESUMEN DE PROBLEMAS Y TABLAS PENDIENTES - MIGRACIÓN DE ENTIDADES
+================================================================
+
+FECHA: 2026-08-03
+OBJETIVO: Corregir caracteres especiales corruptos en migración de entidades
+
+PROBLEMA IDENTIFICADO:
+----------------------
+- Caracteres corruptos en datos de entidades: ┬á, ┬, ┬é, ┬ó, etc.
+- Ejemplo: "MARIA ISABEL┬áSARAZU┬áOCHOA" en lugar de "MARIA ISABEL SARAZU OCHOA"
+- El problema afecta nombres, direcciones y otros campos de texto
+
+TABLAS INVOLUCRADAS:
+-------------------
+
+1. CbdMAuxi (SQL Server - ORIGEN)
+   - Ubicación: 192.168.1.17,1433 / YELAVE22
+   - Estado: NO ACCESIBLE desde Docker (timeout de conexión)
+   - Contiene datos originales limpos en SQL Server
+   - Columnas clave: codcia, codaux, nomaux, diraux, rucaux, ApePat, ApeMat, NomBres
+
+2. cbdmauxi (migconta_db - INTERMEDIA)
+   - Ubicación: PostgreSQL migconta_db
+   - Estado: CORREGIDA (808 registros con caracteres corruptos corregidos)
+   - Contiene datos migrados con caracteres corruptos
+   - CORRECCIÓN APLICADA: Reemplazo de ┬á→á, ┬é→é, ┬ó→ó, ┬→í, etc.
+   - Pendiente: Re-ejecutar ETL para migrar datos corregidos a Contasis
+
+3. cg_entitrib (Contasis - FINAL)
+   - Ubicación: PostgreSQL contasis_002, contasis_004, contasis_005
+   - Estado: CONTIENE DATOS CORRUPTOS (pendiente de corrección)
+   - Primary Key: ccodruc
+   - Registros actuales: 32,964 registros totales
+   - Distribución por company_id:
+     * company_id 1: 22,210 registros
+     * company_id 4: 738 registros  
+     * company_id 5: 9,010 registros
+     * company_id 6: 6 registros
+   - NO SE PUEDE MODIFICAR DIRECTAMENTE sin backup previo
+
+SOLUCIONES INTENTADAS:
+---------------------
+
+1. ✅ API de DNI/RUC (api.org.pe)
+   - Estado: Implementada pero bloqueada (HTTP 403 Forbidden)
+   - Causa: API bloquea acceso desde Docker
+   - Archivo: fix_corrupted_entities.py
+
+2. ✅ Extracción directa de SQL Server
+   - Estado: Implementada pero fallida (timeout de conexión)
+   - Causa: SQL Server no accesible desde Docker
+   - Archivo: fix_from_sqlserver.py
+
+3. ✅ Corrección en tabla intermedia (cbdmauxi)
+   - Estado: EXITOSA (808 registros corregidos)
+   - Método: Reemplazo de caracteres corruptos específicos
+   - Archivo: fix_cbdmauxi_encoding.py
+
+4. ✅ Encoding UTF-8 en ETL
+   - Estado: Implementado en backend/app/api/endpoints/etl.py
+   - Método: fix_encoding() durante extracción y migración
+   - Pendiente: Re-ejecutar ETL completo
+
+5. ✅ Filtro por empresa en UPSERT
+   - Estado: Implementado en backend/app/api/endpoints/mapeo.py
+   - Método: Agregado company_id en WHERE clause de UPSERT
+   - Evita sobrescritura de datos entre empresas
+
+PASOS PENDIENTES:
+-----------------
+
+1. RE-EJECUTAR ETL PARA ENTIDADES
+   - Comando: docker exec sistemamigconta-app python run_etl_entidades.py
+   - Objetivo: Migrar datos corregidos de cbdmauxi a cg_entitrib
+   - Esto aplicará los 808 registros corregidos a Contasis
+
+2. VERIFICAR RESULTADOS
+   - Comando: docker exec sistemamigconta-app python verify_entidades_migration.py
+   - Objetivo: Confirmar que caracteres corruptos fueron eliminados
+
+3. REVISAR REGISTROS NO CORREGIDOS
+   - Algunos caracteres pueden requerir corrección manual
+   - Revisar patrones de corrupción adicionales no detectados
+
+4. BACKUP DE CONTASIS
+   - CRÍTICO: Realizar backup antes de modificaciones directas
+   - Necesario para correcciones manuales si es requerido
+
+EMPRESAS PROCESADAS:
+-------------------
+- codcia 001: OMITIDA (dada de baja)
+- codcia 002: Mapeada a contasis_002 (company_id=1)
+- codcia 004: Mapeada a contasis_004 (company_id=7)
+- codcia 005: Mapeada a contasis_005 (company_id=3)
+- codcia 007: Mapeada a contasis_002 (company_id=4)
+
+SUBCATEGORÍAS DE ENTIDADES:
+---------------------------
+- ID 55: 9,489 registros
+- ID 56: 13,459 registros
+- ID 57: 9,010 registros
+- ID 58: 6 registros
+- ID 125: Datos adicionales
+
+ARCHIVOS CREADOS PARA SOLUCIÓN:
+-------------------------------
+- check_tipo_documento.py: Análisis de tipo de documento
+- check_contasis_structure.py: Verificación de estructura cg_entitrib
+- fix_corrupted_entities.py: Script de corrección con API DNI/RUC
+- fix_from_sqlserver.py: Script de extracción directa SQL Server
+- fix_migconta_data.py: Script de corrección en migconta_db
+- fix_cbdmauxi_encoding.py: Script de corrección en cbdmauxi (EXITOSO)
+- run_etl_entidades.py: Script para ejecutar ETL completo
+- verify_entidades_migration.py: Script de verificación de resultados
+
+MODIFICACIONES EN CÓDIGO EXISTENTE:
+-----------------------------------
+- backend/app/api/endpoints/etl.py: Agregado fix_encoding() en run_incremental_etl
+- backend/app/api/endpoints/mapeo.py: Agregado company_id en UPSERT de migrate_to_final
+- MCon/209/subdiario209_migrator.py: Corregido error ccodori no definido
+
+CONCLUSIÓN:
+-----------
+- 808 registros corregidos en tabla intermedia cbdmauxi
+- ETL tiene encoding UTF-8 implementado
+- Filtro por empresa implementado para evitar sobrescritura
+- PENDIENTE: Re-ejecutar ETL para aplicar correcciones a Contasis
+- ADVERTENCIA: No modificar Contasis directamente sin backup

@@ -16,6 +16,7 @@ from backend.app.models.models import (
     AsientoContableGenerado, ComputedColumnRule
 )
 from backend.app.core.io_monitor import track_io
+from backend.app.core.encoding_fixer import fix_encoding
 from pydantic import BaseModel
 import re
 import ast
@@ -2662,6 +2663,10 @@ def _migrate_to_final_internal(
 
                                 if data['header'] and FinalHeadTable is not None:
                                     h_dict = {k: v for k, v in data['header'].items() if k in remote_head_cols}
+                                    # Aplicar corrección de encoding a campos de texto
+                                    for k, v in h_dict.items():
+                                        if isinstance(v, str):
+                                            h_dict[k] = fix_encoding(v)
                                     final_db.execute(FinalHeadTable.insert(), [h_dict])
 
                                 if data['details'] and FinalDetTable is not None:
@@ -2674,7 +2679,11 @@ def _migrate_to_final_internal(
                                                     try: insert_item[k] = float(v)
                                                     except: insert_item[k] = None
                                                 else:
-                                                    insert_item[k] = v
+                                                    # Aplicar corrección de encoding a campos de texto
+                                                    if isinstance(v, str):
+                                                        insert_item[k] = fix_encoding(v)
+                                                    else:
+                                                        insert_item[k] = v
                                         d_list.append(insert_item)
                                     final_db.execute(FinalDetTable.insert(), d_list)
 
@@ -2738,6 +2747,9 @@ def _migrate_to_final_internal(
                                         if v is not None and hasattr(v, '__float__') and not isinstance(v, str) and str(active_final.columns[k].type) in ['NUMERIC', 'FLOAT', 'INTEGER']:
                                             try: insert_item[k] = float(v)
                                             except: insert_item[k] = None
+                                        elif isinstance(v, str):
+                                            # Aplicar corrección de encoding específica para caracteres corruptos UTF-8
+                                            insert_item[k] = fix_encoding(v)
                                         else:
                                             insert_item[k] = v
 
@@ -2745,19 +2757,23 @@ def _migrate_to_final_internal(
                                 exists = False
                                 if allow_overwrite and upsert_col and r_d.get(upsert_col) is not None:
                                     from sqlalchemy import select
+                                    # Filter by both upsert_col AND company_id to avoid modifying other companies' records
+                                    where_clause = getattr(active_final.c, upsert_col) == r_d.get(upsert_col)
+                                    if 'company_id' in active_final.columns and r_d.get('company_id') is not None:
+                                        where_clause = where_clause & (active_final.c.company_id == r_d.get('company_id'))
                                     exists_check = final_db.execute(
-                                        select(active_final).where(
-                                            getattr(active_final.c, upsert_col) == r_d.get(upsert_col)
-                                        )
+                                        select(active_final).where(where_clause)
                                     ).first()
                                     if exists_check:
                                         exists = True
 
                                 if exists:
+                                    # Filter by both upsert_col AND company_id to avoid modifying other companies' records
+                                    where_clause = getattr(active_final.c, upsert_col) == r_d.get(upsert_col)
+                                    if 'company_id' in active_final.columns and r_d.get('company_id') is not None:
+                                        where_clause = where_clause & (active_final.c.company_id == r_d.get('company_id'))
                                     final_db.execute(
-                                        active_final.update().where(
-                                            getattr(active_final.c, upsert_col) == r_d.get(upsert_col)
-                                        ).values(**insert_item)
+                                        active_final.update().where(where_clause).values(**insert_item)
                                     )
                                 else:
                                     final_db.execute(active_final.insert(), [insert_item])

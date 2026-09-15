@@ -565,6 +565,13 @@ def run_incremental_etl(company_id: int, table_selection_id: int, db: Session, s
         # (psycopg2.errors.InvalidTextRepresentation: invalid input syntax for type double precision: "")
         for col in df.select_dtypes(include=['object']).columns:
             df[col] = df[col].apply(lambda x: None if x == "" else x)
+        
+        # ── Corregir encoding UTF-8 para caracteres especiales ──
+        # Asegurar que todos los strings estén correctamente codificados en UTF-8
+        for col in df.select_dtypes(include=['object']).columns:
+            df[col] = df[col].apply(lambda x: 
+                x.encode('utf-8', errors='replace').decode('utf-8') if isinstance(x, str) and x else x
+            )
 
         # Escribir en destino (siempre append ya que borramos previamente)
         df.to_sql(table_dest, dst_engine, if_exists='append', index=False, chunksize=1000)

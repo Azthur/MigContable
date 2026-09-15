@@ -322,6 +322,10 @@ class Subdiario209Migrator:
         try:
             logger.info(f"Iniciando migración para codcia {codcia}, periodo {cper}-{cmes}")
             
+            # Obtener ccodori de la configuración
+            migracion = self.config_data['migracion']
+            ccodori = migracion['ccodori']
+            
             if not self.connect_sql_server():
                 return False
             

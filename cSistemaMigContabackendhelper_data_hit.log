@@ -8101,3 +8101,6 @@ MATCH FOUND: FinPlanillaMovilidadDet -> PlanillaId
 --- ENDPOINT START 63 --- table=cntfacturadet, company=4
 Found 18 table selections
 MATCH FOUND: CntFacturaDet -> FacturaCabId
+--- ENDPOINT START 57 --- table=cbdmauxi, company=5
+Found 19 table selections
+MATCH FOUND: CbdMAuxi -> rucaux
