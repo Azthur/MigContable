@@ -17,6 +17,7 @@ __pycache__/
 
 # Logs
 *.log
+
 # Excluir archivos de dependencias
 !requirements.txt
 !*_requirements.txt
@@ -37,3 +38,5 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+
