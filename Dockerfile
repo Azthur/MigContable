@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bullseye
+FROM python:3.11-slim-bookworm
 
 # Configurar variables de entorno
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -16,11 +16,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Agregar repositorio de Microsoft e instalar ODBC Driver 17 for SQL Server
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-    && curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
+    | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/debian/12/prod bookworm main" \
+    > /etc/apt/sources.list.d/microsoft-prod.list \
     && apt-get update \
-    && apt-get install -y --no-install-recommends msodbcsql17 mssql-tools \
-    && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc \
+    && ACCEPT_EULA=Y apt-get install -y \
+       msodbcsql18 \
+       mssql-tools18 \
     && rm -rf /var/lib/apt/lists/*
 
 # Configurar OpenSSL para permitir protocolos antiguos (TLSv1, TLSv1.1) si el servidor lo requiere
