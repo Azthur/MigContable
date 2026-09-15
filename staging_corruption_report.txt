@@ -1,0 +1,26 @@
+=== REPORTE DE CARACTERES CORRUPTOS EN STAGING LOCAL ===
+
+Patrones buscados:
+  - ┬á
+  - ┬é
+  - ┬í
+  - ┬ó
+  - ┬ú
+  - ┬ñ
+  - ┬¿
+  - ┬
+  - í┤
+  - ┤
+  - á
+  - íÁ
+  - Á
+  - éP
+  - éS
+  - é
+  - Dé
+
+cbdmauxi.nomaux: 39
+cbdmauxi.diraux: 199
+cbdmauxi.tlfaux: 4
+cbdmauxi.email: 2
+cbdmauxi.contacto: 18
