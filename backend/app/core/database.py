@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from backend.app.core.config import get_settings
+from backend.app.core.resource_monitor import attach_slow_query_logging
 
 settings = get_settings()
 
@@ -15,6 +16,7 @@ source_engine = create_engine(
     pool_pre_ping=True,     # Verificar conexiones antes de usarlas
     pool_recycle=3600,      # Reciclar conexiones cada hora (evitar stale connections)
 )
+attach_slow_query_logging(source_engine, "mssql_source")
 SourceSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=source_engine)
 SourceBase = declarative_base()
 
@@ -28,6 +30,7 @@ dest_engine = create_engine(
     pool_pre_ping=True,     # Verificar conexiones antes de usarlas
     pool_recycle=3600,      # Reciclar conexiones cada hora
 )
+attach_slow_query_logging(dest_engine, "postgres_dest")
 DestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=dest_engine)
 DestBase = declarative_base()
 

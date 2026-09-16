@@ -2728,12 +2728,15 @@ def _migrate_to_final_internal(
                         failed_rows_raw.append({"seat": "Config", "error": f"No se encontró tabla local/final para subcategoría {sub.nombre}", "subcategoria_id": sub.id})
                         continue
 
-                    # Determine a unique key column for overwrite (idcontrol or first available)
-                    upsert_col = None
-                    if allow_overwrite:
+                    # Unique key for existence check: prefer remote PK, fallback a candidatos.
+                    # Se evalúa SIEMPRE (no solo con allow_overwrite) para evitar
+                    # UniqueViolation cuando el registro ya existe en Contasis.
+                    remote_pk = [c.name for c in active_final.primary_key.columns]
+                    pk_cols = remote_pk if remote_pk and all(c in active_local.columns for c in remote_pk) else []
+                    if not pk_cols:
                         for candidate in ['idcontrol', 'codaux', 'rucaux', 'ccodruc']:
                             if candidate in active_final.columns and candidate in active_local.columns:
-                                upsert_col = candidate
+                                pk_cols = [candidate]
                                 break
 
                     for row in all_rows:
@@ -2753,30 +2756,33 @@ def _migrate_to_final_internal(
                                         else:
                                             insert_item[k] = v
 
-                                # Upsert logic: Check if record exists first
+                                # Chequeo de existencia por PK remota (siempre activo)
                                 exists = False
-                                if allow_overwrite and upsert_col and r_d.get(upsert_col) is not None:
+                                if pk_cols and all(r_d.get(c) is not None for c in pk_cols):
                                     from sqlalchemy import select
-                                    # Filter by both upsert_col AND company_id to avoid modifying other companies' records
-                                    where_clause = getattr(active_final.c, upsert_col) == r_d.get(upsert_col)
+                                    where_clause = None
+                                    for c in pk_cols:
+                                        cond = getattr(active_final.c, c) == r_d.get(c)
+                                        where_clause = cond if where_clause is None else where_clause & cond
                                     if 'company_id' in active_final.columns and r_d.get('company_id') is not None:
                                         where_clause = where_clause & (active_final.c.company_id == r_d.get('company_id'))
-                                    exists_check = final_db.execute(
-                                        select(active_final).where(where_clause)
-                                    ).first()
-                                    if exists_check:
-                                        exists = True
+                                    exists = final_db.execute(
+                                        select(active_final.c[pk_cols[0]]).where(where_clause)
+                                    ).first() is not None
 
-                                if exists:
-                                    # Filter by both upsert_col AND company_id to avoid modifying other companies' records
-                                    where_clause = getattr(active_final.c, upsert_col) == r_d.get(upsert_col)
+                                if exists and allow_overwrite:
+                                    where_clause = None
+                                    for c in pk_cols:
+                                        cond = getattr(active_final.c, c) == r_d.get(c)
+                                        where_clause = cond if where_clause is None else where_clause & cond
                                     if 'company_id' in active_final.columns and r_d.get('company_id') is not None:
                                         where_clause = where_clause & (active_final.c.company_id == r_d.get('company_id'))
                                     final_db.execute(
                                         active_final.update().where(where_clause).values(**insert_item)
                                     )
-                                else:
+                                elif not exists:
                                     final_db.execute(active_final.insert(), [insert_item])
+                                # Si existe y no hay overwrite: skip insert, igual se marca MIGRADO (idempotente)
 
                             # Mark as migrated locally
                             db.execute(active_local.update().where(

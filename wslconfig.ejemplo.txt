@@ -1,0 +1,11 @@
+[wsl2]
+# Copiar este contenido a C:\Users\<usuario>\.wslconfig en el EQUIPO DESTINO
+# y ejecutar: wsl --shutdown   (luego abrir Docker Desktop de nuevo)
+#
+# Equipo destino: 8GB RAM / 4 cores
+# WSL2 (donde viven los contenedores) queda limitado a 5GB para que
+# nunca pueda tumbar Windows por falta de memoria.
+memory=5GB
+processors=4
+swap=2GB
+localhostForwarding=true

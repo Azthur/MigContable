@@ -8,6 +8,7 @@ from backend.app.celery_app import celery
 from backend.app.celery_tasks import company_semaphore
 from backend.app.core.database import DestSessionLocal
 from backend.app.core.io_monitor import track_io
+from backend.app.core.resource_monitor import log_memory_checkpoint
 from datetime import datetime, timezone
 import traceback
 
@@ -17,6 +18,7 @@ class ETLTask(Task):
     
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         """Se ejecuta cuando la tarea falla definitivamente (sin más retries)."""
+        log_memory_checkpoint(f"TASK_FAILURE task={task_id}", extra=str(exc)[:300])
         pipeline_id = args[0] if args else kwargs.get("pipeline_id")
         db = DestSessionLocal()
         try:
@@ -146,7 +148,9 @@ def run_etl_pipeline(self, pipeline_id: int):
         db.refresh(ejecucion)
         
         # ─── 4. Ejecutar pipeline (3 etapas) ───
+        log_memory_checkpoint(f"PIPELINE_START pipeline={pipeline_id} task={self.request.id}")
         results = _execute_pipeline(config, ejecucion, db)
+        log_memory_checkpoint(f"PIPELINE_END pipeline={pipeline_id} task={self.request.id}")
         
         # ─── 5. Marcar éxito o advertencia ───
         has_validation_errors = False
@@ -281,7 +285,8 @@ def _execute_pipeline(config, ejecucion, db):
     if config.run_extraction:
         ejecucion.step_current = "EXTRACTION"
         db.commit()
-        
+        log_memory_checkpoint(f"EXTRACTION_START pipeline={config.id}")
+
         selections = db.query(TableSelection).filter(
             TableSelection.company_id == empresa_id,
             TableSelection.is_selected == True
@@ -311,6 +316,7 @@ def _execute_pipeline(config, ejecucion, db):
         ejecucion.step_current = "GENERATION"
         ejecucion.records_extracted = results["extracted"]
         db.commit()
+        log_memory_checkpoint(f"GENERATION_START pipeline={config.id}")
         
         gen_res = generate_to_cf_diariol({
             "company_id": empresa_id,
@@ -333,6 +339,7 @@ def _execute_pipeline(config, ejecucion, db):
         ejecucion.step_current = "MIGRATION"
         ejecucion.records_generated = results["generated"]
         db.commit()
+        log_memory_checkpoint(f"MIGRATION_START pipeline={config.id}")
         
         final_conn = db.query(FinalDestConnection).filter(
             FinalDestConnection.company_id == empresa_id,

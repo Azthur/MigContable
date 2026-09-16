@@ -9,6 +9,13 @@ __pycache__
 *.txt
 *.sqlite
 *.db
+*.sql
+*.pdf
+*.xlsx
 postgres_data
+redis_data
+Backup MigConta
+scratch
+MCon
 !backend/requirements.txt
 !backend/app/main.py
